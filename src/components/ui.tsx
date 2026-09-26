@@ -289,9 +289,9 @@ export function Table({
   );
 }
 
-export function Row({ children }: { children: ReactNode }) {
+export function Row({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <tr className="border-b border-[color:var(--color-border-default)] last:border-0 hover:bg-[color:var(--color-surface-muted)]">
+    <tr className={cx(className, "border-b border-[color:var(--color-border-default)] last:border-0 hover:bg-[color:var(--color-surface-muted)]")}>
       {children}
     </tr>
   );

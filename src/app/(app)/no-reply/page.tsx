@@ -11,6 +11,15 @@ const SEEN: Record<string, { label: string; tone: "success" | "info" | "neutral"
   DELIVERED: { label: "Delivered", tone: "info" },
   SENT: { label: "Sent", tone: "neutral" },
 };
+const RED_BG = "bg-[color:var(--color-status-error)]/10";
+
+/** Status badge: red once the whole funnel went unanswered. */
+function Seen({ status, customer }: { status: string; customer: { status: string } }) {
+  if (customer.status === "NO_RESPONSE") return <Badge tone="error">No response</Badge>;
+  return <Badge tone={SEEN[status].tone}>{SEEN[status].label}</Badge>;
+}
+
+const step = (payload: unknown) => (payload as { step?: number } | null)?.step ?? 1;
 
 /** A number is listed while its latest brand message went through but they never tapped BRAND. */
 export default async function NoReplyPage() {
@@ -25,6 +34,7 @@ export default async function NoReplyPage() {
       customerId: true,
       deliveryStatus: true,
       createdAt: true,
+      payload: true,
       customer: { select: { name: true, phoneE164: true, status: true } },
     },
   });
@@ -39,7 +49,7 @@ export default async function NoReplyPage() {
     <>
       <PageHeader
         title="No reply"
-        description="The message reached these numbers, but they have not tapped BRAND yet."
+        description="The message reached these numbers, but they have not tapped BRAND yet. Red = no reply after all 3 funnel messages."
       />
       {rows.length === 0 ? (
         <Card flush>
@@ -52,7 +62,7 @@ export default async function NoReplyPage() {
             {rows.map((m) => (
               <li
                 key={m.id}
-                className="rounded-[var(--radius-md)] border border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] p-3 shadow-[var(--shadow-surface)]"
+                className={`rounded-[var(--radius-md)] border p-3 ${m.customer.status === "NO_RESPONSE" ? `border-[color:var(--color-status-error)] ${RED_BG}` : "border-[color:var(--color-border-default)] bg-[color:var(--color-surface)]"} shadow-[var(--shadow-surface)]`}
               >
                 <div className="flex items-baseline justify-between gap-2">
                   <span className="truncate font-semibold">{m.customer.name ?? "—"}</span>
@@ -62,7 +72,10 @@ export default async function NoReplyPage() {
                 </div>
                 <div className="mt-0.5 flex items-center justify-between gap-2">
                   <span className="tabular-nums text-[color:var(--color-text-secondary)]">{m.customer.phoneE164}</span>
-                  <Badge tone={SEEN[m.deliveryStatus].tone}>{SEEN[m.deliveryStatus].label}</Badge>
+                  <span className="flex shrink-0 gap-1">
+                    <Badge>Funnel {step(m.payload)}</Badge>
+                    <Seen status={m.deliveryStatus} customer={m.customer} />
+                  </span>
                 </div>
                 <ContactButtons phone={m.customer.phoneE164} className="mt-2 grid grid-cols-2" />
               </li>
@@ -71,14 +84,15 @@ export default async function NoReplyPage() {
 
           <div className="hidden lg:block">
             <Card flush>
-              <Table head={["Name", "Number", "Sent at", "Status", "Contact"]} caption="Got the message, no BRAND tap">
+              <Table head={["Name", "Number", "Sent at", "Funnel", "Status", "Contact"]} caption="Got the message, no BRAND tap">
                 {rows.map((m) => (
-                  <Row key={m.id}>
+                  <Row key={m.id} className={m.customer.status === "NO_RESPONSE" ? RED_BG : undefined}>
                     <Cell>{m.customer.name ?? "—"}</Cell>
                     <Cell className="whitespace-nowrap tabular-nums">{m.customer.phoneE164}</Cell>
                     <Cell className="whitespace-nowrap">{formatDateTime(m.createdAt)}</Cell>
+                    <Cell>{step(m.payload)} of 3</Cell>
                     <Cell>
-                      <Badge tone={SEEN[m.deliveryStatus].tone}>{SEEN[m.deliveryStatus].label}</Badge>
+                      <Seen status={m.deliveryStatus} customer={m.customer} />
                     </Cell>
                     <Cell>
                       <ContactButtons phone={m.customer.phoneE164} className="flex" />

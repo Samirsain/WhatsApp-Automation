@@ -3,18 +3,31 @@ import test from "node:test";
 import { parseNumberList } from "../numbers/parse-list";
 import {
   failureAction, failureReason, isBrandReply, retryDueAt,
-  csvCell, parseCsvRows, rowsToText, RETRY_AFTER_MS,
+  csvCell, parseCsvRows, rowsToText, RETRY_AFTER_MS, FOLLOW_UP_AFTER_MS, nextFunnelAction,
 } from "./rules";
-import { BRAND_TEMPLATES, pickTemplate, thankYouText } from "./templates";
+import { pickTemplate, thankYouText } from "./templates";
 
-const brand = { kind: "brand", template: "property_brand_1", image: "x", name: "A" };
+const brand = { kind: "brand", template: "funnel_1a", image: "x", name: "A" };
 
-test("pickTemplate returns each of the three at the edges of the range", () => {
-  assert.equal(pickTemplate(() => 0).template, "property_brand_1");
-  assert.equal(pickTemplate(() => 0.5).template, "property_brand_2");
-  assert.equal(pickTemplate(() => 0.9999).template, "property_brand_3");
-  assert.equal(pickTemplate(() => 1).template, "property_brand_3");
-  assert.equal(BRAND_TEMPLATES.length, 3);
+test("pickTemplate picks within the step, at both edges of the range", () => {
+  assert.equal(pickTemplate(1, () => 0).template, "funnel_1a");
+  assert.equal(pickTemplate(1, () => 0.5).template, "funnel_1b");
+  assert.equal(pickTemplate(1, () => 1).template, "funnel_1c");
+  assert.equal(pickTemplate(2, () => 0.9999).template, "funnel_2c");
+  assert.equal(pickTemplate(3, () => 0.9).template, "funnel_3");
+  assert.equal(pickTemplate().template.startsWith("funnel_1"), true);
+});
+
+test("follow-ups: 3 days after step 1, then 2 days after steps 2 and 3", () => {
+  assert.deepEqual(Object.values(FOLLOW_UP_AFTER_MS).map((ms) => ms / 86_400_000), [3, 2, 2]);
+});
+
+test("funnel: 1 → 2 → 3 → red, and any reply, failure, BRAND or opt-out stops it", () => {
+  const quiet = { anythingSince: false, failed: false, brandLead: false, optedOut: false };
+  assert.equal(nextFunnelAction(1, quiet), 2);
+  assert.equal(nextFunnelAction(2, quiet), 3);
+  assert.equal(nextFunnelAction(3, quiet), "red");
+  for (const k of Object.keys(quiet)) assert.equal(nextFunnelAction(1, { ...quiet, [k]: true }), "skip");
 });
 
 test("thank-you puts the name in bold capitals when known and falls back cleanly", () => {

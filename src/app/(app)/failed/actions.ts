@@ -37,7 +37,7 @@ export async function resendBrand(formData: FormData): Promise<void> {
   await sendBrandMessage({
     e164: m.customer.phoneE164,
     name: null,
-    pick: { template: p.template, image: p.image },
+    step: p.step ?? 1,
     retryOf: m.id,
   });
   revalidatePath("/failed");

@@ -1,10 +1,14 @@
 /** Pure rules for the brand panel. No database, no network. */
+import type { FunnelStep } from "./templates";
+
 
 export type BrandPayload = {
   kind: "brand";
   template: string;
   image: string;
   name: string;
+  /** Funnel step; missing on sends from before the funnel (treated as 1). */
+  step?: FunnelStep;
   /** Id of the failed message this one re-sends. */
   retryOf?: string;
 };
@@ -28,6 +32,19 @@ export function retryDueAt(
   const p = payload as Partial<BrandPayload> | null;
   if (p?.kind !== "brand" || p.retryOf) return null;
   return new Date(failedAt.getTime() + RETRY_AFTER_MS);
+}
+
+const DAY = 24 * 60 * 60 * 1000;
+/** How long after a step went out, with no reply, the next one (or the red mark) is due. */
+export const FOLLOW_UP_AFTER_MS: Record<FunnelStep, number> = { 1: 3 * DAY, 2: 2 * DAY, 3: 2 * DAY };
+
+/** What a due funnel step leads to. Anything since (a reply, a newer send) ends the chain. */
+export function nextFunnelAction(
+  step: FunnelStep,
+  state: { anythingSince: boolean; failed: boolean; brandLead: boolean; optedOut: boolean },
+): "skip" | "red" | FunnelStep {
+  if (state.anythingSince || state.failed || state.brandLead || state.optedOut) return "skip";
+  return step === 3 ? "red" : ((step + 1) as FunnelStep);
 }
 
 const REASONS: Record<string, string> = {

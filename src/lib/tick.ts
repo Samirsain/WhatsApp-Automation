@@ -1,6 +1,7 @@
 import "server-only";
 import { tick } from "@/lib/automation/worker";
 import { dispatchRunningBatches } from "@/lib/batches/runner";
+import { sendDueFollowUps } from "@/lib/brand/funnel";
 import { sendDueRetries } from "@/lib/brand/retry";
 
 /** One pass of every timed job. Safe to overlap: each job claims its rows. */
@@ -8,7 +9,8 @@ export async function runTick() {
   const automations = await tick();
   const batches = await dispatchRunningBatches();
   const retries = await sendDueRetries();
-  return { automations, batches, retries };
+  const funnel = await sendDueFollowUps();
+  return { automations, batches, retries, funnel };
 }
 
 const EVERY_MS = 15 * 60 * 1000;
@@ -23,6 +25,7 @@ export function startTickLoop() {
     runTick()
       .then((r) => {
         if (r.retries.sent || r.retries.skipped) console.info("[tick] retries", r.retries);
+        if (r.funnel.sent || r.funnel.red) console.info("[tick] funnel", r.funnel);
       })
       .catch((err) => console.error("[tick] failed", err instanceof Error ? err.message : err));
   setTimeout(run, 60_000); // first pass shortly after boot, to catch up after a deploy

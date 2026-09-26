@@ -241,6 +241,8 @@ model Message {
   failureCode       String?
   /// Set when a brand message failed with 131049; the tick route re-sends it once.
   retryDueAt        DateTime?
+  /// When the next funnel step (or the no-response mark) is due; src/lib/brand/funnel.ts.
+  followUpAt        DateTime?
   createdAt         DateTime         @default(now())
 
   conversation Conversation       @relation(fields: [conversationId], references: [id], onDelete: Cascade)
@@ -252,6 +254,7 @@ model Message {
   @@index([customerId, createdAt])
   @@index([deliveryStatus])
   @@index([retryDueAt])
+  @@index([followUpAt])
   @@map("messages")
 }
 

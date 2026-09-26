@@ -48,7 +48,7 @@ export async function sendDueRetries(now = new Date()): Promise<{ sent: number; 
     await sendBrandMessage({
       e164: m.customer.phoneE164,
       name: null,
-      pick: { template: p.template, image: p.image },
+      step: p.step ?? 1,
       retryOf: m.id,
     });
     sent++;

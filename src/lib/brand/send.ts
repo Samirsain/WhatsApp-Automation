@@ -2,8 +2,8 @@ import "server-only";
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { whatsapp, type OutboundMessage } from "@/lib/whatsapp/adapter";
-import type { BrandPayload } from "./rules";
-import { BRAND_LANGUAGE, pickTemplate, thankYouText, type BrandTemplate } from "./templates";
+import { FOLLOW_UP_AFTER_MS, type BrandPayload } from "./rules";
+import { BRAND_LANGUAGE, pickTemplate, thankYouText, type FunnelStep } from "./templates";
 
 async function conversationId(customerId: string): Promise<string> {
   const open = await prisma.conversation.findFirst({
@@ -27,6 +27,7 @@ async function recordAndSend(
   customerId: string,
   message: OutboundMessage,
   row: { type: "TEMPLATE" | "TEXT"; body?: string; payload: Prisma.InputJsonValue },
+  followUpAt?: Date,
 ): Promise<{ ok: boolean; error?: string }> {
   const stored = await prisma.message.create({
     data: {
@@ -42,37 +43,41 @@ async function recordAndSend(
   await prisma.message.update({
     where: { id: stored.id },
     data: result.ok
-      ? { providerMessageId: result.providerMessageId }
+      ? { providerMessageId: result.providerMessageId, followUpAt }
       : { deliveryStatus: "FAILED", failedAt: new Date(), failureCode: result.code },
   });
   return result.ok ? { ok: true } : { ok: false, error: result.message };
 }
 
 /**
- * One brand template to one number. The row is stored whether or not Meta
+ * One funnel template to one number. The row is stored whether or not Meta
  * accepted it, so a synchronous rejection shows on "Not delivered" too.
+ * A number that tapped BRAND gets nothing but the thank-you, ever.
  */
 export async function sendBrandMessage(input: {
   e164: string;
   name: string | null;
-  pick?: BrandTemplate;
+  step?: FunnelStep;
   retryOf?: string;
-}): Promise<{ e164: string; ok: boolean; skipped?: "opted-out"; error?: string }> {
+}): Promise<{ e164: string; ok: boolean; skipped?: "opted-out" | "brand-lead"; error?: string }> {
   const customer = await prisma.customer.upsert({
     where: { phoneE164: input.e164 },
     create: { phoneE164: input.e164, name: input.name },
     update: input.name ? { name: input.name } : {},
-    select: { id: true, name: true, optedOutAt: true },
+    select: { id: true, name: true, optedOutAt: true, qualifiedAt: true },
   });
   if (customer.optedOutAt) return { e164: input.e164, ok: false, skipped: "opted-out" };
+  if (customer.qualifiedAt) return { e164: input.e164, ok: false, skipped: "brand-lead" };
 
-  const pick = input.pick ?? pickTemplate();
+  const step = input.step ?? 1;
+  const pick = pickTemplate(step);
   const name = customer.name?.trim() || "Sir/Madam";
   const payload: BrandPayload = {
     kind: "brand",
     template: pick.template,
     image: pick.image,
     name,
+    step,
     ...(input.retryOf && { retryOf: input.retryOf }),
   };
   const result = await recordAndSend(
@@ -86,6 +91,7 @@ export async function sendBrandMessage(input: {
       variables: { name },
     },
     { type: "TEMPLATE", payload },
+    new Date(Date.now() + FOLLOW_UP_AFTER_MS[step]),
   );
   return { e164: input.e164, ...result };
 }
