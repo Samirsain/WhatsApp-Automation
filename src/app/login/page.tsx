@@ -42,10 +42,10 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
       <div className="w-full max-w-sm rounded-[var(--radius-md)] border border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] p-6 shadow-[var(--shadow-surface)]">
         <h1 className="text-[length:var(--text-h2)] font-semibold">3% Club</h1>
         <p className="mt-1 mb-6 text-[color:var(--color-text-secondary)]">
-          Sign in to the customer dashboard.
+          Sign in to send messages and see leads.
         </p>
 
-        {error === "invalid" && <ErrorNote>Incorrect email or password.</ErrorNote>}
+        {error === "invalid" && <ErrorNote>Incorrect username or password.</ErrorNote>}
         {error === "unavailable" && (
           <ErrorNote>
             Sign-in is temporarily unavailable. This is not your password — ask
@@ -54,10 +54,10 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         )}
 
         <form action={authenticate} className="mt-4 flex flex-col gap-4">
-          <Field label="Email">
+          <Field label="Username">
             <input
               className={inputClass}
-              type="email"
+              type="text"
               name="email"
               autoComplete="username"
               required
