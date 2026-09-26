@@ -39,6 +39,7 @@ export type MessageMinAggregateOutputType = {
   readAt: Date | null
   failedAt: Date | null
   failureCode: string | null
+  retryDueAt: Date | null
   createdAt: Date | null
 }
 
@@ -57,6 +58,7 @@ export type MessageMaxAggregateOutputType = {
   readAt: Date | null
   failedAt: Date | null
   failureCode: string | null
+  retryDueAt: Date | null
   createdAt: Date | null
 }
 
@@ -76,6 +78,7 @@ export type MessageCountAggregateOutputType = {
   readAt: number
   failedAt: number
   failureCode: number
+  retryDueAt: number
   createdAt: number
   _all: number
 }
@@ -96,6 +99,7 @@ export type MessageMinAggregateInputType = {
   readAt?: true
   failedAt?: true
   failureCode?: true
+  retryDueAt?: true
   createdAt?: true
 }
 
@@ -114,6 +118,7 @@ export type MessageMaxAggregateInputType = {
   readAt?: true
   failedAt?: true
   failureCode?: true
+  retryDueAt?: true
   createdAt?: true
 }
 
@@ -133,6 +138,7 @@ export type MessageCountAggregateInputType = {
   readAt?: true
   failedAt?: true
   failureCode?: true
+  retryDueAt?: true
   createdAt?: true
   _all?: true
 }
@@ -225,6 +231,7 @@ export type MessageGroupByOutputType = {
   readAt: Date | null
   failedAt: Date | null
   failureCode: string | null
+  retryDueAt: Date | null
   createdAt: Date
   _count: MessageCountAggregateOutputType | null
   _min: MessageMinAggregateOutputType | null
@@ -265,6 +272,7 @@ export type MessageWhereInput = {
   readAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   failedAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   failureCode?: Prisma.StringNullableFilter<"Message"> | string | null
+  retryDueAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
   conversation?: Prisma.XOR<Prisma.ConversationScalarRelationFilter, Prisma.ConversationWhereInput>
   customer?: Prisma.XOR<Prisma.CustomerScalarRelationFilter, Prisma.CustomerWhereInput>
@@ -288,6 +296,7 @@ export type MessageOrderByWithRelationInput = {
   readAt?: Prisma.SortOrderInput | Prisma.SortOrder
   failedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   failureCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  retryDueAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   conversation?: Prisma.ConversationOrderByWithRelationInput
   customer?: Prisma.CustomerOrderByWithRelationInput
@@ -314,6 +323,7 @@ export type MessageWhereUniqueInput = Prisma.AtLeast<{
   readAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   failedAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   failureCode?: Prisma.StringNullableFilter<"Message"> | string | null
+  retryDueAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
   conversation?: Prisma.XOR<Prisma.ConversationScalarRelationFilter, Prisma.ConversationWhereInput>
   customer?: Prisma.XOR<Prisma.CustomerScalarRelationFilter, Prisma.CustomerWhereInput>
@@ -337,6 +347,7 @@ export type MessageOrderByWithAggregationInput = {
   readAt?: Prisma.SortOrderInput | Prisma.SortOrder
   failedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   failureCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  retryDueAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.MessageCountOrderByAggregateInput
   _max?: Prisma.MessageMaxOrderByAggregateInput
@@ -362,6 +373,7 @@ export type MessageScalarWhereWithAggregatesInput = {
   readAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Message"> | Date | string | null
   failedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Message"> | Date | string | null
   failureCode?: Prisma.StringNullableWithAggregatesFilter<"Message"> | string | null
+  retryDueAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Message"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Message"> | Date | string
 }
 
@@ -378,6 +390,7 @@ export type MessageCreateInput = {
   readAt?: Date | string | null
   failedAt?: Date | string | null
   failureCode?: string | null
+  retryDueAt?: Date | string | null
   createdAt?: Date | string
   conversation: Prisma.ConversationCreateNestedOneWithoutMessagesInput
   customer: Prisma.CustomerCreateNestedOneWithoutMessagesInput
@@ -401,6 +414,7 @@ export type MessageUncheckedCreateInput = {
   readAt?: Date | string | null
   failedAt?: Date | string | null
   failureCode?: string | null
+  retryDueAt?: Date | string | null
   createdAt?: Date | string
   responses?: Prisma.CustomerResponseUncheckedCreateNestedManyWithoutMessageInput
 }
@@ -418,6 +432,7 @@ export type MessageUpdateInput = {
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  retryDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   conversation?: Prisma.ConversationUpdateOneRequiredWithoutMessagesNestedInput
   customer?: Prisma.CustomerUpdateOneRequiredWithoutMessagesNestedInput
@@ -441,6 +456,7 @@ export type MessageUncheckedUpdateInput = {
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  retryDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   responses?: Prisma.CustomerResponseUncheckedUpdateManyWithoutMessageNestedInput
 }
@@ -461,6 +477,7 @@ export type MessageCreateManyInput = {
   readAt?: Date | string | null
   failedAt?: Date | string | null
   failureCode?: string | null
+  retryDueAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -477,6 +494,7 @@ export type MessageUpdateManyMutationInput = {
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  retryDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -496,6 +514,7 @@ export type MessageUncheckedUpdateManyInput = {
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  retryDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -525,6 +544,7 @@ export type MessageCountOrderByAggregateInput = {
   readAt?: Prisma.SortOrder
   failedAt?: Prisma.SortOrder
   failureCode?: Prisma.SortOrder
+  retryDueAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -543,6 +563,7 @@ export type MessageMaxOrderByAggregateInput = {
   readAt?: Prisma.SortOrder
   failedAt?: Prisma.SortOrder
   failureCode?: Prisma.SortOrder
+  retryDueAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -561,6 +582,7 @@ export type MessageMinOrderByAggregateInput = {
   readAt?: Prisma.SortOrder
   failedAt?: Prisma.SortOrder
   failureCode?: Prisma.SortOrder
+  retryDueAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -736,6 +758,7 @@ export type MessageCreateWithoutCustomerInput = {
   readAt?: Date | string | null
   failedAt?: Date | string | null
   failureCode?: string | null
+  retryDueAt?: Date | string | null
   createdAt?: Date | string
   conversation: Prisma.ConversationCreateNestedOneWithoutMessagesInput
   template?: Prisma.TemplateCreateNestedOneWithoutMessagesInput
@@ -757,6 +780,7 @@ export type MessageUncheckedCreateWithoutCustomerInput = {
   readAt?: Date | string | null
   failedAt?: Date | string | null
   failureCode?: string | null
+  retryDueAt?: Date | string | null
   createdAt?: Date | string
   responses?: Prisma.CustomerResponseUncheckedCreateNestedManyWithoutMessageInput
 }
@@ -806,6 +830,7 @@ export type MessageScalarWhereInput = {
   readAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   failedAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   failureCode?: Prisma.StringNullableFilter<"Message"> | string | null
+  retryDueAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
 }
 
@@ -822,6 +847,7 @@ export type MessageCreateWithoutConversationInput = {
   readAt?: Date | string | null
   failedAt?: Date | string | null
   failureCode?: string | null
+  retryDueAt?: Date | string | null
   createdAt?: Date | string
   customer: Prisma.CustomerCreateNestedOneWithoutMessagesInput
   template?: Prisma.TemplateCreateNestedOneWithoutMessagesInput
@@ -843,6 +869,7 @@ export type MessageUncheckedCreateWithoutConversationInput = {
   readAt?: Date | string | null
   failedAt?: Date | string | null
   failureCode?: string | null
+  retryDueAt?: Date | string | null
   createdAt?: Date | string
   responses?: Prisma.CustomerResponseUncheckedCreateNestedManyWithoutMessageInput
 }
@@ -886,6 +913,7 @@ export type MessageCreateWithoutTemplateInput = {
   readAt?: Date | string | null
   failedAt?: Date | string | null
   failureCode?: string | null
+  retryDueAt?: Date | string | null
   createdAt?: Date | string
   conversation: Prisma.ConversationCreateNestedOneWithoutMessagesInput
   customer: Prisma.CustomerCreateNestedOneWithoutMessagesInput
@@ -907,6 +935,7 @@ export type MessageUncheckedCreateWithoutTemplateInput = {
   readAt?: Date | string | null
   failedAt?: Date | string | null
   failureCode?: string | null
+  retryDueAt?: Date | string | null
   createdAt?: Date | string
   responses?: Prisma.CustomerResponseUncheckedCreateNestedManyWithoutMessageInput
 }
@@ -950,6 +979,7 @@ export type MessageCreateWithoutResponsesInput = {
   readAt?: Date | string | null
   failedAt?: Date | string | null
   failureCode?: string | null
+  retryDueAt?: Date | string | null
   createdAt?: Date | string
   conversation: Prisma.ConversationCreateNestedOneWithoutMessagesInput
   customer: Prisma.CustomerCreateNestedOneWithoutMessagesInput
@@ -972,6 +1002,7 @@ export type MessageUncheckedCreateWithoutResponsesInput = {
   readAt?: Date | string | null
   failedAt?: Date | string | null
   failureCode?: string | null
+  retryDueAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -1004,6 +1035,7 @@ export type MessageUpdateWithoutResponsesInput = {
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  retryDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   conversation?: Prisma.ConversationUpdateOneRequiredWithoutMessagesNestedInput
   customer?: Prisma.CustomerUpdateOneRequiredWithoutMessagesNestedInput
@@ -1026,6 +1058,7 @@ export type MessageUncheckedUpdateWithoutResponsesInput = {
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  retryDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -1044,6 +1077,7 @@ export type MessageCreateManyCustomerInput = {
   readAt?: Date | string | null
   failedAt?: Date | string | null
   failureCode?: string | null
+  retryDueAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -1060,6 +1094,7 @@ export type MessageUpdateWithoutCustomerInput = {
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  retryDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   conversation?: Prisma.ConversationUpdateOneRequiredWithoutMessagesNestedInput
   template?: Prisma.TemplateUpdateOneWithoutMessagesNestedInput
@@ -1081,6 +1116,7 @@ export type MessageUncheckedUpdateWithoutCustomerInput = {
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  retryDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   responses?: Prisma.CustomerResponseUncheckedUpdateManyWithoutMessageNestedInput
 }
@@ -1100,6 +1136,7 @@ export type MessageUncheckedUpdateManyWithoutCustomerInput = {
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  retryDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -1118,6 +1155,7 @@ export type MessageCreateManyConversationInput = {
   readAt?: Date | string | null
   failedAt?: Date | string | null
   failureCode?: string | null
+  retryDueAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -1134,6 +1172,7 @@ export type MessageUpdateWithoutConversationInput = {
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  retryDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   customer?: Prisma.CustomerUpdateOneRequiredWithoutMessagesNestedInput
   template?: Prisma.TemplateUpdateOneWithoutMessagesNestedInput
@@ -1155,6 +1194,7 @@ export type MessageUncheckedUpdateWithoutConversationInput = {
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  retryDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   responses?: Prisma.CustomerResponseUncheckedUpdateManyWithoutMessageNestedInput
 }
@@ -1174,6 +1214,7 @@ export type MessageUncheckedUpdateManyWithoutConversationInput = {
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  retryDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -1192,6 +1233,7 @@ export type MessageCreateManyTemplateInput = {
   readAt?: Date | string | null
   failedAt?: Date | string | null
   failureCode?: string | null
+  retryDueAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -1208,6 +1250,7 @@ export type MessageUpdateWithoutTemplateInput = {
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  retryDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   conversation?: Prisma.ConversationUpdateOneRequiredWithoutMessagesNestedInput
   customer?: Prisma.CustomerUpdateOneRequiredWithoutMessagesNestedInput
@@ -1229,6 +1272,7 @@ export type MessageUncheckedUpdateWithoutTemplateInput = {
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  retryDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   responses?: Prisma.CustomerResponseUncheckedUpdateManyWithoutMessageNestedInput
 }
@@ -1248,6 +1292,7 @@ export type MessageUncheckedUpdateManyWithoutTemplateInput = {
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   failureCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  retryDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -1298,6 +1343,7 @@ export type MessageSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   readAt?: boolean
   failedAt?: boolean
   failureCode?: boolean
+  retryDueAt?: boolean
   createdAt?: boolean
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
   customer?: boolean | Prisma.CustomerDefaultArgs<ExtArgs>
@@ -1322,6 +1368,7 @@ export type MessageSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   readAt?: boolean
   failedAt?: boolean
   failureCode?: boolean
+  retryDueAt?: boolean
   createdAt?: boolean
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
   customer?: boolean | Prisma.CustomerDefaultArgs<ExtArgs>
@@ -1344,6 +1391,7 @@ export type MessageSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   readAt?: boolean
   failedAt?: boolean
   failureCode?: boolean
+  retryDueAt?: boolean
   createdAt?: boolean
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
   customer?: boolean | Prisma.CustomerDefaultArgs<ExtArgs>
@@ -1366,10 +1414,11 @@ export type MessageSelectScalar = {
   readAt?: boolean
   failedAt?: boolean
   failureCode?: boolean
+  retryDueAt?: boolean
   createdAt?: boolean
 }
 
-export type MessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "conversationId" | "customerId" | "providerMessageId" | "direction" | "type" | "templateId" | "body" | "payload" | "deliveryStatus" | "sentAt" | "deliveredAt" | "readAt" | "failedAt" | "failureCode" | "createdAt", ExtArgs["result"]["message"]>
+export type MessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "conversationId" | "customerId" | "providerMessageId" | "direction" | "type" | "templateId" | "body" | "payload" | "deliveryStatus" | "sentAt" | "deliveredAt" | "readAt" | "failedAt" | "failureCode" | "retryDueAt" | "createdAt", ExtArgs["result"]["message"]>
 export type MessageInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
   customer?: boolean | Prisma.CustomerDefaultArgs<ExtArgs>
@@ -1412,6 +1461,10 @@ export type $MessagePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     readAt: Date | null
     failedAt: Date | null
     failureCode: string | null
+    /**
+     * Set when a brand message failed with 131049; the tick route re-sends it once.
+     */
+    retryDueAt: Date | null
     createdAt: Date
   }, ExtArgs["result"]["message"]>
   composites: {}
@@ -1855,6 +1908,7 @@ export interface MessageFieldRefs {
   readonly readAt: Prisma.FieldRef<"Message", 'DateTime'>
   readonly failedAt: Prisma.FieldRef<"Message", 'DateTime'>
   readonly failureCode: Prisma.FieldRef<"Message", 'String'>
+  readonly retryDueAt: Prisma.FieldRef<"Message", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Message", 'DateTime'>
 }
     

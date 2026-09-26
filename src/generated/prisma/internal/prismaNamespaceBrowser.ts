@@ -175,6 +175,7 @@ export const MessageScalarFieldEnum = {
   readAt: 'readAt',
   failedAt: 'failedAt',
   failureCode: 'failureCode',
+  retryDueAt: 'retryDueAt',
   createdAt: 'createdAt'
 } as const
 
