@@ -72,11 +72,13 @@ export function Sidebar({
   items,
   counts,
   paused,
+  footer,
 }: {
   items: NavItem[];
   /** Keyed by href, so a screen's weight is visible before opening it. */
   counts: NavCounts;
   paused: boolean;
+  footer?: React.ReactNode;
 }) {
   const pathname = usePathname();
   const groups = ["Running", "Set up"] as const;
@@ -84,23 +86,16 @@ export function Sidebar({
   return (
     <nav
       aria-label="Main"
-      className="flex h-full w-58 shrink-0 flex-col gap-6 border-r border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] p-3"
+      className="sticky top-0 flex h-screen w-52 shrink-0 flex-col gap-4 overflow-y-auto border-r border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] p-3"
     >
       <div className="flex items-center gap-2.5 px-2 py-1">
         <span
           aria-hidden
-          className="flex h-[30px] w-[30px] items-center justify-center rounded-[var(--radius-md)] bg-[color:var(--color-action-primary)] text-[length:var(--text-small)] font-semibold tracking-tight text-white"
+          className="flex h-7 w-7 items-center justify-center rounded-[var(--radius-md)] bg-[color:var(--color-action-primary)] text-[length:var(--text-small)] font-semibold tracking-tight text-white"
         >
           3%
         </span>
-        <span className="flex flex-col leading-tight">
-          <span className="font-semibold tracking-tight">
-            3% Club
-          </span>
-          <span className="text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">
-            Qualification filter
-          </span>
-        </span>
+        <span className="font-semibold tracking-tight">3% Club</span>
       </div>
 
       {groups.map((group) => {
@@ -109,7 +104,7 @@ export function Sidebar({
 
         return (
           <div key={group} className="flex flex-col gap-0.5">
-            <span className="px-2 pb-1.5 text-[11px] font-semibold tracking-[0.06em] text-[color:var(--color-text-secondary)] uppercase">
+            <span className="px-2 pb-1 text-[11px] font-semibold tracking-[0.06em] text-[color:var(--color-text-secondary)] uppercase">
               {group}
             </span>
             <ul className="flex flex-col gap-0.5">
@@ -126,7 +121,7 @@ export function Sidebar({
                       href={item.href}
                       aria-current={active ? "page" : undefined}
                       className={cx(
-                        "flex items-center gap-2.5 rounded-[var(--radius-sm)] py-2 pr-2 pl-2.5 transition-colors",
+                        "flex items-center gap-2.5 rounded-[var(--radius-sm)] py-1.5 pr-2 pl-2.5 transition-colors",
                         active
                           ? "bg-[color:var(--color-surface-muted)] font-semibold shadow-[inset_2px_0_0_var(--color-action-primary)]"
                           : "hover:bg-[color:var(--color-surface-muted)]",
@@ -151,7 +146,7 @@ export function Sidebar({
       {paused && (
         // A paused system looks identical to an idle one. Say so where the
         // person already is, rather than only on the screen holding the switch.
-        <div className="mt-auto flex flex-col gap-2 rounded-[var(--radius-md)] border border-[color:var(--color-status-warning)] bg-[color:var(--color-status-warning)]/10 p-3">
+        <div className="mt-auto flex flex-col gap-1.5 rounded-[var(--radius-md)] border border-[color:var(--color-status-warning)] bg-[color:var(--color-status-warning)]/10 p-2.5">
           <span className="flex items-center gap-2 text-[length:var(--text-small)] font-semibold">
             <svg
               aria-hidden
@@ -179,6 +174,8 @@ export function Sidebar({
           </Link>
         </div>
       )}
+
+      {footer && <div className={paused ? undefined : "mt-auto"}>{footer}</div>}
     </nav>
   );
 }

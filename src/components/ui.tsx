@@ -21,13 +21,13 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
+    <header className="mb-4 flex flex-wrap items-center justify-between gap-3">
       <div>
         <h1 className="text-[length:var(--text-h1)] font-semibold tracking-tight">
           {title}
         </h1>
         {description && (
-          <p className="mt-1 max-w-2xl text-[color:var(--color-text-secondary)]">
+          <p className="mt-0.5 max-w-2xl text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">
             {description}
           </p>
         )}
@@ -61,7 +61,7 @@ export function Card({
       )}
     >
       {(title || actions) && (
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[color:var(--color-border-default)] px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[color:var(--color-border-default)] px-3 py-2">
           {title && (
             <h2 className="text-[length:var(--text-h3)] font-semibold">
               {title}
@@ -70,9 +70,9 @@ export function Card({
           {actions}
         </div>
       )}
-      <div className={flush ? undefined : "p-4"}>{children}</div>
+      <div className={flush ? undefined : "p-3"}>{children}</div>
       {footer && (
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[color:var(--color-border-default)] bg-[color:var(--color-surface-muted)] px-4 py-2.5 text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[color:var(--color-border-default)] bg-[color:var(--color-surface-muted)] px-3 py-1.5 text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">
           {footer}
         </div>
       )}
@@ -96,7 +96,7 @@ export function StatTile({
       <div className="text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">
         {label}
       </div>
-      <div className="mt-1 text-[length:var(--text-h1)] font-semibold tabular-nums">
+      <div className="mt-0.5 text-[length:var(--text-h1)] font-semibold tabular-nums">
         {value}
       </div>
       {hint && (
@@ -107,7 +107,7 @@ export function StatTile({
     </>
   );
   const base =
-    "block rounded-[var(--radius-md)] border border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] p-4 shadow-[var(--shadow-surface)]";
+    "block rounded-[var(--radius-md)] border border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] p-3 shadow-[var(--shadow-surface)]";
   return href ? (
     <a href={href} className={cx(base, "hover:border-[color:var(--color-action-primary)]")}>
       {inner}
@@ -150,7 +150,7 @@ export function Badge({
   return (
     <span
       className={cx(
-        "inline-flex items-center gap-1.5 rounded-[var(--radius-sm)] border px-2 py-0.5 text-[length:var(--text-small)] font-medium whitespace-nowrap",
+        "inline-flex items-center gap-1.5 rounded-[var(--radius-sm)] border px-1.5 py-px text-[length:var(--text-small)] font-medium whitespace-nowrap",
         TONE_CLASS[tone],
       )}
     >
@@ -244,7 +244,7 @@ export function FilterChip({
       href={href}
       aria-current={active ? "true" : undefined}
       className={cx(
-        "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[length:var(--text-small)] whitespace-nowrap transition-colors",
+        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[length:var(--text-small)] whitespace-nowrap transition-colors",
         active
           ? "border-[color:var(--color-action-primary)] bg-[color:var(--color-action-primary)]/8 font-semibold text-[color:var(--color-action-primary)]"
           : "border-[color:var(--color-border-default)] hover:bg-[color:var(--color-surface-muted)]",
@@ -268,7 +268,7 @@ export function Table({
   return (
     // §4: tables may exceed grid width and use controlled horizontal scroll.
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[40rem] border-collapse text-left">
+      <table className="w-full min-w-[36rem] border-collapse text-left">
         {caption && <caption className="sr-only">{caption}</caption>}
         <thead>
           <tr className="border-b border-[color:var(--color-border-default)] bg-[color:var(--color-surface-muted)]">
@@ -276,7 +276,7 @@ export function Table({
               <th
                 key={i}
                 scope="col"
-                className="px-4 py-2.5 text-[11px] font-semibold tracking-[0.03em] text-[color:var(--color-text-secondary)] uppercase"
+                className="px-3 py-1.5 text-[11px] font-semibold tracking-[0.03em] text-[color:var(--color-text-secondary)] uppercase"
               >
                 {h}
               </th>
@@ -304,7 +304,7 @@ export function Cell({
   children: ReactNode;
   className?: string;
 }) {
-  return <td className={cx("px-4 py-3 align-middle", className)}>{children}</td>;
+  return <td className={cx("px-3 py-2 align-middle", className)}>{children}</td>;
 }
 
 export function EmptyState({
@@ -317,7 +317,7 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center gap-2 px-4 py-12 text-center">
+    <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">
       <p className="font-medium">{title}</p>
       {description && (
         <p className="max-w-sm text-[color:var(--color-text-secondary)]">
@@ -333,7 +333,7 @@ export function ErrorNote({ children }: { children: ReactNode }) {
   return (
     <p
       role="alert"
-      className="rounded-[var(--radius-sm)] border border-[color:var(--color-status-error)] px-3 py-2 text-[color:var(--color-status-error)]"
+      className="rounded-[var(--radius-sm)] border border-[color:var(--color-status-error)] px-2.5 py-1.5 text-[color:var(--color-status-error)]"
     >
       {children}
     </p>
@@ -341,7 +341,7 @@ export function ErrorNote({ children }: { children: ReactNode }) {
 }
 
 const BUTTON_BASE =
-  "inline-flex items-center justify-center gap-2 rounded-[var(--radius-sm)] px-3 py-2 font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex items-center justify-center gap-2 rounded-[var(--radius-sm)] px-2.5 py-1.5 font-medium whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-60";
 
 export const buttonClass = {
   primary: cx(
@@ -359,7 +359,7 @@ export const buttonClass = {
 };
 
 export const inputClass =
-  "w-full rounded-[var(--radius-sm)] border border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] px-3 py-2 text-[color:var(--color-text-primary)] placeholder:text-[color:var(--color-text-secondary)]";
+  "w-full rounded-[var(--radius-sm)] border border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] px-2.5 py-1.5 text-[color:var(--color-text-primary)] placeholder:text-[color:var(--color-text-secondary)]";
 
 export function Field({
   label,

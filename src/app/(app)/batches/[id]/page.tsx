@@ -4,7 +4,6 @@ import { setBatchStatus, startBatchAction } from "../actions";
 import {
   Badge,
   Card,
-  FilterChip,
   Cell,
   EmptyState,
   PageHeader,
@@ -225,7 +224,7 @@ export default async function BatchPage({
     <>
       <Link
         href="/batches"
-        className="mb-3 inline-flex items-center gap-1 text-[length:var(--text-small)] text-[color:var(--color-text-secondary)] underline-offset-2 hover:underline"
+        className="mb-1.5 inline-flex items-center gap-1 text-[length:var(--text-small)] text-[color:var(--color-text-secondary)] underline-offset-2 hover:underline"
       >
         ← All batches
       </Link>
@@ -281,15 +280,21 @@ export default async function BatchPage({
       />
 
       {/*
-        Each count sits under its own slice of the bar, and the slice is as
-        wide as its share — so the colour, the number and the label are one
-        column and nothing has to be matched up by eye. Filtering lives in the
-        row underneath: the figures report, the chips act.
+        Each count sits under its own slice of the bar, as wide as its share,
+        and is itself the filter: click a number to see those numbers.
       */}
-      <section className="mb-6">
-        <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
+      <section className="mb-4">
+        <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="text-[length:var(--text-h3)] font-semibold tracking-tight">
             Where the {total} number{total === 1 ? "" : "s"} stand
+            {filter && (
+              <Link
+                href={href()}
+                className="ml-2 text-[length:var(--text-small)] font-normal text-[color:var(--color-action-primary)] underline-offset-2 hover:underline"
+              >
+                Show all
+              </Link>
+            )}
           </h2>
           <span className="text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">
             {pending > 0 && <>{pending} still to enrol</>}
@@ -298,23 +303,32 @@ export default async function BatchPage({
           </span>
         </div>
 
-        <div className="flex flex-wrap gap-x-6 gap-y-5">
+        <div className="flex flex-wrap gap-2">
           {cells.map((cell) => {
             const value = counts[cell.key] ?? 0;
+            const active = filter === cell.key;
             return (
-              <div
+              <Link
                 key={cell.key}
-                className="flex min-w-28 flex-col gap-2"
-                style={{ flexGrow: value, flexBasis: 0 }}
+                href={active ? href() : href(cell.key)}
+                aria-current={active ? "true" : undefined}
+                title={active ? "Show all" : `Show ${cell.label.toLowerCase()}`}
+                className={cx(
+                  "flex min-w-24 flex-col gap-1 rounded-[var(--radius-md)] border bg-[color:var(--color-surface)] px-2.5 py-2 transition-colors",
+                  active
+                    ? "border-[color:var(--color-action-primary)] shadow-[inset_0_0_0_1px_var(--color-action-primary)]"
+                    : "border-[color:var(--color-border-default)] hover:border-[color:var(--color-text-secondary)]",
+                )}
+                style={{ flexGrow: Math.max(value, 1), flexBasis: 0 }}
               >
                 <span
                   aria-hidden
-                  className="h-1.5 rounded-full"
+                  className="h-1 rounded-full"
                   style={{ background: cell.color }}
                 />
                 <span className="flex items-baseline gap-1.5">
                   <span
-                    className="text-[length:var(--text-h1)] leading-none font-semibold tracking-tight tabular-nums"
+                    className="text-[length:var(--text-h2)] leading-none font-semibold tabular-nums"
                     style={
                       cell.key === "QUALIFIED"
                         ? { color: "var(--color-status-success)" }
@@ -329,28 +343,12 @@ export default async function BatchPage({
                     </span>
                   )}
                 </span>
-                <span className="text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">
+                <span className="text-[length:var(--text-small)] whitespace-nowrap text-[color:var(--color-text-secondary)]">
                   {cell.label}
                 </span>
-              </div>
+              </Link>
             );
           })}
-        </div>
-
-        <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-[color:var(--color-border-default)] pt-4">
-          <span className="mr-1 text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">
-            Show
-          </span>
-          <FilterChip href={href()} label="All" count={total} active={!filter} />
-          {cells.map((cell) => (
-            <FilterChip
-              key={cell.key}
-              href={href(cell.key)}
-              label={cell.label}
-              count={counts[cell.key] ?? 0}
-              active={filter === cell.key}
-            />
-          ))}
         </div>
       </section>
 
@@ -387,7 +385,7 @@ export default async function BatchPage({
                 defaultValue={search}
                 placeholder="Search a number or name"
                 aria-label="Search a number or name"
-                className="w-60 rounded-[var(--radius-sm)] border border-[color:var(--color-border-default)] px-2.5 py-1.5 text-[length:var(--text-small)] placeholder:text-[color:var(--color-text-secondary)]"
+                className="w-52 rounded-[var(--radius-sm)] border border-[color:var(--color-border-default)] px-2 py-1 text-[length:var(--text-small)] placeholder:text-[color:var(--color-text-secondary)]"
               />
               <button type="submit" className={buttonClass.secondary}>
                 Search
@@ -530,7 +528,7 @@ export default async function BatchPage({
                           under a qualified number as if they were still coming.
                           What is left over is one honest line, not a list.
                         */}
-                        <ol className="mt-3 grid grid-cols-[auto_1fr_auto] items-baseline gap-x-3 gap-y-2 border-l border-[color:var(--color-border-default)] py-1 pl-4">
+                        <ol className="mt-2 grid grid-cols-[auto_1fr_auto] items-baseline gap-x-3 gap-y-2 border-l border-[color:var(--color-border-default)] py-1 pl-4">
                           {funnelSteps
                             .filter((funnelStep) => done.has(funnelStep.key))
                             .map((funnelStep) => (

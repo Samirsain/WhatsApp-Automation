@@ -105,7 +105,7 @@ export default async function QualifiedPage({
       />
 
       <Card className="mb-4">
-        <div className="flex flex-wrap items-center gap-6">
+        <div className="flex flex-wrap items-center gap-4">
           <div className="flex flex-col gap-0.5">
             <span className="text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">
               Waiting to be exported
