@@ -1,14 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { timingSafeEqual } from "node:crypto";
-import { tick } from "@/lib/automation/worker";
-import { sendDueRetries } from "@/lib/brand/retry";
-import { dispatchRunningBatches } from "@/lib/batches/runner";
+import { runTick } from "@/lib/tick";
 
 export const dynamic = "force-dynamic";
 
 /**
- * Drives the durable timer worker. Call it on a schedule — a platform cron,
- * a container sidecar, or `curl` in a loop for local development:
+ * Runs the timed jobs on demand. In production the app already runs them
+ * every 15 minutes itself (src/lib/tick.ts); this route is for a manual
+ * nudge or local development:
  *
  *   curl -H "Authorization: Bearer $AUTOMATION_TICK_SECRET" \
  *        http://localhost:3000/api/automation/tick
@@ -30,10 +29,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const automations = await tick();
-    const batches = await dispatchRunningBatches();
-    const retries = await sendDueRetries();
-    return NextResponse.json({ automations, batches, retries });
+    return NextResponse.json(await runTick());
   } catch (err) {
     console.error("[tick] failed", err);
     return new NextResponse("Tick failed", { status: 500 });
