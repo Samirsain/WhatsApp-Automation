@@ -15,7 +15,8 @@
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
     "test": "tsx --test \"src/**/*.test.ts\" \"prisma/**/*.test.ts\"",
-    "db:clear-demo": "tsx prisma/clear-demo.ts"
+    "db:clear-demo": "tsx prisma/clear-demo.ts",
+    "user:add": "tsx prisma/add-user.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",

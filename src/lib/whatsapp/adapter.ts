@@ -20,6 +20,8 @@ export type OutboundTemplate = {
   templateKey: string;
   language: string;
   variables?: Record<string, string>;
+  /** Public URL of the header image, for templates with an IMAGE header. */
+  headerImageUrl?: string;
 };
 
 export type OutboundMessage = OutboundText | OutboundTemplate;
@@ -39,6 +41,8 @@ export type InboundEvent =
       text: string;
       /** Set when the customer tapped a structured reply. */
       replyId?: string;
+      /** WhatsApp profile name of the sender, when Meta includes it. */
+      profileName?: string;
       raw: unknown;
     }
   | {
@@ -116,6 +120,7 @@ const GRAPH_VERSION = "v25.0";
 
 type MetaChange = {
   value?: {
+    contacts?: { wa_id?: string; profile?: { name?: string } }[];
     messages?: {
       id?: string;
       from?: string;
@@ -142,6 +147,36 @@ function toDate(timestamp?: string): Date {
   return Number.isFinite(seconds) ? new Date(seconds * 1000) : new Date();
 }
 
+/** The Cloud API request body for one message. Pure, so it can be tested. */
+export function buildMetaPayload(message: OutboundMessage): Record<string, unknown> {
+  if (message.kind === "text") {
+    return { messaging_product: "whatsapp", to: message.to, type: "text", text: { body: message.body } };
+  }
+  const components = [
+    ...(message.headerImageUrl
+      ? [{ type: "header", parameters: [{ type: "image", image: { link: message.headerImageUrl } }] }]
+      : []),
+    ...(message.variables
+      ? [
+          {
+            type: "body",
+            parameters: Object.values(message.variables).map((text) => ({ type: "text", text })),
+          },
+        ]
+      : []),
+  ];
+  return {
+    messaging_product: "whatsapp",
+    to: message.to,
+    type: "template",
+    template: {
+      name: message.templateKey,
+      language: { code: message.language },
+      ...(components.length > 0 && { components }),
+    },
+  };
+}
+
 const metaAdapter: WhatsAppAdapter = {
   name: "meta",
 
@@ -157,34 +192,7 @@ const metaAdapter: WhatsAppAdapter = {
       };
     }
 
-    const payload =
-      message.kind === "text"
-        ? {
-            messaging_product: "whatsapp",
-            to: message.to,
-            type: "text",
-            text: { body: message.body },
-          }
-        : {
-            messaging_product: "whatsapp",
-            to: message.to,
-            type: "template",
-            template: {
-              name: message.templateKey,
-              language: { code: message.language },
-              ...(message.variables && {
-                components: [
-                  {
-                    type: "body",
-                    parameters: Object.values(message.variables).map((text) => ({
-                      type: "text",
-                      text,
-                    })),
-                  },
-                ],
-              }),
-            },
-          };
+    const payload = buildMetaPayload(message);
 
     try {
       const res = await fetch(
@@ -241,6 +249,7 @@ const metaAdapter: WhatsAppAdapter = {
 
     for (const entry of entries) {
       for (const change of entry.changes ?? []) {
+        const contacts = change.value?.contacts ?? [];
         for (const m of change.value?.messages ?? []) {
           if (!m.id || !m.from) continue;
           const reply = m.interactive?.button_reply ?? m.interactive?.list_reply;
@@ -251,6 +260,9 @@ const metaAdapter: WhatsAppAdapter = {
             receivedAt: toDate(m.timestamp),
             text: reply?.title ?? m.button?.text ?? m.text?.body ?? "",
             replyId: reply?.id ?? m.button?.payload,
+            profileName:
+              contacts.find((c) => c.wa_id === m.from?.replace(/^\+/, ""))?.profile?.name ??
+              contacts[0]?.profile?.name,
             raw: m,
           });
         }

@@ -1,7 +1,7 @@
 import NextAuth, { type DefaultSession } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
-import { z } from "zod";
+import { parseLogin } from "@/lib/login";
 import { prisma } from "@/lib/prisma";
 import { clientKey, rateLimit, resetLimit } from "@/lib/rate-limit";
 import type { RoleCode } from "@/lib/rbac";
@@ -15,30 +15,25 @@ declare module "next-auth" {
   }
 }
 
-const credentialsSchema = z.object({
-  email: z.email(),
-  password: z.string().min(1),
-});
-
 export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },
   providers: [
     Credentials({
       credentials: {
-        email: { label: "Email", type: "email" },
+        email: { label: "Username or email", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(raw, request) {
-        const parsed = credentialsSchema.safeParse(raw);
-        if (!parsed.success) return null;
+        const parsed = parseLogin(raw);
+        if (!parsed) return null;
 
         // Doc 11 §2 — slow credential stuffing. Limited per client and per
         // account, so one attacker cannot lock out every user by guessing.
         const key = clientKey(request.headers, "auth");
         const perClient = rateLimit(key, 10, 300);
         const perAccount = rateLimit(
-          `auth:acct:${parsed.data.email.toLowerCase()}`,
+          `auth:acct:${parsed.login}`,
           5,
           300,
         );
@@ -61,18 +56,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         const user = await prisma.user.findUnique({
-          where: { email: parsed.data.email.toLowerCase() },
+          where: { email: parsed.login },
         });
 
         // §7: disabled/suspended users must not obtain a session.
         if (!user || user.status !== "ACTIVE" || !user.passwordHash) return null;
 
-        const ok = await bcrypt.compare(parsed.data.password, user.passwordHash);
+        const ok = await bcrypt.compare(parsed.password, user.passwordHash);
         if (!ok) return null;
 
         // A genuine sign-in clears the attempt counters.
         resetLimit(clientKey(request.headers, "auth"));
-        resetLimit(`auth:acct:${parsed.data.email.toLowerCase()}`);
+        resetLimit(`auth:acct:${parsed.login}`);
 
         await prisma.user.update({
           where: { id: user.id },

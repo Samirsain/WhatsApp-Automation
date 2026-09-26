@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createHmac } from "node:crypto";
 import test from "node:test";
-import { whatsapp } from "./adapter";
+import { buildMetaPayload, whatsapp } from "./adapter";
 
 process.env.WHATSAPP_PROVIDER = "meta";
 process.env.WHATSAPP_VERIFY_TOKEN = "verify-me";
@@ -122,4 +122,43 @@ test("payload verification requires a matching signature", () => {
   );
   // Unsigned traffic must never reach business processing.
   assert.equal(adapter.verifyWebhook({ rawBody }), false);
+});
+
+test("template payload carries a header image and the body name", () => {
+  const payload = buildMetaPayload({
+    kind: "template",
+    to: "+919876543210",
+    templateKey: "property_brand_1",
+    language: "hi",
+    headerImageUrl: "https://img.example/a.jpg",
+    variables: { name: "Rahul" },
+  }) as { template: { components: unknown[] } };
+
+  assert.deepEqual(payload.template.components, [
+    { type: "header", parameters: [{ type: "image", image: { link: "https://img.example/a.jpg" } }] },
+    { type: "body", parameters: [{ type: "text", text: "Rahul" }] },
+  ]);
+});
+
+test("template payload without image or variables has no components", () => {
+  const payload = buildMetaPayload({
+    kind: "template",
+    to: "+919876543210",
+    templateKey: "hello",
+    language: "en",
+  }) as { template: Record<string, unknown> };
+  assert.equal("components" in payload.template, false);
+});
+
+test("inbound message carries the contact's profile name", () => {
+  const [event] = adapter.parseWebhook({
+    entry: [{ changes: [{ value: {
+      contacts: [{ wa_id: "919352410667", profile: { name: "Samir Sain" } }],
+      messages: [{ id: "wamid.9", from: "919352410667", timestamp: "1700000000",
+        type: "button", button: { text: "BRAND", payload: "BRAND" } }],
+    } }] }],
+  });
+  assert.equal(event.kind, "message");
+  assert.equal(event.kind === "message" && event.profileName, "Samir Sain");
+  assert.equal(event.kind === "message" && event.text, "BRAND");
 });

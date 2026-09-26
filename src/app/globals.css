@@ -29,12 +29,12 @@
     Arial, sans-serif;
   --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", monospace;
 
-  --text-display: 2.125rem;
-  --text-h1: 1.75rem;
-  --text-h2: 1.375rem;
-  --text-h3: 1.125rem;
-  --text-body: 0.9375rem;
-  --text-small: 0.8125rem;
+  --text-display: 1.75rem;
+  --text-h1: 1.25rem;
+  --text-h2: 1.0625rem;
+  --text-h3: 0.9375rem;
+  --text-body: 0.875rem;
+  --text-small: 0.75rem;
 
   /* §5 Radius — small inputs/badges, medium cards, large modals */
   --radius-sm: 4px;

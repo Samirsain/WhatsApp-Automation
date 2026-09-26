@@ -229,6 +229,8 @@ model Message {
   readAt            DateTime?
   failedAt          DateTime?
   failureCode       String?
+  /// Set when a brand message failed with 131049; the tick route re-sends it once.
+  retryDueAt        DateTime?
   createdAt         DateTime         @default(now())
 
   conversation Conversation       @relation(fields: [conversationId], references: [id], onDelete: Cascade)
@@ -239,6 +241,7 @@ model Message {
   @@index([conversationId, createdAt])
   @@index([customerId, createdAt])
   @@index([deliveryStatus])
+  @@index([retryDueAt])
   @@map("messages")
 }
 
