@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { buttonClass, ErrorNote, inputClass } from "@/components/ui";
-import { rowsToText } from "@/lib/brand/rules";
+import { parseCsvRows, rowsToText } from "@/lib/brand/rules";
 import { sendBulk, type SendState } from "./actions";
 
 type RowInput = { name: string; number: string };
@@ -11,10 +11,14 @@ const blank = (n: number): RowInput[] => Array.from({ length: n }, () => ({ name
 
 export function SendForm() {
   const [rows, setRows] = useState<RowInput[]>(blank(5));
+  const [csvNote, setCsvNote] = useState<string | null>(null);
   const [state, action, pending] = useActionState<SendState, FormData>(async (prev, formData) => {
     const result = await sendBulk(prev, formData);
     // Sent rows are cleared so the same list is not sent twice by accident.
-    if (result.sent !== undefined) setRows(blank(5));
+    if (result.sent !== undefined) {
+      setRows(blank(5));
+      setCsvNote(null);
+    }
     return result;
   }, {});
   const filled = rows.filter((r) => r.number.trim() !== "").length;
@@ -23,14 +27,13 @@ export function SendForm() {
     setRows((rs) => rs.map((r, j) => (j === i ? { ...r, [key]: value } : r)));
   }
 
-  async function loadCsv(file: File) {
-    const lines = (await file.text()).split(/\r?\n/).filter((l) => l.trim() !== "");
-    const loaded = lines.map((line) => {
-      const parts = line.split(",");
-      return { name: parts.slice(0, -1).join(",").trim(), number: (parts.at(-1) ?? "").trim() };
-    });
-    // A header row has no digits in the number column.
-    setRows(loaded.filter((r) => /\d/.test(r.number)));
+  async function loadCsv(input: HTMLInputElement) {
+    const file = input.files?.[0];
+    if (!file) return;
+    const { rows: loaded, skipped } = parseCsvRows(await file.text());
+    setRows(loaded.length > 0 ? loaded : blank(5));
+    setCsvNote(`${loaded.length} rows loaded from ${file.name}${skipped ? `, ${skipped} skipped (no phone number)` : ""}.`);
+    input.value = ""; // so picking the same file again still loads it
   }
 
   return (
@@ -73,10 +76,15 @@ export function SendForm() {
             type="file"
             accept=".csv,text/csv"
             className="sr-only"
-            onChange={(e) => e.target.files?.[0] && loadCsv(e.target.files[0])}
+            onChange={(e) => loadCsv(e.target)}
           />
         </label>
       </div>
+      {csvNote && (
+        <p role="status" className="text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">
+          {csvNote}
+        </p>
+      )}
 
       {state.error && <ErrorNote>{state.error}</ErrorNote>}
       {state.rejected && state.rejected.length > 0 && (

@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { parseNumberList } from "../numbers/parse-list";
 import {
-  failureAction, failureReason, isBrandReply, isFirstBrandTap, retryDueAt,
-  rowsToText, RETRY_AFTER_MS,
+  failureAction, failureReason, isBrandReply, retryDueAt,
+  csvCell, parseCsvRows, rowsToText, RETRY_AFTER_MS,
 } from "./rules";
 import { BRAND_TEMPLATES, pickTemplate, thankYouText } from "./templates";
 
@@ -74,7 +74,32 @@ test("a CSV header row is skipped by parseNumberList", () => {
   assert.equal(parsed.rejected.length, 0);
 });
 
-test("only the first BRAND tap qualifies", () => {
-  assert.equal(isFirstBrandTap(null), true);
-  assert.equal(isFirstBrandTap(new Date()), false);
+
+test("csvCell neutralises spreadsheet formulas and keeps phones as text", () => {
+  assert.equal(csvCell('=HYPERLINK("http://x","y")'), `"'=HYPERLINK(""http://x"",""y"")"`);
+  assert.equal(csvCell("@cmd"), "'@cmd");
+  assert.equal(csvCell("-2+3"), "'-2+3");
+  assert.equal(csvCell("+919876543210"), "'+919876543210");
+  assert.equal(csvCell("Sharma, Rahul"), '"Sharma, Rahul"');
+  assert.equal(csvCell(null), "");
+  assert.equal(csvCell("Rahul"), "Rahul");
+});
+
+test("parseCsvRows picks the number column, strips quotes, handles ; and counts skips", () => {
+  const { rows, skipped } = parseCsvRows(
+    [
+      "﻿name,number,city",
+      "Rahul,9876543210,Jaipur",
+      '"Sharma, Rahul",9812345678,',
+      "Priya;9123456789",
+      "no number here,,",
+      "",
+    ].join("\r\n"),
+  );
+  assert.deepEqual(rows, [
+    { name: "Rahul", number: "9876543210" },
+    { name: "Sharma, Rahul", number: "9812345678" },
+    { name: "Priya", number: "9123456789" },
+  ]);
+  assert.equal(skipped, 2); // the header row and the row with no number
 });

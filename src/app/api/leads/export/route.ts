@@ -1,13 +1,9 @@
 import { NextResponse } from "next/server";
+import { csvCell as csv } from "@/lib/brand/rules";
 import { prisma } from "@/lib/prisma";
 import { requirePermission } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
-
-function csv(value: string | null | undefined): string {
-  const v = value ?? "";
-  return /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
-}
 
 export async function GET() {
   await requirePermission("qualified:export");

@@ -32,10 +32,16 @@ export async function sendBulk(_prev: SendState, formData: FormData): Promise<Se
   let skipped = 0;
   // ponytail: sequential inside the request; move to the tick worker if lists grow past a few hundred
   for (const row of parsed.valid) {
-    const r = await sendBrandMessage({ e164: row.e164, name: row.name });
-    if (r.ok) sent++;
-    else if (r.skipped) skipped++;
-    else failed++;
+    try {
+      const r = await sendBrandMessage({ e164: row.e164, name: row.name });
+      if (r.ok) sent++;
+      else if (r.skipped) skipped++;
+      else failed++;
+    } catch (err) {
+      // One bad row must not hide what happened to the rest of the list.
+      console.error("[send] row failed", err instanceof Error ? err.message : err);
+      failed++;
+    }
   }
 
   await logActivity({

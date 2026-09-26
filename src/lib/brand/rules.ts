@@ -61,6 +61,55 @@ export function rowsToText(rows: { name: string; number: string }[]): string {
     .join("\n");
 }
 
-export function isFirstBrandTap(qualifiedAt: Date | null): boolean {
-  return qualifiedAt === null;
+/** Split one CSV line on `delimiter`, honouring double quotes. */
+function splitCsvLine(line: string, delimiter: string): string[] {
+  const fields: string[] = [];
+  let field = "";
+  let quoted = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (quoted) {
+      if (ch === '"' && line[i + 1] === '"') { field += '"'; i++; }
+      else if (ch === '"') quoted = false;
+      else field += ch;
+    } else if (ch === '"') quoted = true;
+    else if (ch === delimiter) { fields.push(field); field = ""; }
+    else field += ch;
+  }
+  fields.push(field);
+  return fields.map((f) => f.trim());
 }
+
+/**
+ * An uploaded CSV → name/number rows. The number is the last column that looks
+ * like a phone, so extra columns (city, trailing empties) do not matter; the
+ * name is everything before it. Lines without a number are counted as skipped.
+ */
+export function parseCsvRows(text: string): { rows: { name: string; number: string }[]; skipped: number } {
+  const rows: { name: string; number: string }[] = [];
+  let skipped = 0;
+  for (const raw of text.replace(/^﻿/, "").split(/\r?\n/)) {
+    const line = raw.trim();
+    if (line === "") continue;
+    const fields = splitCsvLine(line, line.includes(",") ? "," : ";");
+    let idx = -1;
+    for (let i = fields.length - 1; i >= 0; i--) {
+      if (fields[i].replace(/\D/g, "").length >= 10) { idx = i; break; }
+    }
+    if (idx === -1) { skipped++; continue; }
+    rows.push({ name: fields.slice(0, idx).filter(Boolean).join(", "), number: fields[idx] });
+  }
+  return { rows, skipped };
+}
+
+/**
+ * One CSV cell. Values starting with = + - @ are prefixed with ' so a
+ * spreadsheet shows them as text instead of running them — names come from
+ * WhatsApp profiles, which anyone can set — and a phone stays a phone.
+ */
+export function csvCell(value: string | null | undefined): string {
+  let v = value ?? "";
+  if (/^[=+\-@\t\r]/.test(v)) v = `'${v}`;
+  return /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+}
+

@@ -1,7 +1,7 @@
 import "server-only";
 import { logActivity } from "@/lib/activity";
 import { applyCustomerResponse } from "@/lib/automation/engine";
-import { isBrandReply, isFirstBrandTap, retryDueAt } from "@/lib/brand/rules";
+import { isBrandReply, retryDueAt } from "@/lib/brand/rules";
 import { sendBrandThanks } from "@/lib/brand/send";
 import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
@@ -97,8 +97,10 @@ async function applyInboundMessage(
   // A BRAND tap is a lead even if this app never messaged the number
   // (n8n did, before cutover). Anything else from a stranger is still ignored.
   if (!customer && isBrandReply(event.text, event.replyId)) {
-    customer = await prisma.customer.create({
-      data: { phoneE164: event.from, name: event.profileName ?? null },
+    customer = await prisma.customer.upsert({
+      where: { phoneE164: event.from },
+      create: { phoneE164: event.from, name: event.profileName ?? null },
+      update: {},
       select: { id: true },
     });
   }
@@ -197,22 +199,24 @@ async function applyInboundMessage(
   if (isBrandReply(event.text, event.replyId)) {
     const lead = await prisma.customer.findUniqueOrThrow({
       where: { id: customer.id },
-      select: { id: true, phoneE164: true, name: true, qualifiedAt: true },
+      select: { id: true, phoneE164: true, name: true },
     });
     const name = lead.name ?? event.profileName ?? null;
-    if (isFirstBrandTap(lead.qualifiedAt)) {
-      await prisma.customer.update({
-        where: { id: lead.id },
-        data: { status: "QUALIFIED", qualifiedAt: event.receivedAt, name },
-      });
+    // Claimed with a conditional update: of two taps processed at once, only
+    // one sees count 1, so qualifiedAt keeps the first tap and one thank-you goes.
+    const claim = await prisma.customer.updateMany({
+      where: { id: lead.id, qualifiedAt: null },
+      data: { status: "QUALIFIED", qualifiedAt: event.receivedAt, name },
+    });
+    if (claim.count === 1) {
       await logActivity({
         eventType: "customer.brand_tapped",
         objectType: "customer",
         objectId: lead.id,
         customerId: lead.id,
       });
+      await sendBrandThanks({ id: lead.id, phoneE164: lead.phoneE164, name });
     }
-    await sendBrandThanks({ id: lead.id, phoneE164: lead.phoneE164, name });
     return "ok";
   }
 
