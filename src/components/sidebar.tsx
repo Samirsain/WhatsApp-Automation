@@ -59,7 +59,7 @@ export function Sidebar({
   return (
     <nav
       aria-label="Main"
-      className="sticky top-0 flex h-screen w-52 shrink-0 flex-col gap-4 overflow-y-auto border-r border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] p-3"
+      className="sticky top-0 flex h-screen w-52 shrink-0 flex-col gap-4 overflow-y-auto border-r print:hidden border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] p-3"
     >
       <div className="flex items-center gap-2.5 px-2 py-1">
         <Image src="/logo.png" alt="" width={28} height={28} className="rounded-full" priority />

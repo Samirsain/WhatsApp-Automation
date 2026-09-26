@@ -133,6 +133,7 @@ export const CustomerScalarFieldEnum = {
   email: 'email',
   location: 'location',
   status: 'status',
+  leadStage: 'leadStage',
   batchId: 'batchId',
   optedOutAt: 'optedOutAt',
   lastInteractionAt: 'lastInteractionAt',
