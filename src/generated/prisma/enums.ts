@@ -37,6 +37,16 @@ export const CustomerStatus = {
 export type CustomerStatus = (typeof CustomerStatus)[keyof typeof CustomerStatus]
 
 
+export const LeadStage = {
+  NEW: 'NEW',
+  INTERESTED: 'INTERESTED',
+  ONBOARDING: 'ONBOARDING',
+  NOT_INTERESTED: 'NOT_INTERESTED'
+} as const
+
+export type LeadStage = (typeof LeadStage)[keyof typeof LeadStage]
+
+
 export const BatchStatus = {
   DRAFT: 'DRAFT',
   RUNNING: 'RUNNING',

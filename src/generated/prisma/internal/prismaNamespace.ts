@@ -1629,6 +1629,7 @@ export const CustomerScalarFieldEnum = {
   email: 'email',
   location: 'location',
   status: 'status',
+  leadStage: 'leadStage',
   batchId: 'batchId',
   optedOutAt: 'optedOutAt',
   lastInteractionAt: 'lastInteractionAt',
@@ -1965,6 +1966,20 @@ export type EnumCustomerStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$P
  * Reference to a field of type 'CustomerStatus[]'
  */
 export type ListEnumCustomerStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CustomerStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'LeadStage'
+ */
+export type EnumLeadStageFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LeadStage'>
+    
+
+
+/**
+ * Reference to a field of type 'LeadStage[]'
+ */
+export type ListEnumLeadStageFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LeadStage[]'>
     
 
 

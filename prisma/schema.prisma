@@ -34,6 +34,14 @@ enum CustomerStatus {
   NO_RESPONSE
 }
 
+/// Where a BRAND lead stands with the team (src/lib/brand/stages.ts).
+enum LeadStage {
+  NEW
+  INTERESTED
+  ONBOARDING
+  NOT_INTERESTED
+}
+
 enum BatchStatus {
   DRAFT
   RUNNING
@@ -170,6 +178,7 @@ model Customer {
   email             String?
   location          String?
   status            CustomerStatus @default(NOT_STARTED)
+  leadStage         LeadStage      @default(NEW)
   batchId           String?        @db.Uuid
   optedOutAt        DateTime?
   lastInteractionAt DateTime?
@@ -190,6 +199,7 @@ model Customer {
   @@index([qualifiedAt])
   @@index([batchId])
   @@index([exportedAt])
+  @@index([status, leadStage])
   @@map("customers")
 }
 
