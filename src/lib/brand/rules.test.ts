@@ -41,11 +41,11 @@ test("retryDueAt only for a first-time 131049 brand failure", () => {
   assert.equal(retryDueAt("131049", null, at), null);
 });
 
-test("failure reasons are plain Hindi and unknown codes show the code", () => {
-  assert.match(failureReason("131049"), /Meta ne roka/);
+test("failure reasons are plain English and unknown codes show the code", () => {
+  assert.match(failureReason("131049"), /Blocked by Meta/);
   assert.match(failureReason("131026"), /WhatsApp/);
-  assert.equal(failureReason("999"), "Meta ne bheja nahi (code 999)");
-  assert.equal(failureReason(null), "Meta ne bheja nahi");
+  assert.equal(failureReason("999"), "Not delivered by Meta (code 999)");
+  assert.equal(failureReason(null), "Not delivered by Meta");
 });
 
 test("failure action: auto while a retry is pending, none when opted out", () => {

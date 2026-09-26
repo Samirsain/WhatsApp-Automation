@@ -7,7 +7,6 @@ import { NAV } from "@/lib/nav";
 import { prisma } from "@/lib/prisma";
 import { can, ROLE_LABELS } from "@/lib/rbac";
 import { requireUser } from "@/lib/session";
-import { getSetting } from "@/lib/settings";
 
 function initials(name: string, email: string) {
   const source = name.trim() || email;
@@ -20,19 +19,16 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   // Nav visibility is usability only; every page re-checks server-side.
   const items = NAV.filter((item) => can(user.roles, item.permission));
 
-  const [unread, batches, qualified, pauseAll] = await Promise.all([
+  const [unread, leads] = await Promise.all([
     prisma.notification.count({ where: { userId: user.id, readAt: null } }),
-    prisma.batch.count(),
     prisma.customer.count({ where: { status: "QUALIFIED" } }),
-    getSetting("automation.pause_all"),
   ]);
 
   return (
     <div className="flex min-h-screen">
       <Sidebar
         items={items}
-        counts={{ "/batches": batches, "/qualified": qualified }}
-        paused={pauseAll === true}
+        counts={{ "/leads": leads }}
         footer={
           <div className="flex flex-col gap-1 border-t border-[color:var(--color-border-default)] pt-2">
             <Link

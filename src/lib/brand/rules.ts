@@ -31,17 +31,17 @@ export function retryDueAt(
 }
 
 const REASONS: Record<string, string> = {
-  "131049": "Meta ne roka (marketing limit)",
-  "131026": "Is number pe WhatsApp nahi hai / message nahi pahuncha",
-  "131050": "User ne marketing messages band kiye hain",
-  "131042": "Payment ki dikkat – Meta billing check karo",
-  "131047": "24 ghante ki window band",
-  "130472": "Meta experiment ki wajah se roka",
+  "131049": "Blocked by Meta (marketing limit for this person)",
+  "131026": "Not on WhatsApp, or the message could not be delivered",
+  "131050": "This person turned off marketing messages",
+  "131042": "Payment problem – check Meta billing",
+  "131047": "24-hour reply window has closed",
+  "130472": "Held back by a Meta experiment",
 };
 
 export function failureReason(code: string | null): string {
-  if (!code) return "Meta ne bheja nahi";
-  return REASONS[code] ?? `Meta ne bheja nahi (code ${code})`;
+  if (!code) return "Not delivered by Meta";
+  return REASONS[code] ?? `Not delivered by Meta (code ${code})`;
 }
 
 export function failureAction(code: string | null, retryDueAt: Date | null): "auto" | "resend" | "none" {
