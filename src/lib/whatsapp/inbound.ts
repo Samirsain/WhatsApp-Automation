@@ -1,6 +1,8 @@
 import "server-only";
 import { logActivity } from "@/lib/activity";
 import { applyCustomerResponse } from "@/lib/automation/engine";
+import { isBrandReply, isFirstBrandTap, retryDueAt } from "@/lib/brand/rules";
+import { sendBrandThanks } from "@/lib/brand/send";
 import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
 import type { InboundEvent } from "@/lib/whatsapp/adapter";
@@ -44,7 +46,7 @@ async function applyStatus(
 ): Promise<boolean> {
   const message = await prisma.message.findUnique({
     where: { providerMessageId: event.providerMessageId },
-    select: { id: true, deliveryStatus: true },
+    select: { id: true, deliveryStatus: true, payload: true, customerId: true },
   });
   if (!message) return false;
 
@@ -62,9 +64,18 @@ async function applyStatus(
       ...(event.status === "FAILED" && {
         failedAt: event.at,
         failureCode: event.failureCode ?? null,
+        retryDueAt: retryDueAt(event.failureCode, message.payload, event.at),
       }),
     },
   });
+
+  // 131050: the person turned off marketing messages. Never send to them again.
+  if (event.status === "FAILED" && event.failureCode === "131050") {
+    await prisma.customer.updateMany({
+      where: { id: message.customerId, optedOutAt: null },
+      data: { optedOutAt: event.at },
+    });
+  }
 
   return true;
 }
@@ -78,10 +89,19 @@ async function applyInboundMessage(
   });
   if (existing) return "duplicate";
 
-  const customer = await prisma.customer.findUnique({
+  let customer = await prisma.customer.findUnique({
     where: { phoneE164: event.from },
     select: { id: true },
   });
+
+  // A BRAND tap is a lead even if this app never messaged the number
+  // (n8n did, before cutover). Anything else from a stranger is still ignored.
+  if (!customer && isBrandReply(event.text, event.replyId)) {
+    customer = await prisma.customer.create({
+      data: { phoneE164: event.from, name: event.profileName ?? null },
+      select: { id: true },
+    });
+  }
 
   // An unknown number is not silently turned into a customer: GAP-004 (dedupe
   // and merge policy) and the source's customer-source requirement both need a
@@ -171,6 +191,28 @@ async function applyInboundMessage(
       objectId: customer.id,
       customerId: customer.id,
     });
+    return "ok";
+  }
+
+  if (isBrandReply(event.text, event.replyId)) {
+    const lead = await prisma.customer.findUniqueOrThrow({
+      where: { id: customer.id },
+      select: { id: true, phoneE164: true, name: true, qualifiedAt: true },
+    });
+    const name = lead.name ?? event.profileName ?? null;
+    if (isFirstBrandTap(lead.qualifiedAt)) {
+      await prisma.customer.update({
+        where: { id: lead.id },
+        data: { status: "QUALIFIED", qualifiedAt: event.receivedAt, name },
+      });
+      await logActivity({
+        eventType: "customer.brand_tapped",
+        objectType: "customer",
+        objectId: lead.id,
+        customerId: lead.id,
+      });
+    }
+    await sendBrandThanks({ id: lead.id, phoneE164: lead.phoneE164, name });
     return "ok";
   }
 
