@@ -10,7 +10,11 @@ export const dynamic = "force-dynamic";
 
 export default async function LeadsPage({ searchParams }: { searchParams: Promise<{ stage?: string }> }) {
   await requirePermission("qualified:read");
-  const stage = parseStage((await searchParams).stage);
+  // No filter = the to-do list: only NEW. Changing a lead's status moves it to that
+  // status's tab, so the team never works the same lead twice. "all" shows everyone.
+  const raw = (await searchParams).stage;
+  const showAll = raw === "all";
+  const stage = showAll ? null : (parseStage(raw) ?? "NEW");
 
   const [leads, counts] = await Promise.all([
     prisma.customer.findMany({
@@ -27,7 +31,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
     <>
       <PageHeader
         title="BRAND leads"
-        description="Everyone who tapped the BRAND button. Each one was sent the thank-you message automatically."
+        description="Everyone who tapped BRAND (each got the thank-you automatically). Set a status and the lead moves to that tab."
         actions={
           <>
             <PrintButton />
@@ -39,10 +43,16 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
       />
       {/* Phones: one row of chips that scrolls sideways instead of wrapping. */}
       <div className="-mx-4 mb-3 flex gap-2 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-wrap md:overflow-visible md:px-0 print:hidden">
-        <FilterChip href="/leads" label="All" count={total} active={!stage} />
         {LEAD_STAGES.map((s) => (
-          <FilterChip key={s} href={`/leads?stage=${s}`} label={STAGE_LABELS[s]} count={countOf(s)} active={stage === s} />
+          <FilterChip
+            key={s}
+            href={s === "NEW" ? "/leads" : `/leads?stage=${s}`}
+            label={STAGE_LABELS[s]}
+            count={countOf(s)}
+            active={stage === s}
+          />
         ))}
+        <FilterChip href="/leads?stage=all" label="All" count={total} active={showAll} />
       </div>
       {stage && <p className="mb-2 hidden font-semibold print:block">Status: {STAGE_LABELS[stage]}</p>}
 
@@ -50,7 +60,11 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
         <Card flush>
           <EmptyState
             title={stage ? `No ${STAGE_LABELS[stage].toLowerCase()} leads` : "No leads yet"}
-            description="People who tap BRAND will show up here."
+            description={
+              stage === "NEW"
+                ? "New taps on BRAND show up here. Change a lead's status and it moves to that tab."
+                : "People who tap BRAND will show up here."
+            }
           />
         </Card>
       ) : (

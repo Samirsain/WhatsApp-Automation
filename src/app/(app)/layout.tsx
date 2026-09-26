@@ -22,7 +22,8 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
   const [unread, leads] = await Promise.all([
     prisma.notification.count({ where: { userId: user.id, readAt: null } }),
-    prisma.customer.count({ where: { status: "QUALIFIED" } }),
+    // Only NEW: the badge is what still needs someone to pick it up.
+    prisma.customer.count({ where: { status: "QUALIFIED", leadStage: "NEW" } }),
   ]);
 
   async function signOutAction() {
