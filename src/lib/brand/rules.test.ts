@@ -17,10 +17,13 @@ test("pickTemplate returns each of the three at the edges of the range", () => {
   assert.equal(BRAND_TEMPLATES.length, 3);
 });
 
-test("thank-you uses the name when known and falls back cleanly", () => {
-  assert.match(thankYouText("Samir"), /^धन्यवाद Samir जी/);
-  assert.match(thankYouText(null), /^धन्यवाद जी/);
-  assert.match(thankYouText("  "), /^धन्यवाद जी/);
+test("thank-you bolds the name when known and falls back cleanly", () => {
+  assert.equal(
+    thankYouText("Samir"),
+    "धन्यवाद *Samir जी* 🙏\nहमारी टीम जल्द ही आपसे संपर्क करेगी। ✅\n*3% Real Estate Club*",
+  );
+  assert.match(thankYouText(null), /^धन्यवाद 🙏\n/);
+  assert.match(thankYouText("  "), /^धन्यवाद 🙏\n/);
 });
 
 test("isBrandReply matches button text, payload, case and spaces only for BRAND", () => {
