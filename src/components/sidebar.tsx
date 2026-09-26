@@ -18,6 +18,12 @@ const ICONS: Record<NavIcon, React.ReactNode> = {
       <path d="M12 7v6M12 16.5v.5" />
     </>
   ),
+  noReply: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </>
+  ),
   leads: <path d="M20 6 9 17l-5-5" />,
 };
 
@@ -44,7 +50,7 @@ function Icon({ name, active }: { name: NavIcon; active: boolean }) {
 
 export type NavCounts = Partial<Record<string, number>>;
 
-/** Phones: the same three screens as a bottom tab bar, like a messaging app. */
+/** Phones: the same screens as a bottom tab bar, like a messaging app. */
 export function MobileNav({ items, counts }: { items: NavItem[]; counts: NavCounts }) {
   const pathname = usePathname();
   return (
