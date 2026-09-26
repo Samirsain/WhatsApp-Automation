@@ -244,7 +244,7 @@ export function FilterChip({
       href={href}
       aria-current={active ? "true" : undefined}
       className={cx(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[length:var(--text-small)] whitespace-nowrap transition-colors",
+        "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-[length:var(--text-small)] whitespace-nowrap transition-[transform,background-color] duration-150 active:scale-95 motion-reduce:active:scale-100 md:px-2.5 md:py-0.5",
         active
           ? "border-[color:var(--color-action-primary)] bg-[color:var(--color-action-primary)]/8 font-semibold text-[color:var(--color-action-primary)]"
           : "border-[color:var(--color-border-default)] hover:bg-[color:var(--color-surface-muted)]",
@@ -341,7 +341,8 @@ export function ErrorNote({ children }: { children: ReactNode }) {
 }
 
 const BUTTON_BASE =
-  "inline-flex items-center justify-center gap-2 rounded-[var(--radius-sm)] px-2.5 py-1.5 font-medium whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-60";
+  // Pressed buttons shrink a touch so a tap is felt; 44px tall on phones, compact on desktop.
+  "inline-flex min-h-11 select-none items-center justify-center gap-2 rounded-[var(--radius-sm)] px-3 py-1.5 font-medium whitespace-nowrap transition-[transform,background-color,border-color,opacity] duration-150 active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100 motion-reduce:transition-none motion-reduce:active:scale-100 md:min-h-0 md:px-2.5";
 
 export const buttonClass = {
   primary: cx(
@@ -359,7 +360,7 @@ export const buttonClass = {
 };
 
 export const inputClass =
-  "w-full rounded-[var(--radius-sm)] border border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] px-2.5 py-1.5 text-[color:var(--color-text-primary)] placeholder:text-[color:var(--color-text-secondary)]";
+  "min-h-11 w-full rounded-[var(--radius-sm)] border border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] px-2.5 py-1.5 text-[color:var(--color-text-primary)] placeholder:text-[color:var(--color-text-secondary)] md:min-h-0";
 
 export function Field({
   label,

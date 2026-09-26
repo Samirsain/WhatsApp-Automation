@@ -7,6 +7,27 @@ import { PrintButton, StageSelect } from "./lead-controls";
 
 export const dynamic = "force-dynamic";
 
+/** WhatsApp and Call as real buttons, so a lead is one tap away on any screen. */
+function ContactButtons({ phone, className = "" }: { phone: string; className?: string }) {
+  const digits = phone.replace(/\D/g, "");
+  return (
+    <div className={`gap-2 print:hidden ${className}`}>
+      <a href={`https://wa.me/${digits}`} target="_blank" rel="noreferrer" className={buttonClass.secondary}>
+        <svg aria-hidden width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 21l1.7-5A8.5 8.5 0 1 1 8 19.3z" />
+        </svg>
+        WhatsApp
+      </a>
+      <a href={`tel:${phone}`} className={buttonClass.secondary}>
+        <svg aria-hidden width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z" />
+        </svg>
+        Call
+      </a>
+    </div>
+  );
+}
+
 export default async function LeadsPage({ searchParams }: { searchParams: Promise<{ stage?: string }> }) {
   await requirePermission("qualified:read");
   const stage = parseStage((await searchParams).stage);
@@ -36,48 +57,72 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
           </>
         }
       />
-      <div className="mb-3 flex flex-wrap gap-2 print:hidden">
+      {/* Phones: one row of chips that scrolls sideways instead of wrapping. */}
+      <div className="-mx-4 mb-3 flex gap-2 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-wrap md:overflow-visible md:px-0 print:hidden">
         <FilterChip href="/leads" label="All" count={total} active={!stage} />
         {LEAD_STAGES.map((s) => (
           <FilterChip key={s} href={`/leads?stage=${s}`} label={STAGE_LABELS[s]} count={countOf(s)} active={stage === s} />
         ))}
       </div>
       {stage && <p className="mb-2 hidden font-semibold print:block">Status: {STAGE_LABELS[stage]}</p>}
-      <Card flush>
-        {leads.length === 0 ? (
+
+      {leads.length === 0 ? (
+        <Card flush>
           <EmptyState
             title={stage ? `No ${STAGE_LABELS[stage].toLowerCase()} leads` : "No leads yet"}
             description="People who tap BRAND will show up here."
           />
-        ) : (
-          <Table head={["Name", "Number", "Tapped at", "Status"]} caption="BRAND leads">
+        </Card>
+      ) : (
+        <>
+          {/* Phones and tablets: one card per lead, with big tap targets to reach them. */}
+          <ul className="grid gap-3 md:grid-cols-2 lg:hidden print:hidden">
             {leads.map((l) => {
-              const digits = l.phoneE164.replace(/\D/g, "");
               return (
-                <Row key={l.id}>
-                  <Cell>{l.name ?? "—"}</Cell>
-                  <Cell className="tabular-nums">
-                    <span>{l.phoneE164}</span>
-                    <span className="ml-2 inline-flex gap-2 text-[length:var(--text-small)] print:hidden">
-                      <a href={`https://wa.me/${digits}`} target="_blank" rel="noreferrer" className="underline">
-                        WhatsApp
-                      </a>
-                      <a href={`tel:${l.phoneE164}`} className="underline">
-                        Call
-                      </a>
+                <li
+                  key={l.id}
+                  className="rounded-[var(--radius-md)] border border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] p-3 shadow-[var(--shadow-surface)]"
+                >
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="truncate font-semibold">{l.name ?? "—"}</span>
+                    <span className="shrink-0 text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">
+                      {l.qualifiedAt ? formatDateTime(l.qualifiedAt) : "—"}
                     </span>
-                  </Cell>
-                  <Cell>{l.qualifiedAt ? formatDateTime(l.qualifiedAt) : "—"}</Cell>
-                  <Cell>
-                    <StageSelect id={l.id} stage={l.leadStage} />
-                    <span className="hidden print:inline">{STAGE_LABELS[l.leadStage]}</span>
-                  </Cell>
-                </Row>
+                  </div>
+                  <div className="mt-0.5 tabular-nums text-[color:var(--color-text-secondary)]">{l.phoneE164}</div>
+                  <ContactButtons phone={l.phoneE164} className="mt-2 grid grid-cols-2" />
+                  <div className="mt-2">
+                    <StageSelect id={l.id} stage={l.leadStage} className="w-full" />
+                  </div>
+                </li>
               );
             })}
-          </Table>
-        )}
-      </Card>
+          </ul>
+
+          <div className="hidden lg:block print:block">
+            <Card flush>
+              <Table head={["Name", "Number", "Tapped at", <span key="c" className="print:hidden">Contact</span>, "Status"]} caption="BRAND leads">
+                {leads.map((l) => {
+                  return (
+                    <Row key={l.id}>
+                      <Cell>{l.name ?? "—"}</Cell>
+                      <Cell className="whitespace-nowrap tabular-nums">{l.phoneE164}</Cell>
+                      <Cell className="whitespace-nowrap">{l.qualifiedAt ? formatDateTime(l.qualifiedAt) : "—"}</Cell>
+                      <Cell className="print:hidden">
+                        <ContactButtons phone={l.phoneE164} className="flex" />
+                      </Cell>
+                      <Cell>
+                        <StageSelect id={l.id} stage={l.leadStage} />
+                        <span className="hidden print:inline">{STAGE_LABELS[l.leadStage]}</span>
+                      </Cell>
+                    </Row>
+                  );
+                })}
+              </Table>
+            </Card>
+          </div>
+        </>
+      )}
     </>
   );
 }
