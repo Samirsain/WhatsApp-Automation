@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cx } from "@/components/ui";
@@ -61,12 +62,7 @@ export function Sidebar({
       className="sticky top-0 flex h-screen w-52 shrink-0 flex-col gap-4 overflow-y-auto border-r border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] p-3"
     >
       <div className="flex items-center gap-2.5 px-2 py-1">
-        <span
-          aria-hidden
-          className="flex h-7 w-7 items-center justify-center rounded-[var(--radius-md)] bg-[color:var(--color-action-primary)] text-[length:var(--text-small)] font-semibold tracking-tight text-white"
-        >
-          3%
-        </span>
+        <Image src="/logo.png" alt="" width={28} height={28} className="rounded-full" priority />
         <span className="font-semibold tracking-tight">3% Club</span>
       </div>
 

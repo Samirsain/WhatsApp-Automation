@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { AuthError } from "next-auth";
 import { signIn } from "@/auth";
@@ -40,6 +41,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   return (
     <div className="flex min-h-screen items-center justify-center p-6">
       <div className="w-full max-w-sm rounded-[var(--radius-md)] border border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] p-6 shadow-[var(--shadow-surface)]">
+        <Image src="/logo.png" alt="" width={48} height={48} className="mb-3 rounded-full" priority />
         <h1 className="text-[length:var(--text-h2)] font-semibold">3% Club</h1>
         <p className="mt-1 mb-6 text-[color:var(--color-text-secondary)]">
           Sign in to send messages and see leads.
