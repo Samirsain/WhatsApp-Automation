@@ -26,7 +26,7 @@
 1. **BRAND from a number the app never messaged** (leads n8n messaged before cutover): expect a customer to be created, qualified and thanked, not silently dropped. Pinned in Task 5.
 2. **BRAND tapped twice, or Meta redelivers the webhook**: one thank-you, `qualifiedAt` keeps the first tap. Pinned in Task 5 (`isFirstBrandTap`) and by the existing `providerMessageId` dedupe.
 3. **Two tick calls overlap** while a retry is due: the message is re-sent once. Pinned in Task 6 (claim by conditional `updateMany`).
-4. **Staff manually re-sent before the auto-retry fired**: the auto-retry must not send a second copy. Pinned in Task 6 (`retryStillWanted`).
+4. **Staff manually re-sent before the auto-retry fired**: the auto-retry must not send a second copy. Enforced by the newer-message count in Task 6; checked by hand in Task 9 step 6 (the repo has no database tests).
 5. **Row with a name containing a comma, or a CSV with a header row**: name kept whole, header skipped. Pinned in Task 3 (`rowsToText` + existing `parseNumberList`).
 
 ---
@@ -213,7 +213,6 @@ git commit -m "feat: template header images and sender profile name in the Whats
   - `isBrandReply(text: string, replyId?: string | null): boolean`
   - `RETRY_AFTER_MS = 86_400_000`
   - `retryDueAt(failureCode: string | undefined, payload: unknown, failedAt: Date): Date | null`
-  - `retryStillWanted(failedMessageCreatedAt: Date, newerBrandMessageExists: boolean): boolean`
   - `failureReason(code: string | null): string`
   - `failureAction(code: string | null, retryDueAt: Date | null): "auto" | "resend" | "none"`
   - `rowsToText(rows: { name: string; number: string }[]): string`
@@ -227,7 +226,7 @@ import test from "node:test";
 import { parseNumberList } from "../numbers/parse-list";
 import {
   failureAction, failureReason, isBrandReply, isFirstBrandTap, retryDueAt,
-  retryStillWanted, rowsToText, RETRY_AFTER_MS,
+  rowsToText, RETRY_AFTER_MS,
 } from "./rules";
 import { BRAND_TEMPLATES, pickTemplate, thankYouText } from "./templates";
 
@@ -263,11 +262,6 @@ test("retryDueAt only for a first-time 131049 brand failure", () => {
   assert.equal(retryDueAt("131049", { ...brand, retryOf: "m1" }, at), null);
   assert.equal(retryDueAt("131049", { kind: "brand_thanks" }, at), null);
   assert.equal(retryDueAt("131049", null, at), null);
-});
-
-test("retry is skipped when a newer brand message went to the same number", () => {
-  assert.equal(retryStillWanted(new Date(), false), true);
-  assert.equal(retryStillWanted(new Date(), true), false);
 });
 
 test("failure reasons are plain Hindi and unknown codes show the code", () => {
@@ -377,11 +371,6 @@ export function retryDueAt(
   const p = payload as Partial<BrandPayload> | null;
   if (p?.kind !== "brand" || p.retryOf) return null;
   return new Date(failedAt.getTime() + RETRY_AFTER_MS);
-}
-
-/** A manual resend in the meantime already covers the number. */
-export function retryStillWanted(_failedMessageCreatedAt: Date, newerBrandMessageExists: boolean): boolean {
-  return !newerBrandMessageExists;
 }
 
 const REASONS: Record<string, string> = {
@@ -709,7 +698,7 @@ git commit -m "feat: BRAND replies qualify and thank the lead; 131049 schedules 
 - Modify: `src/app/api/automation/tick/route.ts`
 
 **Interfaces:**
-- Consumes: `sendBrandMessage` (Task 4), `retryStillWanted`, `BrandPayload` (Task 2).
+- Consumes: `sendBrandMessage` (Task 4), `BrandPayload` (Task 2).
 - Produces: `sendDueRetries(now?: Date): Promise<{ sent: number; skipped: number }>`
 
 - [ ] **Step 1: Implement** — `src/lib/brand/retry.ts`
@@ -717,7 +706,7 @@ git commit -m "feat: BRAND replies qualify and thank the lead; 131049 schedules 
 ```ts
 import "server-only";
 import { prisma } from "@/lib/prisma";
-import { retryStillWanted, type BrandPayload } from "./rules";
+import type { BrandPayload } from "./rules";
 import { sendBrandMessage } from "./send";
 
 /**
@@ -749,7 +738,8 @@ export async function sendDueRetries(now = new Date()): Promise<{ sent: number; 
         payload: { path: ["kind"], equals: "brand" },
       },
     });
-    if (!retryStillWanted(m.createdAt, newer > 0)) {
+    // A manual resend in the meantime already covers the number.
+    if (newer > 0) {
       skipped++;
       continue;
     }
@@ -919,7 +909,7 @@ export function SendForm() {
       {state.error && <ErrorNote>{state.error}</ErrorNote>}
       {state.rejected && state.rejected.length > 0 && (
         <ErrorNote>
-          Ye numbers galat hain, nahi bheje: {state.rejected.map((r) => r.raw).join(" · ")}
+          Ye numbers galat hain, nahi bheje: {state.rejected.map((r) => `${r.raw} (${r.reason})`).join(" · ")}
         </ErrorNote>
       )}
       {state.sent !== undefined && (
