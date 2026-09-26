@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { timingSafeEqual } from "node:crypto";
 import { tick } from "@/lib/automation/worker";
+import { sendDueRetries } from "@/lib/brand/retry";
 import { dispatchRunningBatches } from "@/lib/batches/runner";
 
 export const dynamic = "force-dynamic";
@@ -31,7 +32,8 @@ export async function POST(request: NextRequest) {
   try {
     const automations = await tick();
     const batches = await dispatchRunningBatches();
-    return NextResponse.json({ automations, batches });
+    const retries = await sendDueRetries();
+    return NextResponse.json({ automations, batches, retries });
   } catch (err) {
     console.error("[tick] failed", err);
     return new NextResponse("Tick failed", { status: 500 });
