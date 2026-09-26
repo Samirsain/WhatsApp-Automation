@@ -21,5 +21,5 @@ export function pickTemplate(random: () => number = Math.random): BrandTemplate 
 /** Sent once after a BRAND tap. Free: it goes inside the 24h window the tap opened. */
 export function thankYouText(name: string | null): string {
   const who = name?.trim() ? ` *${name.trim().toUpperCase()} जी*` : "";
-  return `धन्यवाद${who} 🙏\nहमारी टीम जल्द ही आपसे संपर्क करेगी। ✅\n3% Real Estate Club`;
+  return `धन्यवाद${who} 🙏\nहमारी टीम जल्द ही आपसे संपर्क करेगी। ✅\n*3% Real Estate Club*`;
 }

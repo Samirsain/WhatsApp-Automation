@@ -20,7 +20,7 @@ test("pickTemplate returns each of the three at the edges of the range", () => {
 test("thank-you puts the name in bold capitals when known and falls back cleanly", () => {
   assert.equal(
     thankYouText("Samir"),
-    "धन्यवाद *SAMIR जी* 🙏\nहमारी टीम जल्द ही आपसे संपर्क करेगी। ✅\n3% Real Estate Club",
+    "धन्यवाद *SAMIR जी* 🙏\nहमारी टीम जल्द ही आपसे संपर्क करेगी। ✅\n*3% Real Estate Club*",
   );
   assert.match(thankYouText(null), /^धन्यवाद 🙏\n/);
   assert.match(thankYouText("  "), /^धन्यवाद 🙏\n/);
