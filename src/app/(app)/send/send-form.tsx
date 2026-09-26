@@ -9,7 +9,7 @@ import { sendBulk, type SendState } from "./actions";
 type RowInput = { name: string; number: string };
 const blank = (n: number): RowInput[] => Array.from({ length: n }, () => ({ name: "", number: "" }));
 
-export function SendForm({ messagesLeft }: { messagesLeft: number | null }) {
+export function SendForm() {
   const [rows, setRows] = useState<RowInput[]>(blank(5));
   const [csvNote, setCsvNote] = useState<string | null>(null);
   const [state, action, pending] = useActionState<SendState, FormData>(async (prev, formData) => {
@@ -86,12 +86,6 @@ export function SendForm({ messagesLeft }: { messagesLeft: number | null }) {
         </p>
       )}
 
-      {messagesLeft !== null && filled > messagesLeft && (
-        <ErrorNote>
-          Funds may run out: {filled} numbers, but only about {messagesLeft} messages are left.
-          Numbers after that will fail until you add funds in Meta.
-        </ErrorNote>
-      )}
       {state.error && <ErrorNote>{state.error}</ErrorNote>}
       {state.rejected && state.rejected.length > 0 && (
         <ErrorNote>
