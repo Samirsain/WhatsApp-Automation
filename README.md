@@ -84,8 +84,6 @@ recommendations were not adopted:
    satisfies the requirements (exact waits, pause/resume, restart-safety via
    `automation_events.idempotency_key`) without a second cluster.
 
-**Not production ready.** See `PRODUCTION.md` for the blockers.
-`PROGRESS.md` has the full build record.
 
 ## Checks
 
