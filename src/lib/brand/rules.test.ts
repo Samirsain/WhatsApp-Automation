@@ -17,10 +17,10 @@ test("pickTemplate returns each of the three at the edges of the range", () => {
   assert.equal(BRAND_TEMPLATES.length, 3);
 });
 
-test("thank-you bolds the name when known and falls back cleanly", () => {
+test("thank-you puts the name in capitals when known and falls back cleanly", () => {
   assert.equal(
     thankYouText("Samir"),
-    "धन्यवाद *Samir जी* 🙏\nहमारी टीम जल्द ही आपसे संपर्क करेगी। ✅\n*3% Real Estate Club*",
+    "धन्यवाद SAMIR जी 🙏\nहमारी टीम जल्द ही आपसे संपर्क करेगी। ✅\n3% Real Estate Club",
   );
   assert.match(thankYouText(null), /^धन्यवाद 🙏\n/);
   assert.match(thankYouText("  "), /^धन्यवाद 🙏\n/);
