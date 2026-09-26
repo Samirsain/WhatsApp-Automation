@@ -1,7 +1,8 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { signOut } from "@/auth";
-import { Sidebar } from "@/components/sidebar";
+import { MobileNav, Sidebar } from "@/components/sidebar";
 import { Badge } from "@/components/ui";
 import { NAV } from "@/lib/nav";
 import { prisma } from "@/lib/prisma";
@@ -23,6 +24,11 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     prisma.notification.count({ where: { userId: user.id, readAt: null } }),
     prisma.customer.count({ where: { status: "QUALIFIED" } }),
   ]);
+
+  async function signOutAction() {
+    "use server";
+    await signOut({ redirectTo: "/login" });
+  }
 
   return (
     <div className="flex min-h-screen">
@@ -53,12 +59,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
                   {user.roles.map((r) => ROLE_LABELS[r]).join(", ") || "No role"}
                 </div>
               </div>
-              <form
-                action={async () => {
-                  "use server";
-                  await signOut({ redirectTo: "/login" });
-                }}
-              >
+              <form action={signOutAction}>
                 <button
                   type="submit"
                   className="rounded-[var(--radius-sm)] px-1.5 py-1 text-[length:var(--text-small)] text-[color:var(--color-text-secondary)] hover:bg-[color:var(--color-surface-muted)] hover:text-[color:var(--color-text-primary)]"
@@ -70,7 +71,23 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           </div>
         }
       />
-      <main className="min-w-0 flex-1 px-5 py-4">{children}</main>
+      <div className="flex min-w-0 flex-1 flex-col">
+        {/* Phones: a slim header instead of the sidebar; navigation sits at the bottom. */}
+        <header className="sticky top-0 z-20 flex items-center gap-2.5 border-b border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] px-4 py-2 md:hidden print:hidden">
+          <Image src="/logo.png" alt="" width={28} height={28} className="rounded-full" priority />
+          <span className="flex-1 font-semibold tracking-tight">3% Club</span>
+          <form action={signOutAction}>
+            <button
+              type="submit"
+              className="min-h-11 rounded-[var(--radius-sm)] px-2 text-[length:var(--text-small)] text-[color:var(--color-text-secondary)] transition-transform active:scale-95"
+            >
+              Sign out
+            </button>
+          </form>
+        </header>
+        <main className="min-w-0 flex-1 px-4 py-4 pb-24 md:px-5 md:pb-4">{children}</main>
+      </div>
+      <MobileNav items={items} counts={{ "/leads": leads }} />
     </div>
   );
 }

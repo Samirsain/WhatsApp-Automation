@@ -44,6 +44,41 @@ function Icon({ name, active }: { name: NavIcon; active: boolean }) {
 
 export type NavCounts = Partial<Record<string, number>>;
 
+/** Phones: the same three screens as a bottom tab bar, like a messaging app. */
+export function MobileNav({ items, counts }: { items: NavItem[]; counts: NavCounts }) {
+  const pathname = usePathname();
+  return (
+    <nav
+      aria-label="Main"
+      className="fixed inset-x-0 bottom-0 z-20 flex border-t border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] pb-[env(safe-area-inset-bottom)] md:hidden print:hidden"
+    >
+      {items.map((item) => {
+        const active = pathname.startsWith(item.href);
+        const count = counts[item.href];
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            aria-current={active ? "page" : undefined}
+            className={cx(
+              "relative flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] transition-transform duration-150 active:scale-95 motion-reduce:active:scale-100",
+              active ? "font-semibold text-[color:var(--color-action-primary)]" : "text-[color:var(--color-text-secondary)]",
+            )}
+          >
+            <Icon name={item.icon} active={active} />
+            <span>{item.label}</span>
+            {count !== undefined && count > 0 && (
+              <span className="absolute top-1.5 left-1/2 ml-2 rounded-full bg-[color:var(--color-action-primary)] px-1.5 text-[10px] leading-4 font-semibold text-white tabular-nums">
+                {count}
+              </span>
+            )}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
 export function Sidebar({
   items,
   counts,
@@ -59,7 +94,7 @@ export function Sidebar({
   return (
     <nav
       aria-label="Main"
-      className="sticky top-0 flex h-screen w-52 shrink-0 flex-col gap-4 overflow-y-auto border-r print:hidden border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] p-3"
+      className="sticky top-0 hidden h-screen w-52 shrink-0 flex-col gap-4 overflow-y-auto border-r border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] p-3 md:flex print:hidden"
     >
       <div className="flex items-center gap-2.5 px-2 py-1">
         <Image src="/logo.png" alt="" width={28} height={28} className="rounded-full" priority />

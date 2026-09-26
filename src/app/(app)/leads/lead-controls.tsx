@@ -6,7 +6,7 @@ import { LEAD_STAGES, STAGE_LABELS, type LeadStage } from "@/lib/brand/stages";
 import { setLeadStage } from "./actions";
 
 /** Saves on change; no separate save button. */
-export function StageSelect({ id, stage }: { id: string; stage: LeadStage }) {
+export function StageSelect({ id, stage, className = "w-40" }: { id: string; stage: LeadStage; className?: string }) {
   const [pending, start] = useTransition();
   return (
     <select
@@ -17,7 +17,7 @@ export function StageSelect({ id, stage }: { id: string; stage: LeadStage }) {
         const value = e.target.value;
         start(() => setLeadStage(id, value));
       }}
-      className={`${inputClass} w-40 py-1 print:hidden`}
+      className={`${inputClass} ${className} py-1 print:hidden`}
     >
       {LEAD_STAGES.map((s) => (
         <option key={s} value={s}>

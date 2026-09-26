@@ -7,6 +7,19 @@ import { resendBrand } from "./actions";
 
 export const dynamic = "force-dynamic";
 
+function Action({ id, action, full }: { id: string; action: "auto" | "resend" | "none"; full?: boolean }) {
+  if (action === "auto") return <Badge tone="info">Retrying automatically in 24h</Badge>;
+  if (action === "none") return null;
+  return (
+    <form action={resendBrand}>
+      <input type="hidden" name="messageId" value={id} />
+      <button type="submit" className={`${buttonClass.secondary}${full ? " w-full" : ""}`}>
+        Resend
+      </button>
+    </form>
+  );
+}
+
 /** A number is listed while its latest brand message is FAILED. */
 export default async function FailedPage() {
   await requirePermission("batch:read");
@@ -39,36 +52,53 @@ export default async function FailedPage() {
         title="Not delivered"
         description="Messages that did not reach these numbers, why, and what happens next."
       />
-      <Card flush>
-        {failed.length === 0 ? (
+      {failed.length === 0 ? (
+        <Card flush>
           <EmptyState title="Everything was delivered" description="Failed messages will show up here." />
-        ) : (
-          <Table head={["Name", "Number", "When", "Reason", ""]} caption="Messages that were not delivered">
-            {failed.map((m) => {
-              const action = failureAction(m.failureCode, m.retryDueAt);
-              return (
-                <Row key={m.id}>
-                  <Cell>{m.customer.name ?? "—"}</Cell>
-                  <Cell className="tabular-nums">{m.customer.phoneE164}</Cell>
-                  <Cell>{formatDateTime(m.failedAt ?? m.createdAt)}</Cell>
-                  <Cell>{failureReason(m.failureCode)}</Cell>
-                  <Cell>
-                    {action === "auto" && <Badge tone="info">Retrying automatically in 24h</Badge>}
-                    {action === "resend" && (
-                      <form action={resendBrand}>
-                        <input type="hidden" name="messageId" value={m.id} />
-                        <button type="submit" className={buttonClass.secondary}>
-                          Resend
-                        </button>
-                      </form>
-                    )}
-                  </Cell>
-                </Row>
-              );
-            })}
-          </Table>
-        )}
-      </Card>
+        </Card>
+      ) : (
+        <>
+          {/* Phones and tablets: one card per number. */}
+          <ul className="grid gap-3 md:grid-cols-2 lg:hidden">
+            {failed.map((m) => (
+              <li
+                key={m.id}
+                className="rounded-[var(--radius-md)] border border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] p-3 shadow-[var(--shadow-surface)]"
+              >
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="truncate font-semibold">{m.customer.name ?? "—"}</span>
+                  <span className="shrink-0 text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">
+                    {formatDateTime(m.failedAt ?? m.createdAt)}
+                  </span>
+                </div>
+                <div className="mt-0.5 tabular-nums text-[color:var(--color-text-secondary)]">{m.customer.phoneE164}</div>
+                <p className="mt-2 text-[color:var(--color-status-error)]">{failureReason(m.failureCode)}</p>
+                <div className="mt-2">
+                  <Action id={m.id} action={failureAction(m.failureCode, m.retryDueAt)} full />
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <div className="hidden lg:block">
+            <Card flush>
+              <Table head={["Name", "Number", "When", "Reason", ""]} caption="Messages that were not delivered">
+                {failed.map((m) => (
+                  <Row key={m.id}>
+                    <Cell>{m.customer.name ?? "—"}</Cell>
+                    <Cell className="tabular-nums">{m.customer.phoneE164}</Cell>
+                    <Cell>{formatDateTime(m.failedAt ?? m.createdAt)}</Cell>
+                    <Cell>{failureReason(m.failureCode)}</Cell>
+                    <Cell>
+                      <Action id={m.id} action={failureAction(m.failureCode, m.retryDueAt)} />
+                    </Cell>
+                  </Row>
+                ))}
+              </Table>
+            </Card>
+          </div>
+        </>
+      )}
     </>
   );
 }

@@ -47,6 +47,7 @@ test("retryDueAt only for a first-time 131049 brand failure", () => {
 test("failure reasons are plain English and unknown codes show the code", () => {
   assert.match(failureReason("131049"), /Blocked by Meta/);
   assert.match(failureReason("131026"), /WhatsApp/);
+  assert.match(failureReason("190"), /access token/);
   assert.equal(failureReason("999"), "Not delivered by Meta (code 999)");
   assert.equal(failureReason(null), "Not delivered by Meta");
 });

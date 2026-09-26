@@ -37,6 +37,7 @@ const REASONS: Record<string, string> = {
   "131042": "Payment problem – check Meta billing",
   "131047": "24-hour reply window has closed",
   "130472": "Held back by a Meta experiment",
+  "190": "WhatsApp access token expired or invalid – update WHATSAPP_ACCESS_TOKEN in Railway",
 };
 
 export function failureReason(code: string | null): string {
