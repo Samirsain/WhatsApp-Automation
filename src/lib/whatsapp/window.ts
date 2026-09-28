@@ -27,6 +27,17 @@ export async function openChats(now = new Date()): Promise<OpenChat[]> {
   }));
 }
 
+/** The last 50 messages with one customer, oldest first. */
+export async function chatMessages(customerId: string) {
+  const rows = await prisma.message.findMany({
+    where: { customerId },
+    orderBy: { createdAt: "desc" },
+    take: 50,
+    select: { id: true, direction: true, type: true, body: true, payload: true, deliveryStatus: true, createdAt: true },
+  });
+  return rows.reverse();
+}
+
 export async function isWindowOpen(customerId: string, now = new Date()): Promise<boolean> {
   const count = await prisma.message.count({
     where: { customerId, direction: "INBOUND", createdAt: { gte: new Date(now.getTime() - WINDOW_MS) } },

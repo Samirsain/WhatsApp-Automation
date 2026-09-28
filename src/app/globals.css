@@ -22,6 +22,10 @@
   --color-status-error: oklch(0.58 0.2 25);
   --color-status-info: oklch(0.6 0.13 240);
   --color-focus: oklch(0.68 0.17 45);
+  /* Message one: the WhatsApp-like chat. */
+  --color-chat-canvas: oklch(0.95 0.012 85);
+  --color-bubble-out: oklch(0.95 0.06 145);
+  --color-tick-read: oklch(0.65 0.13 235);
 
   /* §3 Typography — the interface face is the reader's own system font. */
   --font-sans:

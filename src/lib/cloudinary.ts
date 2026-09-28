@@ -12,12 +12,15 @@ export type UploadTicket = {
 /**
  * Signs one browser-to-Cloudinary upload, so the secret never leaves the
  * server and files never pass through our request body limit.
- * CLOUDINARY_URL = cloudinary://<api_key>:<api_secret>@<cloud_name>
+ * Reads CLOUDINARY_CLOUD_NAME / CLOUDINARY_API_KEY / CLOUDINARY_API_SECRET,
+ * or CLOUDINARY_URL = cloudinary://<api_key>:<api_secret>@<cloud_name>.
  */
 export function signUpload(env: NodeJS.ProcessEnv = process.env): UploadTicket | null {
   const match = env.CLOUDINARY_URL?.match(/^cloudinary:\/\/([^:]+):([^@]+)@(.+)$/);
-  if (!match) return null;
-  const [, apiKey, secret, cloud] = match;
+  const cloud = env.CLOUDINARY_CLOUD_NAME?.trim() || match?.[3];
+  const apiKey = env.CLOUDINARY_API_KEY?.trim() || match?.[1];
+  const secret = env.CLOUDINARY_API_SECRET?.trim() || match?.[2];
+  if (!cloud || !apiKey || !secret || secret === "PASTE_API_SECRET_HERE") return null;
   const folder = "direct-messages";
   const timestamp = String(Math.floor(Date.now() / 1000));
   // Cloudinary: sha1 of the sorted params joined with &, then the secret.
