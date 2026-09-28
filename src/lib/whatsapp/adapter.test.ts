@@ -150,6 +150,17 @@ test("template payload without image or variables has no components", () => {
   assert.equal("components" in payload.template, false);
 });
 
+test("media payload keys the object by type and drops the caption on audio", () => {
+  assert.deepEqual(
+    buildMetaPayload({ kind: "media", to: "+91", mediaType: "video", link: "https://v.example/a.mp4", caption: "Hi" }),
+    { messaging_product: "whatsapp", to: "+91", type: "video", video: { link: "https://v.example/a.mp4", caption: "Hi" } },
+  );
+  assert.deepEqual(
+    buildMetaPayload({ kind: "media", to: "+91", mediaType: "audio", link: "https://a.example/a.mp3", caption: "Hi" }),
+    { messaging_product: "whatsapp", to: "+91", type: "audio", audio: { link: "https://a.example/a.mp3" } },
+  );
+});
+
 test("inbound message carries the contact's profile name", () => {
   const [event] = adapter.parseWebhook({
     entry: [{ changes: [{ value: {

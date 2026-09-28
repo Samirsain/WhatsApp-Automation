@@ -24,7 +24,18 @@ export type OutboundTemplate = {
   headerImageUrl?: string;
 };
 
-export type OutboundMessage = OutboundText | OutboundTemplate;
+export type MediaType = "image" | "video" | "audio" | "document";
+
+/** Media by public URL; Meta fetches it. Audio takes no caption. */
+export type OutboundMedia = {
+  kind: "media";
+  to: string;
+  mediaType: MediaType;
+  link: string;
+  caption?: string;
+};
+
+export type OutboundMessage = OutboundText | OutboundTemplate | OutboundMedia;
 
 export type SendResult =
   | { ok: true; providerMessageId: string }
@@ -151,6 +162,15 @@ function toDate(timestamp?: string): Date {
 export function buildMetaPayload(message: OutboundMessage): Record<string, unknown> {
   if (message.kind === "text") {
     return { messaging_product: "whatsapp", to: message.to, type: "text", text: { body: message.body } };
+  }
+  if (message.kind === "media") {
+    const caption = message.mediaType !== "audio" && message.caption ? { caption: message.caption } : {};
+    return {
+      messaging_product: "whatsapp",
+      to: message.to,
+      type: message.mediaType,
+      [message.mediaType]: { link: message.link, ...caption },
+    };
   }
   const components = [
     ...(message.headerImageUrl

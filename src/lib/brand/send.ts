@@ -23,10 +23,10 @@ async function conversationId(customerId: string): Promise<string> {
  * send only has to wait for one update, and a send is never left unrecorded.
  * Same order as src/lib/whatsapp/outbound.ts.
  */
-async function recordAndSend(
+export async function recordAndSend(
   customerId: string,
   message: OutboundMessage,
-  row: { type: "TEMPLATE" | "TEXT"; body?: string; payload: Prisma.InputJsonValue },
+  row: { type: "TEMPLATE" | "TEXT" | "MEDIA"; body?: string; payload: Prisma.InputJsonValue },
   followUpAt?: Date,
 ): Promise<{ ok: boolean; error?: string }> {
   const stored = await prisma.message.create({

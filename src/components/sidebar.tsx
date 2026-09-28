@@ -12,6 +12,7 @@ import type { NavIcon, NavItem } from "@/lib/nav";
  */
 const ICONS: Record<NavIcon, React.ReactNode> = {
   send: <path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z" />,
+  message: <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z" />,
   failed: (
     <>
       <circle cx="12" cy="12" r="9" />
