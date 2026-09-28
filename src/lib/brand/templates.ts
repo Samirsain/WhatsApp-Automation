@@ -9,24 +9,25 @@ export type BrandTemplate = { template: string; image: string };
 
 export const BRAND_LANGUAGE = "hi";
 
-const IMG = [
-  "https://res.cloudinary.com/dn7bbf8cp/image/upload/v1790311483/d5d81305-e7a9-423b-8d61-115b617be8c2_o2ugry.jpg",
-  "https://res.cloudinary.com/dn7bbf8cp/image/upload/v1790311490/222fac9b-84bb-41a4-80b3-e70409ec655d_uovoqs.jpg",
-  "https://res.cloudinary.com/dn7bbf8cp/image/upload/v1790311500/b6399380-9d9e-48f3-8ce9-161fd0c0b2d1_t4sqlt.jpg",
-];
+// One header image per step: "Dealer नहीं, Brand बनिए" / "कृपया ध्यान दें" / "Last chance".
+const IMG: Record<FunnelStep, string> = {
+  1: "https://res.cloudinary.com/tnvyehsj/image/upload/v1790595262/funnel/funnel_1.jpg",
+  2: "https://res.cloudinary.com/tnvyehsj/image/upload/v1790595264/funnel/funnel_2.jpg",
+  3: "https://res.cloudinary.com/tnvyehsj/image/upload/v1790595265/funnel/funnel_3.jpg",
+};
 
 export const FUNNEL: Record<FunnelStep, readonly BrandTemplate[]> = {
   1: [
-    { template: "funnel_1a", image: IMG[0] },
+    { template: "funnel_1a", image: IMG[1] },
     { template: "funnel_1b", image: IMG[1] },
-    { template: "funnel_1c", image: IMG[2] },
+    { template: "funnel_1c", image: IMG[1] },
   ],
   2: [
-    { template: "funnel_2a", image: IMG[0] },
-    { template: "funnel_2b", image: IMG[1] },
+    { template: "funnel_2a", image: IMG[2] },
+    { template: "funnel_2b", image: IMG[2] },
     { template: "funnel_2c", image: IMG[2] },
   ],
-  3: [{ template: "funnel_3", image: IMG[0] }],
+  3: [{ template: "funnel_3", image: IMG[3] }],
 };
 
 export function pickTemplate(step: FunnelStep = 1, random: () => number = Math.random): BrandTemplate {
