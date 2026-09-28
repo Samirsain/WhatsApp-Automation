@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { relativeTime } from "@/lib/relative-time";
 import { requirePermission } from "@/lib/session";
 import { chatMessages, openChats, WINDOW_MS } from "@/lib/whatsapp/window";
+import { AutoRefresh } from "./auto-refresh";
 import { Composer } from "./composer";
 
 export const dynamic = "force-dynamic";
@@ -12,7 +13,15 @@ export const dynamic = "force-dynamic";
 const TIME = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Kolkata" });
 const DAY = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" });
 
-type Payload = { kind?: string; mediaType?: string; link?: string; image?: string; step?: number } | null;
+type Payload = {
+  kind?: string;
+  mediaType?: string;
+  link?: string;
+  mediaId?: string;
+  filename?: string;
+  image?: string;
+  step?: number;
+} | null;
 type ChatMessage = Awaited<ReturnType<typeof chatMessages>>[number];
 
 function Avatar({ name }: { name: string }) {
@@ -43,23 +52,32 @@ function Ticks({ status }: { status: ChatMessage["deliveryStatus"] }) {
 
 function Body({ m }: { m: ChatMessage }) {
   const p = m.payload as Payload;
-  const media = p?.link && p.mediaType;
+  // Ours live on Cloudinary; the customer's are proxied from WhatsApp.
+  const src = p?.link ?? (p?.mediaId ? `/api/whatsapp-media/${p.mediaId}` : undefined);
+  const media = src && p?.mediaType;
   return (
     <>
-      {media === "image" && (
-        // eslint-disable-next-line @next/next/no-img-element -- remote user upload, no fixed size
-        <img src={p!.link} alt="Sent image" className="mb-1 max-h-72 rounded-[var(--radius-md)]" />
+      {(media === "image" || media === "sticker") && (
+        <a href={src} target="_blank" rel="noreferrer">
+          {/* eslint-disable-next-line @next/next/no-img-element -- remote media, no fixed size */}
+          <img
+            src={src}
+            alt={media === "sticker" ? "Sticker" : "Photo"}
+            loading="lazy"
+            className={cx("mb-1 rounded-[var(--radius-md)]", media === "sticker" ? "h-32 w-32" : "max-h-72")}
+          />
+        </a>
       )}
-      {media === "video" && <video src={p!.link} controls className="mb-1 max-h-72 rounded-[var(--radius-md)]" />}
-      {media === "audio" && <audio src={p!.link} controls className="mb-1 max-w-full" />}
+      {media === "video" && <video src={src} controls preload="metadata" className="mb-1 max-h-72 rounded-[var(--radius-md)]" />}
+      {media === "audio" && <audio src={src} controls preload="metadata" className="mb-1 max-w-full" />}
       {media === "document" && (
         <a
-          href={p!.link}
+          href={src}
           target="_blank"
           rel="noreferrer"
           className="mb-1 flex items-center gap-2 rounded-[var(--radius-md)] bg-black/5 px-2.5 py-2 underline-offset-2 hover:underline"
         >
-          📄 <span className="truncate">{decodeURIComponent(p!.link!.split("/").at(-1) ?? "Document")}</span>
+          📄 <span className="truncate">{p!.filename || "Document"}</span>
         </a>
       )}
       {m.type === "TEMPLATE" && (
@@ -74,6 +92,10 @@ function Body({ m }: { m: ChatMessage }) {
         </>
       )}
       {m.body && <p className="whitespace-pre-wrap break-words">{m.body}</p>}
+      {/* Anything WhatsApp sends that we don't render (location, contact, older media rows). */}
+      {m.direction === "INBOUND" && !m.body && !media && (
+        <p className="italic text-[color:var(--color-text-secondary)]">Unsupported message — open WhatsApp to see it</p>
+      )}
     </>
   );
 }
@@ -96,7 +118,10 @@ export default async function MessagePage({ searchParams }: { searchParams: Prom
   const messages = customer ? await chatMessages(customer.customerId) : [];
 
   return (
-    <div className="grid h-[calc(100dvh-11rem)] min-h-[420px] overflow-hidden rounded-[var(--radius-lg)] border border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] md:h-[calc(100dvh-2rem)] md:grid-cols-[300px_1fr]">
+    // Phones: pinned between the app's top bar (61px) and bottom tab bar (57px + safe area),
+    // edge to edge like a messaging app. Desktop: a framed two-pane panel.
+    <div className="grid grid-rows-[minmax(0,1fr)] overflow-hidden bg-[color:var(--color-surface)] max-md:fixed max-md:inset-x-0 max-md:top-[61px] max-md:bottom-[calc(57px+env(safe-area-inset-bottom))] max-md:z-10 md:h-[calc(100dvh-2rem)] md:min-h-[420px] md:grid-cols-[minmax(260px,340px)_1fr] md:rounded-[var(--radius-lg)] md:border md:border-[color:var(--color-border-default)]">
+      <AutoRefresh />
       {/* Chat list. Phones show either the list or one chat. */}
       <aside
         className={cx(
@@ -129,16 +154,19 @@ export default async function MessagePage({ searchParams }: { searchParams: Prom
                 )}
               >
                 <Avatar name={c.name || c.phoneE164.slice(-1)} />
-                <span className="min-w-0 flex-1">
+                <span className="min-w-0 flex-1 leading-snug">
                   <span className="flex items-baseline justify-between gap-2">
                     <b className="truncate">{c.name || c.phoneE164}</b>
                     <span className="shrink-0 text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">
                       {TIME.format(c.lastAt)}
                     </span>
                   </span>
-                  <span className="block truncate text-[color:var(--color-text-secondary)]">
-                    {c.lastText || c.phoneE164}
-                  </span>
+                  {c.name && (
+                    <span className="block text-[length:var(--text-small)] tabular-nums text-[color:var(--color-text-secondary)]">
+                      {c.phoneE164}
+                    </span>
+                  )}
+                  {c.lastText && <span className="block truncate">{c.lastText}</span>}
                 </span>
               </Link>
             </li>
@@ -149,16 +177,21 @@ export default async function MessagePage({ searchParams }: { searchParams: Prom
       {/* Conversation */}
       {customer ? (
         <section className="flex min-h-0 flex-col">
-          <header className="flex items-center gap-3 border-b border-[color:var(--color-border-default)] px-3 py-2">
-            <Link href="/message" className="px-1 text-xl md:hidden" aria-label="Back to chats">
+          <header className="flex items-center gap-2 border-b border-[color:var(--color-border-default)] px-2 py-2 md:gap-3 md:px-3">
+            <Link
+              href="/message"
+              className="flex h-11 w-9 shrink-0 items-center justify-center text-xl md:hidden"
+              aria-label="Back to chats"
+            >
               ←
             </Link>
             <Avatar name={customer.name || customer.phoneE164.slice(-1)} />
-            <div className="min-w-0 leading-tight">
+            <div className="min-w-0 flex-1 leading-tight">
               <div className="truncate font-semibold">{customer.name || customer.phoneE164}</div>
-              <div className="text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">
-                {customer.phoneE164}
-                {open && ` · chat open for ${relativeTime(new Date(open.lastAt.getTime() + WINDOW_MS), now).replace(/^in /, "")}`}
+              <div className="truncate text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">
+                {customer.name && <span className="tabular-nums">{customer.phoneE164}</span>}
+                {customer.name && open && " · "}
+                {open && `open ${relativeTime(new Date(open.lastAt.getTime() + WINDOW_MS), now).replace(/^in /, "")} more`}
               </div>
             </div>
           </header>
@@ -179,7 +212,7 @@ export default async function MessagePage({ searchParams }: { searchParams: Prom
                     )}
                     <div
                       className={cx(
-                        "max-w-[80%] rounded-[var(--radius-lg)] px-2.5 py-1.5 shadow-[var(--shadow-surface)] md:max-w-[65%]",
+                        "max-w-[85%] min-w-0 break-words rounded-[var(--radius-lg)] px-2.5 py-1.5 shadow-[var(--shadow-surface)] md:max-w-[65%] [&_audio]:w-64 [&_audio]:max-w-full [&_img]:max-w-full [&_video]:max-w-full",
                         out
                           ? "self-end rounded-tr-[var(--radius-sm)] bg-[color:var(--color-bubble-out)]"
                           : "self-start rounded-tl-[var(--radius-sm)] bg-[color:var(--color-surface)]",

@@ -33,6 +33,8 @@ export type OutboundMedia = {
   mediaType: MediaType;
   link: string;
   caption?: string;
+  /** Documents only: the name the customer sees instead of the URL's. */
+  filename?: string;
 };
 
 export type OutboundMessage = OutboundText | OutboundTemplate | OutboundMedia;
@@ -40,6 +42,14 @@ export type OutboundMessage = OutboundText | OutboundTemplate | OutboundMedia;
 export type SendResult =
   | { ok: true; providerMessageId: string }
   | { ok: false; code: string; message: string; retryable: boolean };
+
+export type InboundMedia = {
+  mediaType: MediaType | "sticker";
+  /** Provider media id; the file is fetched through /api/whatsapp-media/<id>. */
+  mediaId: string;
+  mimeType?: string;
+  filename?: string;
+};
 
 /** Normalized inbound event — provider payload shapes never leak past here. */
 export type InboundEvent =
@@ -54,6 +64,8 @@ export type InboundEvent =
       replyId?: string;
       /** WhatsApp profile name of the sender, when Meta includes it. */
       profileName?: string;
+      /** A photo, video, voice note, document or sticker; `text` holds its caption. */
+      media?: InboundMedia;
       raw: unknown;
     }
   | {
@@ -129,6 +141,10 @@ const mockAdapter: WhatsAppAdapter = {
 // Matches the version the app's API-testing console issues calls on.
 const GRAPH_VERSION = "v25.0";
 
+type MetaMedia = { id?: string; mime_type?: string; caption?: string; filename?: string };
+
+const INBOUND_MEDIA = ["image", "video", "audio", "document", "sticker"] as const;
+
 type MetaChange = {
   value?: {
     contacts?: { wa_id?: string; profile?: { name?: string } }[];
@@ -138,6 +154,11 @@ type MetaChange = {
       timestamp?: string;
       type?: string;
       text?: { body?: string };
+      image?: MetaMedia;
+      video?: MetaMedia;
+      audio?: MetaMedia;
+      document?: MetaMedia;
+      sticker?: MetaMedia;
       button?: { text?: string; payload?: string };
       interactive?: {
         button_reply?: { id?: string; title?: string };
@@ -165,11 +186,12 @@ export function buildMetaPayload(message: OutboundMessage): Record<string, unkno
   }
   if (message.kind === "media") {
     const caption = message.mediaType !== "audio" && message.caption ? { caption: message.caption } : {};
+    const filename = message.mediaType === "document" && message.filename ? { filename: message.filename } : {};
     return {
       messaging_product: "whatsapp",
       to: message.to,
       type: message.mediaType,
-      [message.mediaType]: { link: message.link, ...caption },
+      [message.mediaType]: { link: message.link, ...caption, ...filename },
     };
   }
   const components = [
@@ -273,12 +295,23 @@ const metaAdapter: WhatsAppAdapter = {
         for (const m of change.value?.messages ?? []) {
           if (!m.id || !m.from) continue;
           const reply = m.interactive?.button_reply ?? m.interactive?.list_reply;
+          const mediaType = INBOUND_MEDIA.find((t) => m[t]?.id);
+          const media = mediaType && m[mediaType];
           events.push({
             kind: "message",
             providerMessageId: m.id,
             from: m.from.startsWith("+") ? m.from : `+${m.from}`,
             receivedAt: toDate(m.timestamp),
-            text: reply?.title ?? m.button?.text ?? m.text?.body ?? "",
+            text: reply?.title ?? m.button?.text ?? m.text?.body ?? media?.caption ?? "",
+            ...(mediaType &&
+              media?.id && {
+                media: {
+                  mediaType,
+                  mediaId: media.id,
+                  ...(media.mime_type && { mimeType: media.mime_type }),
+                  ...(media.filename && { filename: media.filename }),
+                },
+              }),
             replyId: reply?.id ?? m.button?.payload,
             profileName:
               contacts.find((c) => c.wa_id === m.from?.replace(/^\+/, ""))?.profile?.name ??
@@ -327,6 +360,22 @@ const metaAdapter: WhatsAppAdapter = {
     return timingSafeEqual(Buffer.from(expected), Buffer.from(provided));
   },
 };
+
+/**
+ * A customer's media file, fetched from Meta. Two hops: the id resolves to a
+ * short-lived URL that also needs the token. Meta keeps media about 30 days.
+ */
+export async function downloadMedia(mediaId: string): Promise<Response | null> {
+  const token = process.env.WHATSAPP_ACCESS_TOKEN;
+  if (!token || !/^\d+$/.test(mediaId)) return null;
+  const auth = { Authorization: `Bearer ${token}` };
+  const meta = await fetch(`https://graph.facebook.com/${GRAPH_VERSION}/${mediaId}`, { headers: auth });
+  if (!meta.ok) return null;
+  const { url } = (await meta.json()) as { url?: string };
+  if (!url) return null;
+  const file = await fetch(url, { headers: auth });
+  return file.ok ? file : null;
+}
 
 const ADAPTERS: Record<string, WhatsAppAdapter> = {
   mock: mockAdapter,

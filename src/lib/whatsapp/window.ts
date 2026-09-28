@@ -16,13 +16,13 @@ export async function openChats(now = new Date()): Promise<OpenChat[]> {
     },
     orderBy: { createdAt: "desc" },
     distinct: ["customerId"],
-    select: { body: true, createdAt: true, customer: { select: { id: true, phoneE164: true, name: true } } },
+    select: { body: true, type: true, createdAt: true, customer: { select: { id: true, phoneE164: true, name: true } } },
   });
   return rows.map((m) => ({
     customerId: m.customer.id,
     phoneE164: m.customer.phoneE164,
     name: m.customer.name,
-    lastText: m.body,
+    lastText: m.body || (m.type === "MEDIA" ? "📎 Media" : null),
     lastAt: m.createdAt,
   }));
 }

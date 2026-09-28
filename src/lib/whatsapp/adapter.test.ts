@@ -159,6 +159,25 @@ test("media payload keys the object by type and drops the caption on audio", () 
     buildMetaPayload({ kind: "media", to: "+91", mediaType: "audio", link: "https://a.example/a.mp3", caption: "Hi" }),
     { messaging_product: "whatsapp", to: "+91", type: "audio", audio: { link: "https://a.example/a.mp3" } },
   );
+  assert.deepEqual(
+    buildMetaPayload({ kind: "media", to: "+91", mediaType: "document", link: "https://d.example/x", filename: "Brochure.pdf" }),
+    { messaging_product: "whatsapp", to: "+91", type: "document", document: { link: "https://d.example/x", filename: "Brochure.pdf" } },
+  );
+});
+
+test("inbound photo carries its media id and caption", () => {
+  const [event] = adapter.parseWebhook({
+    entry: [{ changes: [{ value: {
+      messages: [{ id: "wamid.m", from: "919876543210", timestamp: "1700000000", type: "image",
+        image: { id: "1234567890", mime_type: "image/jpeg", caption: "Mera ghar" } }],
+    } }] }],
+  });
+  assert.equal(event.kind === "message" && event.text, "Mera ghar");
+  assert.deepEqual(event.kind === "message" && event.media, {
+    mediaType: "image",
+    mediaId: "1234567890",
+    mimeType: "image/jpeg",
+  });
 });
 
 test("inbound message carries the contact's profile name", () => {

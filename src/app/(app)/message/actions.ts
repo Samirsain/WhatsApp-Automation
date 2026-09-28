@@ -22,7 +22,11 @@ const input = z.object({
   type: z.enum(["text", "image", "video", "audio", "document"]),
   text: z.string().trim().max(4096),
   link: z.string().trim(),
+  filename: z.string().trim().max(240),
 });
+
+/** Only our own uploads go out, so nobody can make the business number send an arbitrary URL. */
+const OUR_UPLOAD = /^https:\/\/res\.cloudinary\.com\/[\w-]+\/(image|video|raw)\/upload\/\S+$/;
 
 /**
  * One message to one customer, outside any funnel. Only customers who wrote
@@ -36,12 +40,14 @@ export async function sendDirect(_prev: DirectState, formData: FormData): Promis
     type: formData.get("type"),
     text: formData.get("text") ?? "",
     link: formData.get("link") ?? "",
+    filename: formData.get("filename") ?? "",
   });
-  if (!parsed.success) return { error: "Pick a number from the list." };
-  const { customerId, type, text, link } = parsed.data;
+  if (!parsed.success) return { error: "Message is too long, or no chat is selected." };
+  const { customerId, type, text, link, filename } = parsed.data;
   if (type === "text" && !text) return { error: "Write a message." };
-  if (type !== "text" && !/^https:\/\/\S+$/.test(link)) {
-    return { error: "Paste a public https:// link to the file." };
+  if (type !== "text") {
+    if (!OUR_UPLOAD.test(link)) return { error: "The file did not upload. Attach it again." };
+    if (text.length > 1024) return { error: "A caption can be at most 1024 characters." };
   }
 
   const customer = await prisma.customer.findUnique({
@@ -64,8 +70,12 @@ export async function sendDirect(_prev: DirectState, formData: FormData): Promis
         )
       : await recordAndSend(
           customer.id,
-          { kind: "media", to, mediaType: type, link, caption: text || undefined },
-          { type: "MEDIA", body: text || undefined, payload: { kind: "direct", mediaType: type, link } },
+          { kind: "media", to, mediaType: type, link, caption: text || undefined, filename: filename || undefined },
+          {
+            type: "MEDIA",
+            body: text || undefined,
+            payload: { kind: "direct", mediaType: type, link, ...(filename && { filename }) },
+          },
         );
 
   await logActivity({

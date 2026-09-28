@@ -34,7 +34,14 @@ async function upload(file: File): Promise<{ link: string } | { error: string }>
   try {
     const res = await fetch(ticket.url, { method: "POST", body });
     const json = (await res.json()) as { secure_url?: string; error?: { message?: string } };
-    return json.secure_url ? { link: json.secure_url } : { error: `Upload failed: ${json.error?.message ?? res.status}` };
+    if (json.secure_url) return { link: json.secure_url };
+    if (json.error?.message?.startsWith("Invalid Signature")) {
+      // The key is public; showing it tells whoever deploys which server variable is wrong.
+      return {
+        error: `Cloudinary rejected this server's keys (API key ${ticket.apiKey}). Fix CLOUDINARY_URL or CLOUDINARY_API_KEY / CLOUDINARY_API_SECRET where the app runs, then redeploy.`,
+      };
+    }
+    return { error: `Upload failed: ${json.error?.message ?? res.status}` };
   } catch {
     return { error: "Upload failed. Check your connection and try again." };
   }
@@ -63,7 +70,7 @@ export function Composer({ customerId }: { customerId: string }) {
       const up = await upload(file);
       if ("error" in up) return up;
       // Audio carries no caption on WhatsApp, so the text follows as its own message.
-      result = await send({ type, link: up.link, text: type === "audio" ? "" : text });
+      result = await send({ type, link: up.link, text: type === "audio" ? "" : text, filename: file.name });
       if (!result.error && type === "audio" && text.trim()) result = await send({ type: "text", text });
     } else {
       if (!text.trim()) return {};
@@ -79,7 +86,7 @@ export function Composer({ customerId }: { customerId: string }) {
   const canSend = !pending && (file !== null || text.trim() !== "");
 
   return (
-    <form ref={formRef} action={action} className="border-t border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] p-2">
+    <form ref={formRef} action={action} className="shrink-0 border-t border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] p-2">
       {state.error && (
         <p role="alert" className="mb-2 rounded-[var(--radius-md)] bg-[color:var(--color-status-error)]/10 px-3 py-1.5 text-[color:var(--color-status-error)]">
           {state.error}
@@ -96,7 +103,7 @@ export function Composer({ customerId }: { customerId: string }) {
             type="button"
             onClick={() => setFile(null)}
             aria-label="Remove attachment"
-            className="rounded-full px-2 text-lg leading-none text-[color:var(--color-text-secondary)] hover:bg-black/5"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xl leading-none text-[color:var(--color-text-secondary)] hover:bg-black/5"
           >
             ×
           </button>
@@ -137,7 +144,7 @@ export function Composer({ customerId }: { customerId: string }) {
               if (canSend) formRef.current?.requestSubmit();
             }
           }}
-          className="max-h-40 min-h-11 flex-1 resize-none rounded-[var(--radius-lg)] border border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] px-3.5 py-2.5 [field-sizing:content] focus:outline-2 focus:outline-[color:var(--color-focus)]"
+          className="max-h-40 min-h-11 min-w-0 flex-1 resize-none text-base md:text-[length:var(--text-body)] rounded-[var(--radius-lg)] border border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] px-3.5 py-2.5 [field-sizing:content] focus:outline-2 focus:outline-[color:var(--color-focus)]"
         />
         <button
           type="submit"
