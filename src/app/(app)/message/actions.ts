@@ -4,11 +4,18 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { logActivity } from "@/lib/activity";
 import { recordAndSend } from "@/lib/brand/send";
+import { signUpload, type UploadTicket } from "@/lib/cloudinary";
 import { prisma } from "@/lib/prisma";
 import { assertPermission } from "@/lib/session";
 import { isWindowOpen } from "@/lib/whatsapp/window";
 
 export type DirectState = { error?: string; sentTo?: string };
+
+/** A one-time signature for the browser to upload a file to Cloudinary. */
+export async function getUploadTicket(): Promise<UploadTicket | null> {
+  await assertPermission("batch:manage");
+  return signUpload();
+}
 
 const input = z.object({
   customerId: z.uuid(),

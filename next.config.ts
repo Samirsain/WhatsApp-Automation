@@ -29,8 +29,8 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob:",
       "font-src 'self' data:",
-      // Only our own origin — the WhatsApp provider is called server-side.
-      "connect-src 'self'",
+      // WhatsApp is called server-side; Cloudinary takes direct-message file uploads from the browser.
+      "connect-src 'self' https://api.cloudinary.com",
       "frame-ancestors 'none'",
       "form-action 'self'",
       "base-uri 'self'",

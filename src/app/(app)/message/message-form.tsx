@@ -3,7 +3,7 @@
 import { useActionState, useState } from "react";
 import { buttonClass, cx, ErrorNote, inputClass } from "@/components/ui";
 import { relativeTime } from "@/lib/relative-time";
-import { sendDirect, type DirectState } from "./actions";
+import { getUploadTicket, sendDirect, type DirectState } from "./actions";
 
 const TYPES = [
   ["text", "Text"],
@@ -14,13 +14,55 @@ const TYPES = [
 ] as const;
 
 const WINDOW_MS = 24 * 60 * 60_000;
+const MB = 1024 * 1024;
+
+/** What WhatsApp accepts per type (Cloud API media limits). */
+const MEDIA: Record<Exclude<(typeof TYPES)[number][0], "text">, { accept: string; maxBytes: number }> = {
+  image: { accept: "image/jpeg,image/png", maxBytes: 5 * MB },
+  video: { accept: "video/mp4,video/3gpp", maxBytes: 16 * MB },
+  audio: { accept: "audio/aac,audio/mp4,audio/mpeg,audio/amr,audio/ogg", maxBytes: 16 * MB },
+  document: { accept: "*/*", maxBytes: 10 * MB }, // Cloudinary free plan caps raw files at 10 MB
+};
+
+/** Upload the chosen file straight to Cloudinary and put its URL on the form as `link`. */
+async function attachUpload(formData: FormData): Promise<string | null> {
+  const file = formData.get("file");
+  formData.delete("file");
+  if (!(file instanceof File) || file.size === 0) return "Choose a file.";
+  const limit = MEDIA[formData.get("type") as keyof typeof MEDIA].maxBytes;
+  if (file.size > limit) return `File is too big. WhatsApp allows up to ${limit / MB} MB for this type.`;
+
+  const ticket = await getUploadTicket();
+  if (!ticket) return "File upload is not set up (CLOUDINARY_URL is missing).";
+  const body = new FormData();
+  body.set("file", file);
+  body.set("api_key", ticket.apiKey);
+  body.set("timestamp", ticket.timestamp);
+  body.set("signature", ticket.signature);
+  body.set("folder", ticket.folder);
+  try {
+    const res = await fetch(ticket.url, { method: "POST", body });
+    const json = (await res.json()) as { secure_url?: string; error?: { message?: string } };
+    if (!json.secure_url) return `Upload failed: ${json.error?.message ?? res.status}`;
+    formData.set("link", json.secure_url);
+    return null;
+  } catch {
+    return "Upload failed. Check your connection and try again.";
+  }
+}
 
 type Chat = { customerId: string; phoneE164: string; name: string | null; lastText: string | null; lastAt: string };
 
 export function MessageForm({ chats }: { chats: Chat[] }) {
   const [type, setType] = useState<(typeof TYPES)[number][0]>("text");
   const [picked, setPicked] = useState(chats[0].customerId);
-  const [state, action, pending] = useActionState<DirectState, FormData>(sendDirect, {});
+  const [state, action, pending] = useActionState<DirectState, FormData>(async (prev, formData) => {
+    if (formData.get("type") !== "text") {
+      const error = await attachUpload(formData);
+      if (error) return { error };
+    }
+    return sendDirect(prev, formData);
+  }, {});
 
   return (
     <form action={action} className="flex max-w-xl flex-col gap-3">
@@ -82,8 +124,10 @@ export function MessageForm({ chats }: { chats: Chat[] }) {
 
       {type !== "text" && (
         <label className="flex flex-col gap-1">
-          <span className="text-[length:var(--text-small)] font-medium">File link (public https URL)</span>
-          <input name="link" type="url" required placeholder="https://…" className={inputClass} />
+          <span className="text-[length:var(--text-small)] font-medium">
+            File (up to {MEDIA[type].maxBytes / MB} MB)
+          </span>
+          <input key={type} name="file" type="file" required accept={MEDIA[type].accept} className={inputClass} />
         </label>
       )}
 
@@ -107,7 +151,7 @@ export function MessageForm({ chats }: { chats: Chat[] }) {
       )}
 
       <button type="submit" disabled={pending} className={buttonClass.primary}>
-        {pending ? "Sending…" : "Send"}
+        {pending ? (type === "text" ? "Sending…" : "Uploading and sending…") : "Send"}
       </button>
     </form>
   );
