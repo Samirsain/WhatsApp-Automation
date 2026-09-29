@@ -102,7 +102,7 @@ export function SendForm() {
           <b>{state.skipped}</b>
           {" — "}
           <Link href="/failed" className="underline">
-            See not delivered
+            See Not Delivered
           </Link>
         </p>
       )}

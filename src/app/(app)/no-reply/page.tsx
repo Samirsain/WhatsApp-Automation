@@ -48,7 +48,7 @@ export default async function NoReplyPage() {
   return (
     <>
       <PageHeader
-        title="No reply"
+        title="No Reply"
         description="The message reached these numbers, but they have not tapped Brand yet. Red = no reply after all 3 funnel messages."
       />
       {rows.length === 0 ? (
