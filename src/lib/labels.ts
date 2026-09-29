@@ -61,10 +61,8 @@ export function statusTone(status: string): Tone {
   }
 }
 
-export function titleCase(value: string): string {
-  return value
-    .toLowerCase()
-    .split("_")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
+/** "BATCH_COMPLETED" → "Batch completed": first letter capital, like every other label. */
+export function sentenceCase(value: string): string {
+  const words = value.toLowerCase().split("_").join(" ");
+  return words.charAt(0).toUpperCase() + words.slice(1);
 }

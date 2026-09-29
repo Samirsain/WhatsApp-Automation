@@ -27,7 +27,7 @@ const securityHeaders = [
       // Next.js needs inline/eval for its runtime; nothing external is loaded.
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
       "style-src 'self' 'unsafe-inline'",
-      // Chat bubbles on Message one show sent media and template images from Cloudinary.
+      // Chat bubbles on the Chats screen show sent media and template images from Cloudinary.
       "img-src 'self' data: blob: https://res.cloudinary.com",
       "media-src 'self' https://res.cloudinary.com",
       "font-src 'self' data:",

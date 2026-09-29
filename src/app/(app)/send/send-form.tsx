@@ -98,7 +98,7 @@ export function SendForm() {
           role="status"
           className="rounded-[var(--radius-sm)] border border-[color:var(--color-border-default)] px-2.5 py-1.5"
         >
-          Sent: <b>{state.sent}</b> · Failed: <b>{state.failed}</b> · Skipped (opted out / already BRAND lead):{" "}
+          Sent: <b>{state.sent}</b> · Failed: <b>{state.failed}</b> · Skipped (opted out / already a Brand lead):{" "}
           <b>{state.skipped}</b>
           {" — "}
           <Link href="/failed" className="underline">

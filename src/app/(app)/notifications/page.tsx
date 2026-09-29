@@ -7,7 +7,7 @@ import {
   PageHeader,
   buttonClass,
 } from "@/components/ui";
-import { titleCase } from "@/lib/labels";
+import { sentenceCase } from "@/lib/labels";
 import { notificationHref } from "@/lib/notifications";
 import { formatDateTime } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
@@ -75,7 +75,7 @@ export default async function NotificationsPage() {
                     </p>
                   )}
                   <p className="text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">
-                    {titleCase(n.eventType.replace(/\./g, "_"))} ·{" "}
+                    {sentenceCase(n.eventType.replace(/\./g, "_"))} ·{" "}
                     <time dateTime={n.createdAt.toISOString()}>
                       {formatDateTime(n.createdAt)}
                     </time>

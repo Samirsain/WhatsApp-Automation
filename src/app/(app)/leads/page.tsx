@@ -30,8 +30,8 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
   return (
     <>
       <PageHeader
-        title="BRAND leads"
-        description="Everyone who tapped BRAND (each got the thank-you automatically). Set a status and the lead moves to that tab."
+        title="Brand leads"
+        description="Everyone who tapped Brand (each got the thank-you automatically). Set a status and the lead moves to that tab."
         actions={
           <>
             <PrintButton />
@@ -62,8 +62,8 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
             title={stage ? `No ${STAGE_LABELS[stage].toLowerCase()} leads` : "No leads yet"}
             description={
               stage === "NEW"
-                ? "New taps on BRAND show up here. Change a lead's status and it moves to that tab."
-                : "People who tap BRAND will show up here."
+                ? "New taps on Brand show up here. Change a lead's status and it moves to that tab."
+                : "People who tap Brand will show up here."
             }
           />
         </Card>
@@ -95,7 +95,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
 
           <div className="hidden lg:block print:block">
             <Card flush>
-              <Table head={["Name", "Number", "Tapped at", <span key="c" className="print:hidden">Contact</span>, "Status"]} caption="BRAND leads">
+              <Table head={["Name", "Number", "Tapped at", <span key="c" className="print:hidden">Contact</span>, "Status"]} caption="Brand leads">
                 {leads.map((l) => {
                   return (
                     <Row key={l.id}>

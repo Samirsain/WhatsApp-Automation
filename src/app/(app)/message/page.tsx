@@ -191,7 +191,7 @@ export default async function MessagePage({ searchParams }: { searchParams: Prom
               <div className="truncate text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">
                 {customer.name && <span className="tabular-nums">{customer.phoneE164}</span>}
                 {customer.name && open && " · "}
-                {open && `open ${relativeTime(new Date(open.lastAt.getTime() + WINDOW_MS), now).replace(/^in /, "")} more`}
+                {open && `Open ${relativeTime(new Date(open.lastAt.getTime() + WINDOW_MS), now).replace(/^in /, "")} more`}
               </div>
             </div>
           </header>

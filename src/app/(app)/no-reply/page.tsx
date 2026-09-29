@@ -21,7 +21,7 @@ function Seen({ status, customer }: { status: string; customer: { status: string
 
 const step = (payload: unknown) => (payload as { step?: number } | null)?.step ?? 1;
 
-/** A number is listed while its latest brand message went through but they never tapped BRAND. */
+/** A number is listed while its latest brand message went through but they never tapped Brand. */
 export default async function NoReplyPage() {
   await requirePermission("batch:read");
 
@@ -49,11 +49,11 @@ export default async function NoReplyPage() {
     <>
       <PageHeader
         title="No reply"
-        description="The message reached these numbers, but they have not tapped BRAND yet. Red = no reply after all 3 funnel messages."
+        description="The message reached these numbers, but they have not tapped Brand yet. Red = no reply after all 3 funnel messages."
       />
       {rows.length === 0 ? (
         <Card flush>
-          <EmptyState title="No one is waiting" description="People who got the message but did not tap BRAND show up here." />
+          <EmptyState title="No one is waiting" description="People who got the message but did not tap Brand show up here." />
         </Card>
       ) : (
         <>
@@ -84,7 +84,7 @@ export default async function NoReplyPage() {
 
           <div className="hidden lg:block">
             <Card flush>
-              <Table head={["Name", "Number", "Sent at", "Funnel", "Status", "Contact"]} caption="Got the message, no BRAND tap">
+              <Table head={["Name", "Number", "Sent at", "Funnel", "Status", "Contact"]} caption="Got the message, no Brand tap">
                 {rows.map((m) => (
                   <Row key={m.id} className={m.customer.status === "NO_RESPONSE" ? RED_BG : undefined}>
                     <Cell>{m.customer.name ?? "—"}</Cell>

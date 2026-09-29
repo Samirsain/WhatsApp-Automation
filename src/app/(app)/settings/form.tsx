@@ -25,7 +25,7 @@ export function OptOutForm({ value }: { value: string }) {
           name="keywords"
           defaultValue={value}
           className={inputClass}
-          placeholder="STOP, UNSUBSCRIBE, BAND KARO"
+          placeholder="Stop, Unsubscribe, Band karo"
           aria-describedby="optout-help"
         />
       </label>
