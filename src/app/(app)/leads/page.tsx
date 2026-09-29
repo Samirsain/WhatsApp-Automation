@@ -30,7 +30,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
   return (
     <>
       <PageHeader
-        title="Brand leads"
+        title="Brand Leads"
         description="Everyone who tapped Brand (each got the thank-you automatically). Set a status and the lead moves to that tab."
         actions={
           <>
@@ -95,7 +95,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
 
           <div className="hidden lg:block print:block">
             <Card flush>
-              <Table head={["Name", "Number", "Tapped at", <span key="c" className="print:hidden">Contact</span>, "Status"]} caption="Brand leads">
+              <Table head={["Name", "Number", "Tapped at", <span key="c" className="print:hidden">Contact</span>, "Status"]} caption="Brand Leads">
                 {leads.map((l) => {
                   return (
                     <Row key={l.id}>

@@ -13,7 +13,7 @@ export type NavItem = {
 export const NAV: NavItem[] = [
   { href: "/send", label: "Broadcast", permission: "batch:manage", icon: "send" },
   { href: "/message", label: "Chats", permission: "batch:manage", icon: "message" },
-  { href: "/failed", label: "Not delivered", permission: "batch:read", icon: "failed" },
-  { href: "/no-reply", label: "No reply", permission: "batch:read", icon: "noReply" },
-  { href: "/leads", label: "Brand leads", permission: "qualified:read", icon: "leads" },
+  { href: "/failed", label: "Not Delivered", permission: "batch:read", icon: "failed" },
+  { href: "/no-reply", label: "No Reply", permission: "batch:read", icon: "noReply" },
+  { href: "/leads", label: "Brand Leads", permission: "qualified:read", icon: "leads" },
 ];

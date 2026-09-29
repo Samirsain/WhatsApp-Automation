@@ -49,7 +49,7 @@ export default async function FailedPage() {
   return (
     <>
       <PageHeader
-        title="Not delivered"
+        title="Not Delivered"
         description="Messages that did not reach these numbers, why, and what happens next."
       />
       {failed.length === 0 ? (
