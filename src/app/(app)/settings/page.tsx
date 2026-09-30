@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { setPauseAllFromSettings } from "./actions";
 import { OptOutForm } from "./form";
+import { ResetButton } from "./reset/form";
 import { Badge, Card, PageHeader, buttonClass } from "@/components/ui";
 import { prisma } from "@/lib/prisma";
 import { can } from "@/lib/rbac";
@@ -96,6 +97,19 @@ export default async function SettingsPage() {
           </p>
         )}
       </Card>
+
+      {canManage && (
+        <Card title="Clear test data" className="mt-4">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <p className="text-[color:var(--color-text-secondary)]">
+              Deletes every number with its chats, funnel runs and replies, plus
+              all batches, notifications and the activity log. Users,
+              templates, funnels and settings stay.
+            </p>
+            <ResetButton />
+          </div>
+        </Card>
+      )}
     </>
   );
 }
