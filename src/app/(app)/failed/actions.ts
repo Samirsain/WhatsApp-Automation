@@ -21,7 +21,16 @@ export async function resendBrand(formData: FormData): Promise<void> {
     },
   });
   const p = m?.payload as BrandPayload | null;
-  if (!m || p?.kind !== "brand" || m.retryDueAt) return;
+  if (!m || p?.kind !== "brand") return;
+  if (m.retryDueAt) {
+    // Sending now replaces the pending automatic retry. Claiming it the same
+    // way the tick does means only one of the two can ever send.
+    const claim = await prisma.message.updateMany({
+      where: { id: m.id, retryDueAt: { not: null } },
+      data: { retryDueAt: null },
+    });
+    if (claim.count !== 1) return;
+  }
 
   // A double-click, or a second person on a stale page, must not send a second
   // paid template: once anything newer went to this number, this row is done.

@@ -8,15 +8,21 @@ import { resendBrand } from "./actions";
 export const dynamic = "force-dynamic";
 
 function Action({ id, action, full }: { id: string; action: "auto" | "resend" | "none"; full?: boolean }) {
-  if (action === "auto") return <Badge tone="info">Retrying automatically in 24h</Badge>;
   if (action === "none") return null;
-  return (
+  const button = (
     <form action={resendBrand}>
       <input type="hidden" name="messageId" value={id} />
       <button type="submit" className={`${buttonClass.secondary}${full ? " w-full" : ""}`}>
-        Resend
+        {action === "auto" ? "Send now" : "Resend"}
       </button>
     </form>
+  );
+  if (action === "resend") return button;
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <Badge tone="info">Retrying automatically in 24h</Badge>
+      {button}
+    </div>
   );
 }
 
