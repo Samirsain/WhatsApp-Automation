@@ -35,7 +35,14 @@ export function pickTemplate(step: FunnelStep = 1, random: () => number = Math.r
   return list[Math.min(list.length - 1, Math.floor(random() * list.length))];
 }
 
-/** Sent once after a BRAND tap. Free: it goes inside the 24h window the tap opened. */
+/** Sent once after a BRAND tap, as the caption of public/guide.pdf with a MEMBER button. */
+export const GUIDE_PATH = "/guide.pdf";
+export const GUIDE_FILENAME = "3%CLUB_PROPERTY_EXPERT_GUIDE.pdf";
+export const MEMBER_BUTTON = "MEMBER";
+export const GUIDE_TEXT =
+  "शुरुआत आपकी *_WhatsApp Profile_* से कीजिए।\n\n> 📄 इस Guide में आसान samples हैं।\n\nएक साल की *FREE Membership* के लिए *“MEMBER”* पर क्लिक करें";
+
+/** Sent once after a MEMBER tap. Free: it goes inside the 24h window the tap opened. */
 export function thankYouText(name: string | null): string {
   const who = name?.trim() ? ` *${name.trim().toUpperCase()} जी*` : "";
   return `धन्यवाद${who} 🙏\nहमारी टीम जल्द ही आपसे संपर्क करेगी। ✅\n*3% Real Estate Club*`;

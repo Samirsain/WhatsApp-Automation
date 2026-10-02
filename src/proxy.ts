@@ -35,5 +35,6 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   // The logo and favicon are shown on the login page, before any session exists.
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|icon.png|logo.png).*)"],
+  // guide.pdf is fetched by Meta, which has no session.
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|icon.png|logo.png|guide.pdf).*)"],
 };

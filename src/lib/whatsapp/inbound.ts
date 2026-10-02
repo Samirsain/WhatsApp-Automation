@@ -1,8 +1,8 @@
 import "server-only";
 import { logActivity } from "@/lib/activity";
 import { applyCustomerResponse } from "@/lib/automation/engine";
-import { isBrandReply, retryDueAt } from "@/lib/brand/rules";
-import { sendBrandThanks } from "@/lib/brand/send";
+import { isBrandReply, isMemberReply, retryDueAt } from "@/lib/brand/rules";
+import { sendBrandGuide, sendBrandThanks } from "@/lib/brand/send";
 import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
 import type { InboundEvent } from "@/lib/whatsapp/adapter";
@@ -21,7 +21,8 @@ export type IngestResult = {
   unknownCustomers: number;
 };
 
-export async function ingestEvents(events: InboundEvent[]): Promise<IngestResult> {
+/** `origin`: this app's public URL, for links Meta fetches (the guide PDF). */
+export async function ingestEvents(events: InboundEvent[], origin: string): Promise<IngestResult> {
   const result: IngestResult = { processed: 0, duplicates: 0, unknownCustomers: 0 };
 
   for (const event of events) {
@@ -32,7 +33,7 @@ export async function ingestEvents(events: InboundEvent[]): Promise<IngestResult
       continue;
     }
 
-    const outcome = await applyInboundMessage(event);
+    const outcome = await applyInboundMessage(event, origin);
     if (outcome === "duplicate") result.duplicates++;
     else if (outcome === "unknown-customer") result.unknownCustomers++;
     else result.processed++;
@@ -82,6 +83,7 @@ async function applyStatus(
 
 async function applyInboundMessage(
   event: Extract<InboundEvent, { kind: "message" }>,
+  origin: string,
 ): Promise<"ok" | "duplicate" | "unknown-customer"> {
   const existing = await prisma.message.findUnique({
     where: { providerMessageId: event.providerMessageId },
@@ -203,7 +205,7 @@ async function applyInboundMessage(
     });
     const name = lead.name ?? event.profileName ?? null;
     // Claimed with a conditional update: of two taps processed at once, only
-    // one sees count 1, so qualifiedAt keeps the first tap and one thank-you goes.
+    // one sees count 1, so qualifiedAt keeps the first tap and one guide goes.
     const claim = await prisma.customer.updateMany({
       where: { id: lead.id, qualifiedAt: null },
       data: { status: "QUALIFIED", qualifiedAt: event.receivedAt, name },
@@ -215,9 +217,25 @@ async function applyInboundMessage(
         objectId: lead.id,
         customerId: lead.id,
       });
-      await sendBrandThanks({ id: lead.id, phoneE164: lead.phoneE164, name });
+      await sendBrandGuide(lead, origin);
     }
     return "ok";
+  }
+
+  // MEMBER is the button on the guide; only a brand lead gets the thank-you, once.
+  if (isMemberReply(event.text, event.replyId)) {
+    const lead = await prisma.customer.findUniqueOrThrow({
+      where: { id: customer.id },
+      select: { id: true, phoneE164: true, name: true, qualifiedAt: true },
+    });
+    // ponytail: two MEMBER taps processed at the same instant can both pass this check; add a memberAt claim column if double thank-yous show up.
+    const thanked = await prisma.message.count({
+      where: { customerId: lead.id, payload: { path: ["kind"], equals: "brand_thanks" } },
+    });
+    if (lead.qualifiedAt && thanked === 0) {
+      await sendBrandThanks({ ...lead, name: lead.name ?? event.profileName ?? null });
+      return "ok";
+    }
   }
 
   /*

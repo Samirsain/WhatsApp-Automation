@@ -61,7 +61,9 @@ export async function POST(request: NextRequest) {
   if (events.length === 0) return NextResponse.json({ ok: true, processed: 0 });
 
   try {
-    const result = await ingestEvents(events);
+    // Railway passes the public host through; Meta only fetches https links.
+    const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
+    const result = await ingestEvents(events, `https://${host}`);
     return NextResponse.json({ ok: true, ...result });
   } catch (err) {
     // 5xx tells the provider to retry; dedupe makes that replay safe.

@@ -35,6 +35,8 @@ export type OutboundMedia = {
   caption?: string;
   /** Documents only: the name the customer sees instead of the URL's. */
   filename?: string;
+  /** Quick-reply titles (max 3, 20 chars each). Sent as an interactive message; not for audio. */
+  buttons?: string[];
 };
 
 export type OutboundMessage = OutboundText | OutboundTemplate | OutboundMedia;
@@ -183,6 +185,20 @@ function toDate(timestamp?: string): Date {
 export function buildMetaPayload(message: OutboundMessage): Record<string, unknown> {
   if (message.kind === "text") {
     return { messaging_product: "whatsapp", to: message.to, type: "text", text: { body: message.body } };
+  }
+  if (message.kind === "media" && message.buttons?.length) {
+    const filename = message.mediaType === "document" && message.filename ? { filename: message.filename } : {};
+    return {
+      messaging_product: "whatsapp",
+      to: message.to,
+      type: "interactive",
+      interactive: {
+        type: "button",
+        header: { type: message.mediaType, [message.mediaType]: { link: message.link, ...filename } },
+        body: { text: message.caption ?? "" },
+        action: { buttons: message.buttons.map((title) => ({ type: "reply", reply: { id: title, title } })) },
+      },
+    };
   }
   if (message.kind === "media") {
     const caption = message.mediaType !== "audio" && message.caption ? { caption: message.caption } : {};

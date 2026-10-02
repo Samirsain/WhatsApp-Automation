@@ -3,7 +3,16 @@ import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { whatsapp, type OutboundMessage } from "@/lib/whatsapp/adapter";
 import { FOLLOW_UP_AFTER_MS, type BrandPayload } from "./rules";
-import { BRAND_LANGUAGE, pickTemplate, thankYouText, type FunnelStep } from "./templates";
+import {
+  BRAND_LANGUAGE,
+  GUIDE_FILENAME,
+  GUIDE_PATH,
+  GUIDE_TEXT,
+  MEMBER_BUTTON,
+  pickTemplate,
+  thankYouText,
+  type FunnelStep,
+} from "./templates";
 
 async function conversationId(customerId: string): Promise<string> {
   const open = await prisma.conversation.findFirst({
@@ -97,8 +106,32 @@ export async function sendBrandMessage(input: {
 }
 
 /**
- * The thank-you after a BRAND tap. Callers send it only for the tap that
- * qualified the lead, so a second tap or a replayed webhook sends nothing.
+ * The guide PDF with a MEMBER button, after a BRAND tap. Callers send it only
+ * for the tap that qualified the lead, so a second tap sends nothing.
+ * `origin` is this app's public URL; Meta fetches the PDF from it.
+ */
+export async function sendBrandGuide(
+  customer: { id: string; phoneE164: string },
+  origin: string,
+): Promise<void> {
+  await recordAndSend(
+    customer.id,
+    {
+      kind: "media",
+      to: customer.phoneE164,
+      mediaType: "document",
+      link: origin + GUIDE_PATH,
+      filename: GUIDE_FILENAME,
+      caption: GUIDE_TEXT,
+      buttons: [MEMBER_BUTTON],
+    },
+    { type: "MEDIA", body: GUIDE_TEXT, payload: { kind: "brand_guide" } },
+  );
+}
+
+/**
+ * The thank-you after a MEMBER tap. Callers send it only for the tap that
+ * claimed it, so a second tap or a replayed webhook sends nothing.
  */
 export async function sendBrandThanks(customer: {
   id: string;

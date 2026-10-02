@@ -14,7 +14,15 @@ export type BrandPayload = {
 };
 
 export function isBrandReply(text: string, replyId?: string | null): boolean {
-  return [text, replyId].some((v) => (v ?? "").trim().toUpperCase() === "BRAND");
+  return isReply("BRAND", text, replyId);
+}
+
+export function isMemberReply(text: string, replyId?: string | null): boolean {
+  return isReply("MEMBER", text, replyId);
+}
+
+function isReply(word: string, text: string, replyId?: string | null): boolean {
+  return [text, replyId].some((v) => (v ?? "").trim().toUpperCase() === word);
 }
 
 export const RETRY_AFTER_MS = 24 * 60 * 60 * 1000;

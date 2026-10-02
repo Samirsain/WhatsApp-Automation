@@ -165,6 +165,25 @@ test("media payload keys the object by type and drops the caption on audio", () 
   );
 });
 
+test("media with buttons goes as an interactive message with a media header", () => {
+  assert.deepEqual(
+    buildMetaPayload({
+      kind: "media", to: "+91", mediaType: "document", link: "https://d.example/x", filename: "G.pdf", caption: "Hi", buttons: ["MEMBER"],
+    }),
+    {
+      messaging_product: "whatsapp",
+      to: "+91",
+      type: "interactive",
+      interactive: {
+        type: "button",
+        header: { type: "document", document: { link: "https://d.example/x", filename: "G.pdf" } },
+        body: { text: "Hi" },
+        action: { buttons: [{ type: "reply", reply: { id: "MEMBER", title: "MEMBER" } }] },
+      },
+    },
+  );
+});
+
 test("inbound photo carries its media id and caption", () => {
   const [event] = adapter.parseWebhook({
     entry: [{ changes: [{ value: {
