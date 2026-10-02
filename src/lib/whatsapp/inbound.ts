@@ -18,12 +18,11 @@ import type { InboundEvent } from "@/lib/whatsapp/adapter";
 export type IngestResult = {
   processed: number;
   duplicates: number;
-  unknownCustomers: number;
 };
 
 /** `origin`: this app's public URL, for links Meta fetches (the guide PDF). */
 export async function ingestEvents(events: InboundEvent[], origin: string): Promise<IngestResult> {
-  const result: IngestResult = { processed: 0, duplicates: 0, unknownCustomers: 0 };
+  const result: IngestResult = { processed: 0, duplicates: 0 };
 
   for (const event of events) {
     if (event.kind === "status") {
@@ -35,7 +34,6 @@ export async function ingestEvents(events: InboundEvent[], origin: string): Prom
 
     const outcome = await applyInboundMessage(event, origin);
     if (outcome === "duplicate") result.duplicates++;
-    else if (outcome === "unknown-customer") result.unknownCustomers++;
     else result.processed++;
   }
 
@@ -84,41 +82,21 @@ async function applyStatus(
 async function applyInboundMessage(
   event: Extract<InboundEvent, { kind: "message" }>,
   origin: string,
-): Promise<"ok" | "duplicate" | "unknown-customer"> {
+): Promise<"ok" | "duplicate"> {
   const existing = await prisma.message.findUnique({
     where: { providerMessageId: event.providerMessageId },
     select: { id: true },
   });
   if (existing) return "duplicate";
 
-  let customer = await prisma.customer.findUnique({
+  // Anyone who writes in becomes a customer, so the message shows in Chats —
+  // also a number this app never messaged (someone who found the number, or n8n's sends before cutover).
+  const customer = await prisma.customer.upsert({
     where: { phoneE164: event.from },
+    create: { phoneE164: event.from, name: event.profileName ?? null },
+    update: {},
     select: { id: true },
   });
-
-  // A BRAND tap is a lead even if this app never messaged the number
-  // (n8n did, before cutover). Anything else from a stranger is still ignored.
-  if (!customer && isBrandReply(event.text, event.replyId)) {
-    customer = await prisma.customer.upsert({
-      where: { phoneE164: event.from },
-      create: { phoneE164: event.from, name: event.profileName ?? null },
-      update: {},
-      select: { id: true },
-    });
-  }
-
-  // An unknown number is not silently turned into a customer: GAP-004 (dedupe
-  // and merge policy) and the source's customer-source requirement both need a
-  // business decision first. The event is recorded so nothing is lost.
-  if (!customer) {
-    await logActivity({
-      eventType: "whatsapp.inbound_unknown_customer",
-      objectType: "message",
-      objectId: event.providerMessageId,
-      metadata: { reason: "no customer matches this phone number" },
-    });
-    return "unknown-customer";
-  }
 
   let storedMessageId: string | null = null;
 
