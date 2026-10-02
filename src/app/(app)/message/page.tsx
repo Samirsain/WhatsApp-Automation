@@ -5,7 +5,7 @@ import { relativeTime } from "@/lib/relative-time";
 import { requirePermission } from "@/lib/session";
 import { chatMessages, openChats, WINDOW_MS } from "@/lib/whatsapp/window";
 import { AutoRefresh } from "./auto-refresh";
-import { Composer } from "./composer";
+import { Composer, SendGuideButton } from "./composer";
 
 export const dynamic = "force-dynamic";
 
@@ -194,6 +194,7 @@ export default async function MessagePage({ searchParams }: { searchParams: Prom
                 {open && `Open ${relativeTime(new Date(open.lastAt.getTime() + WINDOW_MS), now).replace(/^in /, "")} more`}
               </div>
             </div>
+            {open && <SendGuideButton key={customer.customerId} customerId={customer.customerId} />}
           </header>
 
           {/* column-reverse keeps the view pinned to the newest message without JS */}

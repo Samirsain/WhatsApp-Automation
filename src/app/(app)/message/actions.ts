@@ -1,9 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { z } from "zod";
 import { logActivity } from "@/lib/activity";
-import { recordAndSend } from "@/lib/brand/send";
+import { recordAndSend, sendBrandGuide } from "@/lib/brand/send";
 import { signUpload, type UploadTicket } from "@/lib/cloudinary";
 import { prisma } from "@/lib/prisma";
 import { assertPermission } from "@/lib/session";
@@ -87,4 +88,47 @@ export async function sendDirect(_prev: DirectState, formData: FormData): Promis
   });
   revalidatePath("/message");
   return result.ok ? { sentTo: to } : { error: result.error ?? "Send failed." };
+}
+
+/**
+ * The guide PDF with the MEMBER button, by hand, to an open chat — for people
+ * who tapped Brand before the guide existed. Whoever gets their first guide
+ * here moves to Brand Leads; a Member tap then makes them a Final Lead.
+ */
+export async function sendGuide(_prev: DirectState, formData: FormData): Promise<DirectState> {
+  const user = await assertPermission("batch:manage");
+  const customerId = z.uuid().safeParse(formData.get("customerId"));
+  if (!customerId.success) return { error: "No chat is selected." };
+
+  const customer = await prisma.customer.findUnique({
+    where: { id: customerId.data },
+    select: { id: true, phoneE164: true, optedOutAt: true, qualifiedAt: true },
+  });
+  if (!customer) return { error: "That customer no longer exists." };
+  if (customer.optedOutAt) return { error: "This number has opted out of messages." };
+  if (!(await isWindowOpen(customer.id))) {
+    return { error: "This number's 24-hour window has closed. They need to message you first." };
+  }
+
+  const hadGuide = await prisma.message.count({
+    where: { customerId: customer.id, payload: { path: ["kind"], equals: "brand_guide" } },
+  });
+  const h = await headers();
+  const result = await sendBrandGuide(customer, `https://${h.get("x-forwarded-host") ?? h.get("host")}`);
+  if (result.ok && hadGuide === 0) {
+    await prisma.customer.update({
+      where: { id: customer.id },
+      data: { status: "IN_FUNNEL", qualifiedAt: customer.qualifiedAt ?? new Date() },
+    });
+  }
+
+  await logActivity({
+    actorUserId: user.id,
+    eventType: result.ok ? "guide.sent" : "guide.failed",
+    objectType: "customer",
+    objectId: customer.id,
+    metadata: { error: result.error ?? null },
+  });
+  revalidatePath("/message");
+  return result.ok ? { sentTo: customer.phoneE164 } : { error: result.error ?? "Send failed." };
 }

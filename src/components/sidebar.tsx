@@ -69,15 +69,15 @@ export function MobileNav({ items, counts }: { items: NavItem[]; counts: NavCoun
             href={item.href}
             aria-current={active ? "page" : undefined}
             className={cx(
-              "relative flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] transition-transform duration-150 active:scale-95 motion-reduce:active:scale-100",
+              "relative flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] leading-tight transition-transform duration-150 active:scale-95 motion-reduce:active:scale-100",
               active ? "font-semibold text-[color:var(--color-action-primary)]" : "text-[color:var(--color-text-secondary)]",
             )}
           >
             <Icon name={item.icon} active={active} />
-            <span>{item.label}</span>
+            <span className="max-w-full truncate px-0.5">{item.short}</span>
             {count !== undefined && count > 0 && (
-              <span className="absolute top-1.5 left-1/2 ml-2 rounded-full bg-[color:var(--color-action-primary)] px-1.5 text-[10px] leading-4 font-semibold text-white tabular-nums">
-                {count}
+              <span className="absolute top-1 left-1/2 ml-1.5 rounded-full bg-[color:var(--color-action-primary)] px-1 text-[10px] leading-4 font-semibold text-white tabular-nums">
+                {count > 99 ? "99+" : count}
               </span>
             )}
           </Link>

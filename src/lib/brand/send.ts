@@ -113,19 +113,24 @@ export async function sendBrandMessage(input: {
 export async function sendBrandGuide(
   customer: { id: string; phoneE164: string },
   origin: string,
-): Promise<void> {
-  await recordAndSend(
+): Promise<{ ok: boolean; error?: string }> {
+  const link = origin + GUIDE_PATH;
+  return recordAndSend(
     customer.id,
     {
       kind: "media",
       to: customer.phoneE164,
       mediaType: "document",
-      link: origin + GUIDE_PATH,
+      link,
       filename: GUIDE_FILENAME,
       caption: GUIDE_TEXT,
       buttons: [MEMBER_BUTTON],
     },
-    { type: "MEDIA", body: GUIDE_TEXT, payload: { kind: "brand_guide" } },
+    {
+      type: "MEDIA",
+      body: GUIDE_TEXT,
+      payload: { kind: "brand_guide", mediaType: "document", link, filename: GUIDE_FILENAME },
+    },
   );
 }
 

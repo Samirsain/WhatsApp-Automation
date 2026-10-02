@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useRef, useState } from "react";
-import { getUploadTicket, sendDirect, type DirectState } from "./actions";
+import { getUploadTicket, sendDirect, sendGuide, type DirectState } from "./actions";
 
 const MB = 1024 * 1024;
 type MediaType = "image" | "video" | "audio" | "document";
@@ -161,6 +161,29 @@ export function Composer({ customerId }: { customerId: string }) {
           )}
         </button>
       </div>
+    </form>
+  );
+}
+
+/** Sends the guide PDF with its MEMBER button, the same message a Brand tap gets. */
+export function SendGuideButton({ customerId }: { customerId: string }) {
+  const [state, action, pending] = useActionState(sendGuide, {});
+  return (
+    <form action={action} className="flex shrink-0 flex-col items-end">
+      <input type="hidden" name="customerId" value={customerId} />
+      <button
+        type="submit"
+        disabled={pending}
+        className="flex min-h-11 items-center gap-1.5 rounded-full border border-[color:var(--color-border-default)] px-3 font-semibold transition-opacity hover:bg-[color:var(--color-surface-muted)] disabled:opacity-50"
+      >
+        <span aria-hidden>📄</span>
+        {pending ? "Sending…" : state.sentTo ? "PDF sent" : "Send PDF"}
+      </button>
+      {state.error && (
+        <p role="alert" className="mt-1 max-w-56 text-right text-[length:var(--text-small)] text-[color:var(--color-status-error)]">
+          {state.error}
+        </p>
+      )}
     </form>
   );
 }
