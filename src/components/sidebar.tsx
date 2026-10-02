@@ -25,6 +25,7 @@ const ICONS: Record<NavIcon, React.ReactNode> = {
       <path d="M12 7v5l3 2" />
     </>
   ),
+  brand: <path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" />,
   leads: <path d="M20 6 9 17l-5-5" />,
 };
 

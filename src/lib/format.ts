@@ -4,13 +4,15 @@
  * `toLocaleString()` follows the server's locale, so the same row read
  * "8/9/2026" to one person and "9/8/2026" to another — a real ambiguity when
  * a column is full of send times. The month is spelled, and seconds are
- * dropped: nobody schedules a WhatsApp message to the second.
+ * dropped: nobody schedules a WhatsApp message to the second. Times are
+ * India time: the server (Railway) runs on UTC, 5½ hours behind.
  */
 
 const DATE = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
   month: "short",
   year: "numeric",
+  timeZone: "Asia/Kolkata",
 });
 
 const DATE_TIME = new Intl.DateTimeFormat("en-GB", {
@@ -19,6 +21,7 @@ const DATE_TIME = new Intl.DateTimeFormat("en-GB", {
   hour: "2-digit",
   minute: "2-digit",
   hour12: false,
+  timeZone: "Asia/Kolkata",
 });
 
 export function formatDate(date: Date): string {

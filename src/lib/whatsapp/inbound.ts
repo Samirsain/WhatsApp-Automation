@@ -205,10 +205,11 @@ async function applyInboundMessage(
     });
     const name = lead.name ?? event.profileName ?? null;
     // Claimed with a conditional update: of two taps processed at once, only
-    // one sees count 1, so qualifiedAt keeps the first tap and one guide goes.
+    // one sees count 1, so one guide goes. qualifiedAt stops the funnel; the
+    // number becomes a Final Lead (QUALIFIED) only on the MEMBER tap below.
     const claim = await prisma.customer.updateMany({
       where: { id: lead.id, qualifiedAt: null },
-      data: { status: "QUALIFIED", qualifiedAt: event.receivedAt, name },
+      data: { status: "IN_FUNNEL", qualifiedAt: event.receivedAt, name },
     });
     if (claim.count === 1) {
       await logActivity({
@@ -222,17 +223,24 @@ async function applyInboundMessage(
     return "ok";
   }
 
-  // MEMBER is the button on the guide; only a brand lead gets the thank-you, once.
+  // MEMBER is the button on the guide. It makes a BRAND tapper a Final Lead and
+  // sends the thank-you; the conditional update lets only one tap through.
   if (isMemberReply(event.text, event.replyId)) {
-    const lead = await prisma.customer.findUniqueOrThrow({
-      where: { id: customer.id },
-      select: { id: true, phoneE164: true, name: true, qualifiedAt: true },
+    const claim = await prisma.customer.updateMany({
+      where: { id: customer.id, qualifiedAt: { not: null }, status: { not: "QUALIFIED" } },
+      data: { status: "QUALIFIED", qualifiedAt: event.receivedAt },
     });
-    // ponytail: two MEMBER taps processed at the same instant can both pass this check; add a memberAt claim column if double thank-yous show up.
-    const thanked = await prisma.message.count({
-      where: { customerId: lead.id, payload: { path: ["kind"], equals: "brand_thanks" } },
-    });
-    if (lead.qualifiedAt && thanked === 0) {
+    if (claim.count === 1) {
+      const lead = await prisma.customer.findUniqueOrThrow({
+        where: { id: customer.id },
+        select: { id: true, phoneE164: true, name: true },
+      });
+      await logActivity({
+        eventType: "customer.member_tapped",
+        objectType: "customer",
+        objectId: lead.id,
+        customerId: lead.id,
+      });
       await sendBrandThanks({ ...lead, name: lead.name ?? event.profileName ?? null });
       return "ok";
     }

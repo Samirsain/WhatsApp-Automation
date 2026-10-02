@@ -1,7 +1,7 @@
 import type { Permission } from "@/lib/rbac";
 
-/** Broadcast, chat with one number, see what failed, who got it but stayed quiet, who tapped Brand. */
-export type NavIcon = "send" | "message" | "failed" | "noReply" | "leads";
+/** Broadcast, chat with one number, see what failed, who stayed quiet, who tapped Brand, who tapped Member. */
+export type NavIcon = "send" | "message" | "failed" | "noReply" | "brand" | "leads";
 
 export type NavItem = {
   href: string;
@@ -15,5 +15,6 @@ export const NAV: NavItem[] = [
   { href: "/message", label: "Chats", permission: "batch:manage", icon: "message" },
   { href: "/failed", label: "Not Delivered", permission: "batch:read", icon: "failed" },
   { href: "/no-reply", label: "No Reply", permission: "batch:read", icon: "noReply" },
-  { href: "/leads", label: "Brand Leads", permission: "qualified:read", icon: "leads" },
+  { href: "/brand-leads", label: "Brand Leads", permission: "qualified:read", icon: "brand" },
+  { href: "/leads", label: "Final Leads", permission: "qualified:read", icon: "leads" },
 ];

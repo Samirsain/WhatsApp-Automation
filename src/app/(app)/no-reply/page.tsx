@@ -35,14 +35,14 @@ export default async function NoReplyPage() {
       deliveryStatus: true,
       createdAt: true,
       payload: true,
-      customer: { select: { name: true, phoneE164: true, status: true } },
+      customer: { select: { name: true, phoneE164: true, status: true, qualifiedAt: true } },
     },
   });
   const seen = new Set<string>();
   const rows = recent.filter((m) => {
     if (seen.has(m.customerId)) return false;
     seen.add(m.customerId);
-    return m.deliveryStatus in SEEN && m.customer.status !== "QUALIFIED";
+    return m.deliveryStatus in SEEN && m.customer.qualifiedAt === null;
   });
 
   return (

@@ -20,11 +20,28 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   // Nav visibility is usability only; every page re-checks server-side.
   const items = NAV.filter((item) => can(user.roles, item.permission));
 
-  const [unread, leads] = await Promise.all([
+  const [unread, finalLeads, brandLeads, recent] = await Promise.all([
     prisma.notification.count({ where: { userId: user.id, readAt: null } }),
-    // Only NEW: the badge is what still needs someone to pick it up.
-    prisma.customer.count({ where: { status: "QUALIFIED", leadStage: "NEW" } }),
+    prisma.customer.count({ where: { status: "QUALIFIED" } }),
+    prisma.customer.count({ where: { qualifiedAt: { not: null }, status: { not: "QUALIFIED" } } }),
+    // Same rows and rule as the Not Delivered and No Reply pages: each number's latest brand message.
+    prisma.message.findMany({
+      where: { direction: "OUTBOUND", payload: { path: ["kind"], equals: "brand" } },
+      orderBy: { createdAt: "desc" },
+      take: 2000, // ponytail: newest 2000 sends, as on those pages
+      select: { customerId: true, deliveryStatus: true, customer: { select: { qualifiedAt: true } } },
+    }),
   ]);
+  const latest = new Map<string, (typeof recent)[number]>();
+  for (const m of recent) if (!latest.has(m.customerId)) latest.set(m.customerId, m);
+  let notDelivered = 0;
+  let noReply = 0;
+  for (const m of latest.values()) {
+    if (m.deliveryStatus === "FAILED") notDelivered++;
+    else if (m.deliveryStatus !== "QUEUED" && m.customer.qualifiedAt === null) noReply++;
+  }
+
+  const counts = { "/failed": notDelivered, "/no-reply": noReply, "/brand-leads": brandLeads, "/leads": finalLeads };
 
   async function signOutAction() {
     "use server";
@@ -35,7 +52,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen">
       <Sidebar
         items={items}
-        counts={{ "/leads": leads }}
+        counts={counts}
         footer={
           <div className="flex flex-col gap-1 border-t border-[color:var(--color-border-default)] pt-2">
             <Link
@@ -88,7 +105,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         </header>
         <main className="min-w-0 flex-1 px-4 py-4 pb-24 md:px-5 md:pb-4">{children}</main>
       </div>
-      <MobileNav items={items} counts={{ "/leads": leads }} />
+      <MobileNav items={items} counts={counts} />
     </div>
   );
 }
