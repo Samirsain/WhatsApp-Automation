@@ -1,6 +1,7 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { after, NextResponse, type NextRequest } from "next/server";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
 import { whatsapp } from "@/lib/whatsapp/adapter";
+import { archiveInboundMedia } from "@/lib/whatsapp/archive";
 import { ingestEvents } from "@/lib/whatsapp/inbound";
 
 export const dynamic = "force-dynamic";
@@ -64,6 +65,10 @@ export async function POST(request: NextRequest) {
     // Railway passes the public host through; Meta only fetches https links.
     const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
     const result = await ingestEvents(events, `https://${host}`);
+    // Keep customers' files past Meta's ~30 days; after the ack so Meta is not kept waiting.
+    if (events.some((e) => e.kind === "message" && e.media)) {
+      after(() => archiveInboundMedia().catch((err) => console.error("[archive] failed", err)));
+    }
     return NextResponse.json({ ok: true, ...result });
   } catch (err) {
     // 5xx tells the provider to retry; dedupe makes that replay safe.

@@ -3,6 +3,7 @@ import { tick } from "@/lib/automation/worker";
 import { dispatchRunningBatches } from "@/lib/batches/runner";
 import { sendDueFollowUps } from "@/lib/brand/funnel";
 import { sendDueRetries } from "@/lib/brand/retry";
+import { archiveInboundMedia } from "@/lib/whatsapp/archive";
 
 /** One pass of every timed job. Safe to overlap: each job claims its rows. */
 export async function runTick() {
@@ -10,7 +11,8 @@ export async function runTick() {
   const batches = await dispatchRunningBatches();
   const retries = await sendDueRetries();
   const funnel = await sendDueFollowUps();
-  return { automations, batches, retries, funnel };
+  const archived = await archiveInboundMedia();
+  return { automations, batches, retries, funnel, archived };
 }
 
 const EVERY_MS = 15 * 60 * 1000;

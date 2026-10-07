@@ -6,12 +6,12 @@ export const WINDOW_MS = 24 * 60 * 60_000;
 
 export type OpenChat = { customerId: string; phoneE164: string; name: string | null; lastText: string | null; lastAt: Date };
 
-/** Customers who wrote in the last 24h, newest first, one row each. */
-export async function openChats(now = new Date()): Promise<OpenChat[]> {
+/** Customers who wrote within `since` ms (default: the open 24h window), newest first, one row each. */
+export async function openChats(now = new Date(), since = WINDOW_MS): Promise<OpenChat[]> {
   const rows = await prisma.message.findMany({
     where: {
       direction: "INBOUND",
-      createdAt: { gte: new Date(now.getTime() - WINDOW_MS) },
+      createdAt: { gte: new Date(now.getTime() - since) },
       customer: { optedOutAt: null },
     },
     orderBy: { createdAt: "desc" },

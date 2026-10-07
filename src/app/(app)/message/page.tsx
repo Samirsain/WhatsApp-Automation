@@ -103,10 +103,12 @@ function Body({ m }: { m: ChatMessage }) {
 export default async function MessagePage({ searchParams }: { searchParams: Promise<{ c?: string }> }) {
   await requirePermission("batch:manage");
   const selectedId = (await searchParams).c;
-  const chats = await openChats();
   const now = new Date();
+  // Closed chats stay listed so their files can still be opened; Meta keeps media about 30 days.
+  const chats = await openChats(now, 30 * 24 * 60 * 60_000);
+  const isOpen = (c: { lastAt: Date }) => now.getTime() - c.lastAt.getTime() < WINDOW_MS;
 
-  const open = chats.find((c) => c.customerId === selectedId);
+  const open = chats.find((c) => c.customerId === selectedId && isOpen(c));
   // A chat whose window closed can still be read, just not written to.
   const customer =
     open ??
@@ -132,13 +134,13 @@ export default async function MessagePage({ searchParams }: { searchParams: Prom
         <div className="border-b border-[color:var(--color-border-default)] px-4 py-3">
           <h1 className="text-[length:var(--text-h2)] font-semibold">Chats</h1>
           <p className="text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">
-            Wrote to you in the last 24 hours
+            Wrote to you in the last 30 days
           </p>
         </div>
         <ul className="min-h-0 flex-1 overflow-y-auto">
           {chats.length === 0 && (
             <li className="px-4 py-8 text-center text-[color:var(--color-text-secondary)]">
-              No open chats. A number shows up here as soon as it messages you.
+              No chats yet. A number shows up here as soon as it messages you.
             </li>
           )}
           {chats.map((c) => (
@@ -148,6 +150,7 @@ export default async function MessagePage({ searchParams }: { searchParams: Prom
                 aria-current={c.customerId === customer?.customerId ? "page" : undefined}
                 className={cx(
                   "flex items-center gap-3 border-b border-[color:var(--color-border-default)] px-4 py-2.5",
+                  !isOpen(c) && "opacity-60",
                   c.customerId === customer?.customerId
                     ? "bg-[color:var(--color-surface-muted)]"
                     : "hover:bg-[color:var(--color-surface-muted)]",
@@ -158,7 +161,7 @@ export default async function MessagePage({ searchParams }: { searchParams: Prom
                   <span className="flex items-baseline justify-between gap-2">
                     <b className="truncate">{c.name || c.phoneE164}</b>
                     <span className="shrink-0 text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">
-                      {TIME.format(c.lastAt)}
+                      {isOpen(c) ? TIME.format(c.lastAt) : `Closed · ${DAY.format(c.lastAt)}`}
                     </span>
                   </span>
                   {c.name && (
