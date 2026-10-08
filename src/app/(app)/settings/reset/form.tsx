@@ -13,7 +13,7 @@ export function ResetButton() {
       className={buttonClass.danger}
       disabled={pending}
       onClick={() => {
-        if (confirm("Delete ALL numbers, chats, batches and logs? This cannot be undone.")) {
+        if (confirm("Delete batches, logs, and numbers that never replied? Chats are kept. This cannot be undone.")) {
           start(() => wipeTestData());
         }
       }}

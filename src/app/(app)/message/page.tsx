@@ -3,7 +3,7 @@ import { cx } from "@/components/ui";
 import { prisma } from "@/lib/prisma";
 import { relativeTime } from "@/lib/relative-time";
 import { requirePermission } from "@/lib/session";
-import { chatMessages, openChats, WINDOW_MS } from "@/lib/whatsapp/window";
+import { allChats, chatMessages, WINDOW_MS } from "@/lib/whatsapp/window";
 import { AutoRefresh } from "./auto-refresh";
 import { Composer, SendGuideButton } from "./composer";
 
@@ -104,8 +104,8 @@ export default async function MessagePage({ searchParams }: { searchParams: Prom
   await requirePermission("batch:manage");
   const selectedId = (await searchParams).c;
   const now = new Date();
-  // Closed chats stay listed so their files can still be opened; Meta keeps media about 30 days.
-  const chats = await openChats(now, 30 * 24 * 60 * 60_000);
+  // Every chat stays listed; closed ones can be read, just not written to.
+  const chats = await allChats();
   const isOpen = (c: { lastAt: Date }) => now.getTime() - c.lastAt.getTime() < WINDOW_MS;
 
   const open = chats.find((c) => c.customerId === selectedId && isOpen(c));
@@ -120,9 +120,9 @@ export default async function MessagePage({ searchParams }: { searchParams: Prom
   const messages = customer ? await chatMessages(customer.customerId) : [];
 
   return (
-    // Phones: pinned between the app's top bar (61px) and bottom tab bar (57px + safe area),
+    // Phones: pinned between the app's top bar (53px) and the bottom safe area.
     // edge to edge like a messaging app. Desktop: a framed two-pane panel.
-    <div className="grid grid-rows-[minmax(0,1fr)] overflow-hidden bg-[color:var(--color-surface)] max-md:fixed max-md:inset-x-0 max-md:top-[61px] max-md:bottom-[calc(57px+env(safe-area-inset-bottom))] max-md:z-10 md:h-[calc(100dvh-2rem)] md:min-h-[420px] md:grid-cols-[minmax(260px,340px)_1fr] md:rounded-[var(--radius-lg)] md:border md:border-[color:var(--color-border-default)]">
+    <div className="grid grid-rows-[minmax(0,1fr)] overflow-hidden bg-[color:var(--color-surface)] max-md:fixed max-md:inset-x-0 max-md:top-[53px] max-md:bottom-[env(safe-area-inset-bottom)] max-md:z-10 md:h-[calc(100dvh-2rem)] md:min-h-[420px] md:grid-cols-[minmax(260px,340px)_1fr] md:rounded-[var(--radius-lg)] md:border md:border-[color:var(--color-border-default)]">
       <AutoRefresh />
       {/* Chat list. Phones show either the list or one chat. */}
       <aside
@@ -134,7 +134,7 @@ export default async function MessagePage({ searchParams }: { searchParams: Prom
         <div className="border-b border-[color:var(--color-border-default)] px-4 py-3">
           <h1 className="text-[length:var(--text-h2)] font-semibold">Chats</h1>
           <p className="text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">
-            Wrote to you in the last 30 days
+            Everyone who has written to you
           </p>
         </div>
         <ul className="min-h-0 flex-1 overflow-y-auto">

@@ -6,14 +6,13 @@ export const WINDOW_MS = 24 * 60 * 60_000;
 
 export type OpenChat = { customerId: string; phoneE164: string; name: string | null; lastText: string | null; lastAt: Date };
 
-/** Customers who wrote within `since` ms (default: the open 24h window), newest first, one row each. */
-export async function openChats(now = new Date(), since = WINDOW_MS): Promise<OpenChat[]> {
+/**
+ * Everyone who ever wrote in, newest first, one row each. Closed and opted-out
+ * chats stay, so nothing is lost; sending is blocked for them in message/actions.ts.
+ */
+export async function allChats(): Promise<OpenChat[]> {
   const rows = await prisma.message.findMany({
-    where: {
-      direction: "INBOUND",
-      createdAt: { gte: new Date(now.getTime() - since) },
-      customer: { optedOutAt: null },
-    },
+    where: { direction: "INBOUND" },
     orderBy: { createdAt: "desc" },
     distinct: ["customerId"],
     select: { body: true, type: true, createdAt: true, customer: { select: { id: true, phoneE164: true, name: true } } },
@@ -27,12 +26,14 @@ export async function openChats(now = new Date(), since = WINDOW_MS): Promise<Op
   }));
 }
 
-/** The last 50 messages with one customer, oldest first. */
+/**
+ * The whole chat with one customer, oldest first.
+ * ponytail: loads every message; add "load older" paging if one chat grows to thousands.
+ */
 export async function chatMessages(customerId: string) {
   const rows = await prisma.message.findMany({
     where: { customerId },
     orderBy: { createdAt: "desc" },
-    take: 50,
     select: { id: true, direction: true, type: true, body: true, payload: true, deliveryStatus: true, createdAt: true },
   });
   return rows.reverse();

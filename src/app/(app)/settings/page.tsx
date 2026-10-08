@@ -102,9 +102,9 @@ export default async function SettingsPage() {
         <Card title="Clear test data" className="mt-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <p className="text-[color:var(--color-text-secondary)]">
-              Deletes every number with its chats, funnel runs and replies, plus
-              all batches, notifications and the activity log. Users,
-              templates, funnels and settings stay.
+              Deletes every number that never wrote to you, plus all batches,
+              notifications and the activity log. Anyone with a chat stays,
+              with the whole chat. Users, templates, funnels and settings stay.
             </p>
             <ResetButton />
           </div>
