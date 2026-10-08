@@ -1,5 +1,5 @@
 import { ContactButtons } from "@/components/contact-buttons";
-import { Card, Cell, EmptyState, PageHeader, Row, Table, buttonClass } from "@/components/ui";
+import { Card, Cell, EmptyState, LeadSteps, PageHeader, Row, Table, buttonClass } from "@/components/ui";
 import { formatDateTime } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
 import { requirePermission } from "@/lib/session";
@@ -10,23 +10,27 @@ export const dynamic = "force-dynamic";
 export default async function BrandLeadsPage() {
   await requirePermission("qualified:read");
 
-  const leads = await prisma.customer.findMany({
-    where: { qualifiedAt: { not: null }, status: { not: "QUALIFIED" } },
-    orderBy: { qualifiedAt: "desc" },
-    select: { id: true, name: true, phoneE164: true, qualifiedAt: true },
-  });
+  const [leads, finalCount] = await Promise.all([
+    prisma.customer.findMany({
+      where: { qualifiedAt: { not: null }, status: { not: "QUALIFIED" } },
+      orderBy: { qualifiedAt: "desc" },
+      select: { id: true, name: true, phoneE164: true, qualifiedAt: true },
+    }),
+    prisma.customer.count({ where: { status: "QUALIFIED" } }),
+  ]);
 
   return (
     <>
       <PageHeader
         title="Brand Leads"
-        description="Tapped Brand and got the guide, but have not tapped Member yet. A Member tap moves them to Final Leads."
+        description="Tapped Brand and got the guide, but have not tapped Member yet. Follow up so they tap Member; that moves them to Final Leads by itself."
         actions={
           <a href="/api/brand-leads/export" className={buttonClass.secondary}>
             CSV download
           </a>
         }
       />
+      <LeadSteps current="brand" brand={leads.length} final={finalCount} />
       {leads.length === 0 ? (
         <Card flush>
           <EmptyState title="No one is waiting" description="People who tap Brand but not Member show up here." />

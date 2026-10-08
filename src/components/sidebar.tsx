@@ -3,7 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cx } from "@/components/ui";
+import { useRef } from "react";
+import { cx, Wordmark } from "@/components/ui";
 import type { NavIcon, NavItem } from "@/lib/nav";
 
 /**
@@ -39,9 +40,9 @@ function Icon({ name, active }: { name: NavIcon; active: boolean }) {
       viewBox="0 0 24 24"
       fill="none"
       stroke={
-        active ? "var(--color-action-primary)" : "var(--color-text-secondary)"
+        active ? "var(--color-action-primary)" : "var(--color-text-primary)"
       }
-      strokeWidth="1.6"
+      strokeWidth="1.8"
       strokeLinecap="round"
       strokeLinejoin="round"
       className="shrink-0"
@@ -53,38 +54,103 @@ function Icon({ name, active }: { name: NavIcon; active: boolean }) {
 
 export type NavCounts = Partial<Record<string, number>>;
 
-/** Phones: the same screens as a bottom tab bar, like a messaging app. */
-export function MobileNav({ items, counts }: { items: NavItem[]; counts: NavCounts }) {
+/**
+ * Phones: a hamburger that opens the full sidebar as a drawer. Native <dialog>
+ * gives focus trap, Esc and backdrop for free.
+ */
+export function MobileNav({
+  items,
+  counts,
+  footer,
+}: {
+  items: NavItem[];
+  counts: NavCounts;
+  footer?: React.ReactNode;
+}) {
   const pathname = usePathname();
+  const ref = useRef<HTMLDialogElement>(null);
+  const close = () => ref.current?.close();
+  const current = items.find((item) => pathname.startsWith(item.href));
+
   return (
-    <nav
-      aria-label="Main"
-      className="fixed inset-x-0 bottom-0 z-20 flex border-t border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] pb-[env(safe-area-inset-bottom)] md:hidden print:hidden"
-    >
-      {items.map((item) => {
-        const active = pathname.startsWith(item.href);
-        const count = counts[item.href];
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            aria-current={active ? "page" : undefined}
-            className={cx(
-              "relative flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] leading-tight transition-transform duration-150 active:scale-95 motion-reduce:active:scale-100",
-              active ? "font-semibold text-[color:var(--color-action-primary)]" : "text-[color:var(--color-text-secondary)]",
-            )}
-          >
-            <Icon name={item.icon} active={active} />
-            <span className="max-w-full truncate px-0.5">{item.short}</span>
-            {count !== undefined && count > 0 && (
-              <span className="absolute top-1 left-1/2 ml-1.5 rounded-full bg-[color:var(--color-action-primary)] px-1 text-[10px] leading-4 font-semibold text-white tabular-nums">
-                {count > 99 ? "99+" : count}
-              </span>
-            )}
-          </Link>
-        );
-      })}
-    </nav>
+    <>
+      <button
+        type="button"
+        aria-label="Open menu"
+        onClick={() => ref.current?.showModal()}
+        className="-ml-2 flex h-11 w-11 items-center justify-center rounded-[var(--radius-sm)] transition-transform active:scale-95 motion-reduce:active:scale-100"
+      >
+        <svg aria-hidden width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+          <path d="M4 7h16M4 12h16M4 17h16" />
+        </svg>
+      </button>
+      <span className="min-w-0 flex-1 truncate font-semibold tracking-tight">{current?.label ?? "3% Club"}</span>
+
+      <dialog
+        ref={ref}
+        aria-label="Menu"
+        // Tap on the backdrop (the dialog box itself, outside the panel) closes it.
+        onClick={(e) => e.target === e.currentTarget && close()}
+        className="m-0 h-dvh max-h-none w-[min(18rem,85vw)] max-w-none bg-transparent p-0 text-[color:var(--color-text-primary)] backdrop:bg-black/40 md:hidden"
+      >
+        <nav
+          aria-label="Main"
+          className="flex h-full flex-col gap-4 overflow-y-auto bg-[color:var(--color-surface)] p-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+        >
+          <div className="flex items-center gap-2.5 px-2">
+            <Image src="/logo.png" alt="" width={36} height={36} className="rounded-full" />
+            <Wordmark className="flex-1 text-[14px]" />
+            <button
+              type="button"
+              aria-label="Close menu"
+              onClick={close}
+              className="flex h-11 w-11 items-center justify-center rounded-[var(--radius-sm)] text-[color:var(--color-text-secondary)] active:scale-95"
+            >
+              <svg aria-hidden width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <path d="M6 6l12 12M18 6 6 18" />
+              </svg>
+            </button>
+          </div>
+
+          <ul className="flex flex-col gap-0.5">
+            {items.map((item) => {
+              const active = pathname.startsWith(item.href);
+              const count = counts[item.href];
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    onClick={close}
+                    aria-current={active ? "page" : undefined}
+                    className={cx(
+                      "flex min-h-12 items-center gap-3 rounded-[var(--radius-md)] pr-2 pl-3 text-[16px] font-medium transition-colors",
+                      active
+                        ? "bg-[color:var(--color-action-soft)] font-semibold text-[color:var(--color-action-primary-hover)] shadow-[inset_3px_0_0_var(--color-action-primary)]"
+                        : "text-[color:var(--color-text-primary)] active:bg-[color:var(--color-surface-muted)]",
+                    )}
+                  >
+                    <Icon name={item.icon} active={active} />
+                    <span>{item.label}</span>
+                    {count !== undefined && (
+                      <span className="ml-auto rounded-full border border-[color:var(--color-border-default)] px-1.5 text-[length:var(--text-small)] font-semibold tabular-nums text-[color:var(--color-text-secondary)]">
+                        {count}
+                      </span>
+                    )}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+
+          {/* Links in the footer (Notifications) also close the drawer. */}
+          {footer && (
+            <div className="mt-auto" onClick={(e) => (e.target as HTMLElement).closest("a") && close()}>
+              {footer}
+            </div>
+          )}
+        </nav>
+      </dialog>
+    </>
   );
 }
 
@@ -103,14 +169,14 @@ export function Sidebar({
   return (
     <nav
       aria-label="Main"
-      className="sticky top-0 hidden h-screen w-52 shrink-0 flex-col gap-4 overflow-y-auto border-r border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] p-3 md:flex print:hidden"
+      className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col gap-6 overflow-y-auto border-r border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] p-4 md:flex print:hidden"
     >
-      <div className="flex items-center gap-2.5 px-2 py-1">
-        <Image src="/logo.png" alt="" width={28} height={28} className="rounded-full" priority />
-        <span className="font-semibold tracking-tight">3% Club</span>
-      </div>
+      <Link href="/" className="flex items-center gap-3 rounded-[var(--radius-md)] px-2 py-1">
+        <Image src="/logo.png" alt="" width={40} height={40} className="rounded-full" priority />
+        <Wordmark className="text-[15px]" />
+      </Link>
 
-      <ul className="flex flex-col gap-0.5">
+      <ul className="flex flex-col gap-1">
         {items.map((item) => {
           const active = pathname.startsWith(item.href);
           const count = counts[item.href];
@@ -121,16 +187,23 @@ export function Sidebar({
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cx(
-                  "flex items-center gap-2.5 rounded-[var(--radius-sm)] py-1.5 pr-2 pl-2.5 transition-colors",
+                  "flex min-h-10 items-center gap-3 rounded-[var(--radius-md)] pr-2 pl-3 text-[15px] font-medium transition-colors",
                   active
-                    ? "bg-[color:var(--color-surface-muted)] font-semibold shadow-[inset_2px_0_0_var(--color-action-primary)]"
-                    : "hover:bg-[color:var(--color-surface-muted)]",
+                    ? "bg-[color:var(--color-action-soft)] font-semibold text-[color:var(--color-action-primary-hover)] shadow-[inset_3px_0_0_var(--color-action-primary)]"
+                    : "text-[color:var(--color-text-primary)] hover:bg-[color:var(--color-surface-muted)]",
                 )}
               >
                 <Icon name={item.icon} active={active} />
                 <span>{item.label}</span>
                 {count !== undefined && (
-                  <span className="ml-auto rounded-full border border-[color:var(--color-border-default)] px-1.5 text-[length:var(--text-small)] font-semibold tabular-nums text-[color:var(--color-text-secondary)]">
+                  <span
+                    className={cx(
+                      "ml-auto rounded-full px-2 text-[length:var(--text-small)] leading-5 font-semibold tabular-nums",
+                      count > 0
+                        ? "bg-[color:var(--color-action-primary)] text-white"
+                        : "border border-[color:var(--color-border-default)] text-[color:var(--color-text-secondary)]",
+                    )}
+                  >
                     {count}
                   </span>
                 )}

@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { AuthError } from "next-auth";
 import { signIn } from "@/auth";
 import { currentUser } from "@/lib/session";
-import { buttonClass, ErrorNote, Field, inputClass } from "@/components/ui";
+import { buttonClass, ErrorNote, Field, inputClass, Wordmark } from "@/components/ui";
 
 /** UI-001 — Login. Centered auth card, credential form, error + loading. */
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
@@ -40,10 +40,12 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
 
   return (
     <div className="flex min-h-screen items-center justify-center p-6">
-      <div className="w-full max-w-sm rounded-[var(--radius-md)] border border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] p-6 shadow-[var(--shadow-surface)]">
-        <Image src="/logo.png" alt="" width={48} height={48} className="mb-3 rounded-full" priority />
-        <h1 className="text-[length:var(--text-h2)] font-semibold">3% Club</h1>
-        <p className="mt-1 mb-6 text-[color:var(--color-text-secondary)]">
+      <div className="w-full max-w-sm rounded-[var(--radius-lg)] border border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] p-7 shadow-[var(--shadow-modal)]">
+        <Image src="/logo.png" alt="" width={56} height={56} className="mb-4 rounded-full" priority />
+        <h1 className="text-[22px]">
+          <Wordmark />
+        </h1>
+        <p className="mt-4 mb-6 text-[color:var(--color-text-secondary)]">
           Sign in to send messages and see leads.
         </p>
 

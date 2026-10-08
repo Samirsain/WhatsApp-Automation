@@ -35,6 +35,7 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   // The logo and favicon are shown on the login page, before any session exists.
-  // guide.pdf is fetched by Meta, which has no session.
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|icon.png|logo.png|guide.pdf).*)"],
+  // guide.pdf is fetched by Meta, which has no session. Phones fetch the
+  // manifest and app icons before or without the cookie when installing.
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|icon|apple-icon|manifest.webmanifest|logo.png|guide.pdf).*)"],
 };

@@ -23,7 +23,7 @@ export function PageHeader({
   return (
     <header className="mb-4 flex flex-wrap items-center justify-between gap-3">
       <div>
-        <h1 className="text-[length:var(--text-h1)] font-semibold tracking-tight">
+        <h1 className="font-display text-[1.625rem] leading-tight font-semibold md:text-[1.875rem]">
           {title}
         </h1>
         {description && (
@@ -34,6 +34,74 @@ export function PageHeader({
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
     </header>
+  );
+}
+
+/** "3%CLUB / REAL ESTATE", set like the logo lockup on the brand posts. */
+export function Wordmark({ className }: { className?: string }) {
+  return (
+    <span className={cx("inline-flex flex-col leading-none", className)}>
+      <span className="font-display text-[1.6em] font-semibold tracking-tight">
+        <span className="text-[color:var(--color-action-primary)]">3%</span>
+        <span className="text-[color:var(--color-text-primary)]">CLUB</span>
+      </span>
+      <span className="mt-1 text-[0.55em] font-medium tracking-[0.42em] text-[color:var(--color-text-secondary)]">
+        REAL ESTATE
+      </span>
+    </span>
+  );
+}
+
+/**
+ * Brand Leads → Final Leads as two numbered steps, so the team always sees
+ * which step a page is and how many leads sit at the other one.
+ */
+export function LeadSteps({ current, brand, final }: { current: "brand" | "final"; brand: number; final: number }) {
+  const steps = [
+    { key: "brand", href: "/brand-leads", n: 1, title: "Brand tapped", note: "Guide sent, not a member yet", count: brand },
+    { key: "final", href: "/leads", n: 2, title: "Member tapped", note: "Final Lead: call them", count: final },
+  ] as const;
+  return (
+    <ol className="mb-4 grid gap-2 sm:grid-cols-2 print:hidden">
+      {steps.map((s) => {
+        const active = s.key === current;
+        return (
+          <li key={s.key}>
+            <Link
+              href={s.href}
+              aria-current={active ? "step" : undefined}
+              className={cx(
+                "flex items-center gap-3 rounded-[var(--radius-md)] border px-3 py-2.5 transition-colors",
+                active
+                  ? "border-[color:var(--color-action-primary)] bg-[color:var(--color-action-soft)]"
+                  : "border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] hover:bg-[color:var(--color-surface-muted)]",
+              )}
+            >
+              <span
+                aria-hidden
+                className={cx(
+                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-semibold",
+                  active
+                    ? "bg-[color:var(--color-action-primary)] text-white"
+                    : "border border-[color:var(--color-border-default)] text-[color:var(--color-text-secondary)]",
+                )}
+              >
+                {s.n}
+              </span>
+              <span className="min-w-0 flex-1 leading-tight">
+                <span className="block font-semibold">
+                  Step {s.n}: {s.title}
+                </span>
+                <span className="block text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">
+                  {s.note}
+                </span>
+              </span>
+              <span className="text-[length:var(--text-h2)] font-semibold tabular-nums">{s.count}</span>
+            </Link>
+          </li>
+        );
+      })}
+    </ol>
   );
 }
 
@@ -342,7 +410,7 @@ export function ErrorNote({ children }: { children: ReactNode }) {
 
 const BUTTON_BASE =
   // Pressed buttons shrink a touch so a tap is felt; 44px tall on phones, compact on desktop.
-  "inline-flex min-h-11 select-none items-center justify-center gap-2 rounded-[var(--radius-sm)] px-3 py-1.5 font-medium whitespace-nowrap transition-[transform,background-color,border-color,opacity] duration-150 active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100 motion-reduce:transition-none motion-reduce:active:scale-100 md:min-h-0 md:px-2.5";
+  "inline-flex min-h-11 select-none items-center justify-center gap-2 rounded-[var(--radius-sm)] px-3 py-1.5 font-medium whitespace-nowrap transition-[transform,background-color,border-color,opacity] duration-150 active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100 motion-reduce:transition-none motion-reduce:active:scale-100 md:min-h-9 md:px-3";
 
 export const buttonClass = {
   primary: cx(
@@ -360,7 +428,7 @@ export const buttonClass = {
 };
 
 export const inputClass =
-  "min-h-11 w-full rounded-[var(--radius-sm)] border border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] px-2.5 py-1.5 text-[color:var(--color-text-primary)] placeholder:text-[color:var(--color-text-secondary)] md:min-h-0";
+  "min-h-11 w-full rounded-[var(--radius-sm)] border border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] px-2.5 py-1.5 text-[color:var(--color-text-primary)] placeholder:text-[color:var(--color-text-secondary)] md:min-h-9";
 
 export function Field({
   label,
