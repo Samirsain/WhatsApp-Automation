@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requirePermission } from "@/lib/session";
 import { logActivity } from "@/lib/activity";
+import { leadId } from "@/lib/lead-id";
 
 export const dynamic = "force-dynamic";
 
@@ -27,10 +28,11 @@ export async function GET(request: NextRequest) {
     include: { batch: { select: { name: true, automation: { select: { name: true } } } } },
   });
 
-  const header = "name,phone,qualified_at,batch,funnel";
+  const header = "lead_id,name,phone,qualified_at,batch,funnel";
   const body = rows
     .map((r) =>
       [
+        csv(leadId(r.leadNumber)),
         csv(r.name),
         csv(r.phoneE164),
         csv(r.qualifiedAt?.toISOString() ?? ""),

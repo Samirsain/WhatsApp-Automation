@@ -1,6 +1,7 @@
 import { ContactButtons } from "@/components/contact-buttons";
 import { Card, Cell, EmptyState, LeadSteps, PageHeader, Row, Table, buttonClass } from "@/components/ui";
 import { formatDateTime } from "@/lib/format";
+import { leadId } from "@/lib/lead-id";
 import { prisma } from "@/lib/prisma";
 import { requirePermission } from "@/lib/session";
 
@@ -14,7 +15,7 @@ export default async function BrandLeadsPage() {
     prisma.customer.findMany({
       where: { qualifiedAt: { not: null }, status: { not: "QUALIFIED" } },
       orderBy: { qualifiedAt: "desc" },
-      select: { id: true, name: true, phoneE164: true, qualifiedAt: true },
+      select: { id: true, leadNumber: true, name: true, phoneE164: true, qualifiedAt: true },
     }),
     prisma.customer.count({ where: { status: "QUALIFIED" } }),
   ]);
@@ -50,7 +51,9 @@ export default async function BrandLeadsPage() {
                     {l.qualifiedAt ? formatDateTime(l.qualifiedAt) : "—"}
                   </span>
                 </div>
-                <div className="mt-0.5 tabular-nums text-[color:var(--color-text-secondary)]">{l.phoneE164}</div>
+                <div className="mt-0.5 tabular-nums text-[color:var(--color-text-secondary)]">
+                  {leadId(l.leadNumber)} · {l.phoneE164}
+                </div>
                 <ContactButtons phone={l.phoneE164} className="mt-2 grid grid-cols-2" />
               </li>
             ))}
@@ -58,9 +61,10 @@ export default async function BrandLeadsPage() {
 
           <div className="hidden lg:block">
             <Card flush>
-              <Table head={["Name", "Number", "Tapped Brand at", "Contact"]} caption="Brand Leads">
+              <Table head={["Lead ID", "Name", "Number", "Tapped Brand at", "Contact"]} caption="Brand Leads">
                 {leads.map((l) => (
                   <Row key={l.id}>
+                    <Cell className="whitespace-nowrap tabular-nums">{leadId(l.leadNumber)}</Cell>
                     <Cell>{l.name ?? "—"}</Cell>
                     <Cell className="whitespace-nowrap tabular-nums">{l.phoneE164}</Cell>
                     <Cell className="whitespace-nowrap">{l.qualifiedAt ? formatDateTime(l.qualifiedAt) : "—"}</Cell>

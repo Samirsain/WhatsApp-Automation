@@ -11,6 +11,7 @@ import {
   buttonClass,
 } from "@/components/ui";
 import { formatDate, formatDateTime } from "@/lib/format";
+import { leadId } from "@/lib/lead-id";
 import { prisma } from "@/lib/prisma";
 import { can } from "@/lib/rbac";
 import { relativeTime } from "@/lib/relative-time";
@@ -227,7 +228,7 @@ export default async function QualifiedPage({
                       {r.phoneE164}
                     </span>
                     <span className="text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">
-                      {r.name ?? "—"}
+                      {leadId(r.leadNumber)} · {r.name ?? "—"}
                     </span>
                   </div>
                 </Cell>

@@ -1,10 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { Fragment, useActionState, useEffect, useState } from "react";
 import { buttonClass, ErrorNote, inputClass } from "@/components/ui";
+import type { AlreadyMessaged } from "@/lib/brand/already-messaged";
 import { parseCsvRows, rowsToText } from "@/lib/brand/rules";
-import { sendBulk, type SendState } from "./actions";
+import { formatDate } from "@/lib/format";
+import { parsePhone } from "@/lib/phone";
+import { checkNumbers, sendBulk, type SendState } from "./actions";
 
 type RowInput = { name: string; number: string };
 const blank = (n: number): RowInput[] => Array.from({ length: n }, () => ({ name: "", number: "" }));
@@ -21,7 +24,38 @@ export function SendForm() {
     }
     return result;
   }, {});
+  // Warn before sending: numbers already messaged, and numbers typed twice.
+  const [already, setAlready] = useState<Record<string, AlreadyMessaged>>({});
+  const numbersKey = rows.map((r) => r.number.trim()).filter(Boolean).join("\n");
+  useEffect(() => {
+    if (numbersKey === "") return;
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      try {
+        const hits = await checkNumbers(numbersKey.split("\n"));
+        if (!cancelled) setAlready(Object.fromEntries(hits.map((h) => [h.e164, h])));
+      } catch {
+        // The check is a convenience; the send itself skips these numbers anyway.
+      }
+    }, 400);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [numbersKey]);
+
+  const seen = new Set<string>();
+  const notes = rows.map((r) => {
+    const p = parsePhone(r.number);
+    if (!p.ok) return null;
+    if (seen.has(p.e164)) return { kind: "duplicate" as const };
+    seen.add(p.e164);
+    const hit = already[p.e164];
+    return hit ? { kind: "already" as const, hit } : null;
+  });
   const filled = rows.filter((r) => r.number.trim() !== "").length;
+  const held = notes.filter(Boolean).length;
+  const toSend = filled - held;
 
   function update(i: number, key: keyof RowInput, value: string) {
     setRows((rs) => rs.map((r, j) => (j === i ? { ...r, [key]: value } : r)));
@@ -43,25 +77,37 @@ export function SendForm() {
         <span>Name</span>
         <span>Number</span>
       </div>
-      {rows.map((r, i) => (
-        <div key={i} className="grid grid-cols-[1fr_1fr] gap-2">
-          <input
-            aria-label={`Name ${i + 1}`}
-            className={inputClass}
-            placeholder={i === 0 ? "Rahul" : undefined}
-            value={r.name}
-            onChange={(e) => update(i, "name", e.target.value)}
-          />
-          <input
-            aria-label={`Number ${i + 1}`}
-            className={inputClass}
-            placeholder={i === 0 ? "9876543210" : undefined}
-            inputMode="tel"
-            value={r.number}
-            onChange={(e) => update(i, "number", e.target.value)}
-          />
-        </div>
-      ))}
+      {rows.map((r, i) => {
+        const note = notes[i];
+        return (
+          <Fragment key={i}>
+            <div className="grid grid-cols-[1fr_1fr] gap-2">
+              <input
+                aria-label={`Name ${i + 1}`}
+                className={inputClass}
+                placeholder={i === 0 ? "Rahul" : undefined}
+                value={r.name}
+                onChange={(e) => update(i, "name", e.target.value)}
+              />
+              <input
+                aria-label={`Number ${i + 1}`}
+                className={inputClass}
+                placeholder={i === 0 ? "9876543210" : undefined}
+                inputMode="tel"
+                value={r.number}
+                onChange={(e) => update(i, "number", e.target.value)}
+              />
+            </div>
+            {note && (
+              <p className="-mt-1.5 text-[length:var(--text-small)] text-[color:var(--color-status-error)]">
+                {note.kind === "already"
+                  ? `Already in system (${note.hit.leadId}), messaged ${formatDate(new Date(note.hit.lastSentAt))}. Will not be sent again.`
+                  : "Same number is already in this list. It will be sent once."}
+              </p>
+            )}
+          </Fragment>
+        );
+      })}
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
@@ -93,13 +139,25 @@ export function SendForm() {
           {state.rejected.map((r) => r.raw.split(",").at(-1)?.trim()).join(" · ")}
         </ErrorNote>
       )}
+      {state.alreadySent && state.alreadySent.length > 0 && (
+        <ErrorNote>
+          Not sent, already in system (messaged before):{" "}
+          {state.alreadySent.map((a) => `${a.name ? `${a.name} ` : ""}${a.e164} (${a.leadId})`).join(" · ")}
+        </ErrorNote>
+      )}
       {state.sent !== undefined && (
         <p
           role="status"
           className="rounded-[var(--radius-sm)] border border-[color:var(--color-border-default)] px-2.5 py-1.5"
         >
           Sent: <b>{state.sent}</b> · Failed: <b>{state.failed}</b> · Skipped (opted out / already tapped Brand):{" "}
-          <b>{state.skipped}</b>
+          <b>{state.skipped}</b> · Already in system: <b>{state.alreadySent?.length ?? 0}</b>
+          {state.duplicates ? (
+            <>
+              {" "}
+              · Duplicates in list: <b>{state.duplicates}</b>
+            </>
+          ) : null}
           {" — "}
           <Link href="/failed" className="underline">
             See Not Delivered
@@ -107,8 +165,13 @@ export function SendForm() {
         </p>
       )}
 
-      <button type="submit" disabled={pending || filled === 0} className={buttonClass.primary}>
-        {pending ? "Sending…" : `Send messages (${filled})`}
+      {held > 0 && (
+        <p role="status" className="text-[length:var(--text-small)] text-[color:var(--color-status-error)]">
+          {held} number{held === 1 ? "" : "s"} marked above will be skipped.
+        </p>
+      )}
+      <button type="submit" disabled={pending || toSend <= 0} className={buttonClass.primary}>
+        {pending ? "Sending…" : `Send messages (${toSend})`}
       </button>
     </form>
   );
