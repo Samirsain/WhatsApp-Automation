@@ -173,6 +173,8 @@ model BatchMember {
 
 model Customer {
   id                String         @id @default(uuid()) @db.Uuid
+  /// Short, human-readable lead ID ("L-0042"); src/lib/lead-id.ts. Never reused.
+  leadNumber        Int            @unique @default(autoincrement())
   name              String?
   phoneE164         String         @unique
   email             String?

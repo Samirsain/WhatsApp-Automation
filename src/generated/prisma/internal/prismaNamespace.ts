@@ -1624,6 +1624,7 @@ export type BatchMemberScalarFieldEnum = (typeof BatchMemberScalarFieldEnum)[key
 
 export const CustomerScalarFieldEnum = {
   id: 'id',
+  leadNumber: 'leadNumber',
   name: 'name',
   phoneE164: 'phoneE164',
   email: 'email',
