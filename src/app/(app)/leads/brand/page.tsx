@@ -1,4 +1,3 @@
-import { ContactButtons } from "@/components/contact-buttons";
 import { Card, Cell, EmptyState, LeadSteps, PageHeader, Row, Table, buttonClass } from "@/components/ui";
 import { formatDateTime } from "@/lib/format";
 import { leadId } from "@/lib/lead-id";
@@ -24,7 +23,6 @@ export default async function BrandLeadsPage() {
     <>
       <PageHeader
         title="Leads"
-        description="Tapped Brand and got the guide, but have not tapped Member yet. Follow up so they tap Member; that moves them to Final Leads by itself."
         actions={
           <a href="/api/brand-leads/export" className={buttonClass.secondary}>
             CSV download
@@ -54,23 +52,19 @@ export default async function BrandLeadsPage() {
                 <div className="mt-0.5 tabular-nums text-[color:var(--color-text-secondary)]">
                   {leadId(l.leadNumber)} · {l.phoneE164}
                 </div>
-                <ContactButtons phone={l.phoneE164} className="mt-2 grid grid-cols-2" />
               </li>
             ))}
           </ul>
 
           <div className="hidden lg:block">
             <Card flush>
-              <Table head={["Lead ID", "Name", "Number", "Tapped Brand at", "Contact"]} caption="Brand Leads">
+              <Table head={["Lead ID", "Name", "Number", "Tapped Brand at"]} caption="Brand Leads">
                 {leads.map((l) => (
                   <Row key={l.id}>
                     <Cell className="whitespace-nowrap tabular-nums">{leadId(l.leadNumber)}</Cell>
                     <Cell>{l.name ?? "—"}</Cell>
                     <Cell className="whitespace-nowrap tabular-nums">{l.phoneE164}</Cell>
                     <Cell className="whitespace-nowrap">{l.qualifiedAt ? formatDateTime(l.qualifiedAt) : "—"}</Cell>
-                    <Cell>
-                      <ContactButtons phone={l.phoneE164} className="flex" />
-                    </Cell>
                   </Row>
                 ))}
               </Table>

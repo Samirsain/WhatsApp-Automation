@@ -93,7 +93,10 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           <MobileNav items={items} counts={counts} footer={footer} />
           <Image src="/logo.png" alt="" width={28} height={28} className="rounded-full" priority />
         </header>
-        <main className="min-w-0 flex-1 px-4 py-4 md:px-8 md:py-6">{children}</main>
+        <main className="min-w-0 flex-1 px-4 py-4 md:px-8 md:py-6">
+          {/* Wide screens: tables stay scannable instead of stretching edge to edge. */}
+          <div className="mx-auto w-full max-w-6xl">{children}</div>
+        </main>
       </div>
     </div>
   );

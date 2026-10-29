@@ -1,6 +1,5 @@
-import { ContactButtons } from "@/components/contact-buttons";
 import { Card, Cell, EmptyState, FilterChip, LeadSteps, PageHeader, Row, Table, buttonClass } from "@/components/ui";
-import { LEAD_STAGES, parseStage, STAGE_HINTS, STAGE_LABELS } from "@/lib/brand/stages";
+import { parseStage, STAGE_LABELS } from "@/lib/brand/stages";
 import { formatDateTime } from "@/lib/format";
 import { leadId } from "@/lib/lead-id";
 import { prisma } from "@/lib/prisma";
@@ -31,7 +30,6 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
     <>
       <PageHeader
         title="Leads"
-        description="People who tapped Member on the guide and got the thank-you automatically. These are the real leads: contact them and set their status."
         actions={
           <>
             <PrintButton />
@@ -49,27 +47,6 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
           <FilterChip key={s} href={`/leads?stage=${s}`} label={STAGE_LABELS[s]} count={countOf(s)} active={stage === s} />
         ))}
       </div>
-      {stage && (
-        <p className="mb-2 text-[color:var(--color-text-secondary)] print:hidden">
-          <span className="font-semibold text-[color:var(--color-text-primary)]">{STAGE_LABELS[stage]}:</span>{" "}
-          {STAGE_HINTS[stage].meaning}.{" "}
-          <span className="font-semibold text-[color:var(--color-action-primary-hover)]">Next: {STAGE_HINTS[stage].next}.</span>
-        </p>
-      )}
-      <details className="mb-3 text-[length:var(--text-small)] print:hidden">
-        <summary className="cursor-pointer font-medium text-[color:var(--color-text-secondary)]">What do the statuses mean?</summary>
-        <dl className="mt-2 grid gap-x-4 gap-y-1.5 rounded-[var(--radius-md)] border border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] p-3 sm:grid-cols-[auto_1fr]">
-          {LEAD_STAGES.map((s) => (
-            <div key={s} className="contents">
-              <dt className="font-semibold">{STAGE_LABELS[s]}</dt>
-              <dd className="mb-1 sm:mb-0">
-                {STAGE_HINTS[s].meaning}.{" "}
-                <span className="text-[color:var(--color-text-secondary)]">Next: {STAGE_HINTS[s].next}.</span>
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </details>
       {stage && <p className="mb-2 hidden font-semibold print:block">Status: {STAGE_LABELS[stage]}</p>}
 
       {leads.length === 0 ? (
@@ -102,7 +79,6 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
                   <div className="mt-0.5 tabular-nums text-[color:var(--color-text-secondary)]">
                     {leadId(l.leadNumber)} · {l.phoneE164}
                   </div>
-                  <ContactButtons phone={l.phoneE164} className="mt-2 grid grid-cols-2" />
                   <div className="mt-2">
                     <StageSelect id={l.id} stage={l.leadStage} className="w-full" />
                   </div>
@@ -113,7 +89,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
 
           <div className="hidden lg:block print:block">
             <Card flush>
-              <Table head={["Lead ID", "Name", "Number", "Tapped Member at", <span key="c" className="print:hidden">Contact</span>, "Status"]} caption="Final Leads">
+              <Table head={["Lead ID", "Name", "Number", "Tapped Member at", "Status"]} caption="Final Leads">
                 {leads.map((l) => {
                   return (
                     <Row key={l.id}>
@@ -121,9 +97,6 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
                       <Cell>{l.name ?? "—"}</Cell>
                       <Cell className="whitespace-nowrap tabular-nums">{l.phoneE164}</Cell>
                       <Cell className="whitespace-nowrap">{l.qualifiedAt ? formatDateTime(l.qualifiedAt) : "—"}</Cell>
-                      <Cell className="print:hidden">
-                        <ContactButtons phone={l.phoneE164} className="flex" />
-                      </Cell>
                       <Cell>
                         <StageSelect id={l.id} stage={l.leadStage} />
                         <span className="hidden print:inline">{STAGE_LABELS[l.leadStage]}</span>

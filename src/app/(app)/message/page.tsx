@@ -127,8 +127,9 @@ export default async function MessagePage({ searchParams }: { searchParams: Prom
 
   return (
     // Phones: pinned between the app's top bar (53px) and the bottom safe area.
-    // edge to edge like a messaging app. Desktop: a framed two-pane panel.
-    <div className="grid grid-rows-[minmax(0,1fr)] overflow-hidden bg-[color:var(--color-surface)] max-md:fixed max-md:inset-x-0 max-md:top-[53px] max-md:bottom-[env(safe-area-inset-bottom)] max-md:z-10 md:h-[calc(100dvh-2rem)] md:min-h-[420px] md:grid-cols-[minmax(260px,340px)_1fr] md:rounded-[var(--radius-lg)] md:border md:border-[color:var(--color-border-default)]">
+    // edge to edge like a messaging app. Desktop: a framed two-pane panel that
+    // fills main exactly (3rem = main's md:py-6), so the page itself never scrolls.
+    <div className="grid grid-rows-[minmax(0,1fr)] overflow-hidden bg-[color:var(--color-surface)] max-md:fixed max-md:inset-x-0 max-md:top-[53px] max-md:bottom-[env(safe-area-inset-bottom)] max-md:z-10 md:h-[calc(100dvh-3rem)] md:min-h-[420px] md:grid-cols-[minmax(260px,340px)_1fr] md:rounded-[var(--radius-lg)] md:border md:border-[color:var(--color-border-default)]">
       <AutoRefresh />
       {/* Chat list. Phones show either the list or one chat. */}
       <aside
