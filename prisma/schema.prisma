@@ -37,9 +37,8 @@ enum CustomerStatus {
 /// Where a BRAND lead stands with the team (src/lib/brand/stages.ts).
 enum LeadStage {
   NEW
-  INTERESTED
-  ONBOARDING
   NOT_INTERESTED
+  MEMBER_ADDED
 }
 
 enum BatchStatus {
@@ -181,6 +180,8 @@ model Customer {
   location          String?
   status            CustomerStatus @default(NOT_STARTED)
   leadStage         LeadStage      @default(NEW)
+  /// Hidden from the Chats list until they write again (src/app/(app)/message).
+  chatArchivedAt    DateTime?
   batchId           String?        @db.Uuid
   optedOutAt        DateTime?
   lastInteractionAt DateTime?

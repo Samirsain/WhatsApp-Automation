@@ -47,6 +47,11 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
+
+  // Brand Leads moved under the merged Leads button; old bookmarks still land.
+  async redirects() {
+    return [{ source: "/brand-leads", destination: "/leads/brand", permanent: true }];
+  },
 };
 
 export default nextConfig;

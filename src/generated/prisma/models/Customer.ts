@@ -43,6 +43,7 @@ export type CustomerMinAggregateOutputType = {
   location: string | null
   status: $Enums.CustomerStatus | null
   leadStage: $Enums.LeadStage | null
+  chatArchivedAt: Date | null
   batchId: string | null
   optedOutAt: Date | null
   lastInteractionAt: Date | null
@@ -61,6 +62,7 @@ export type CustomerMaxAggregateOutputType = {
   location: string | null
   status: $Enums.CustomerStatus | null
   leadStage: $Enums.LeadStage | null
+  chatArchivedAt: Date | null
   batchId: string | null
   optedOutAt: Date | null
   lastInteractionAt: Date | null
@@ -79,6 +81,7 @@ export type CustomerCountAggregateOutputType = {
   location: number
   status: number
   leadStage: number
+  chatArchivedAt: number
   batchId: number
   optedOutAt: number
   lastInteractionAt: number
@@ -107,6 +110,7 @@ export type CustomerMinAggregateInputType = {
   location?: true
   status?: true
   leadStage?: true
+  chatArchivedAt?: true
   batchId?: true
   optedOutAt?: true
   lastInteractionAt?: true
@@ -125,6 +129,7 @@ export type CustomerMaxAggregateInputType = {
   location?: true
   status?: true
   leadStage?: true
+  chatArchivedAt?: true
   batchId?: true
   optedOutAt?: true
   lastInteractionAt?: true
@@ -143,6 +148,7 @@ export type CustomerCountAggregateInputType = {
   location?: true
   status?: true
   leadStage?: true
+  chatArchivedAt?: true
   batchId?: true
   optedOutAt?: true
   lastInteractionAt?: true
@@ -248,6 +254,7 @@ export type CustomerGroupByOutputType = {
   location: string | null
   status: $Enums.CustomerStatus
   leadStage: $Enums.LeadStage
+  chatArchivedAt: Date | null
   batchId: string | null
   optedOutAt: Date | null
   lastInteractionAt: Date | null
@@ -289,6 +296,7 @@ export type CustomerWhereInput = {
   location?: Prisma.StringNullableFilter<"Customer"> | string | null
   status?: Prisma.EnumCustomerStatusFilter<"Customer"> | $Enums.CustomerStatus
   leadStage?: Prisma.EnumLeadStageFilter<"Customer"> | $Enums.LeadStage
+  chatArchivedAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
   batchId?: Prisma.UuidNullableFilter<"Customer"> | string | null
   optedOutAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
   lastInteractionAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
@@ -314,6 +322,7 @@ export type CustomerOrderByWithRelationInput = {
   location?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   leadStage?: Prisma.SortOrder
+  chatArchivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   batchId?: Prisma.SortOrderInput | Prisma.SortOrder
   optedOutAt?: Prisma.SortOrderInput | Prisma.SortOrder
   lastInteractionAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -342,6 +351,7 @@ export type CustomerWhereUniqueInput = Prisma.AtLeast<{
   location?: Prisma.StringNullableFilter<"Customer"> | string | null
   status?: Prisma.EnumCustomerStatusFilter<"Customer"> | $Enums.CustomerStatus
   leadStage?: Prisma.EnumLeadStageFilter<"Customer"> | $Enums.LeadStage
+  chatArchivedAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
   batchId?: Prisma.UuidNullableFilter<"Customer"> | string | null
   optedOutAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
   lastInteractionAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
@@ -367,6 +377,7 @@ export type CustomerOrderByWithAggregationInput = {
   location?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   leadStage?: Prisma.SortOrder
+  chatArchivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   batchId?: Prisma.SortOrderInput | Prisma.SortOrder
   optedOutAt?: Prisma.SortOrderInput | Prisma.SortOrder
   lastInteractionAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -393,6 +404,7 @@ export type CustomerScalarWhereWithAggregatesInput = {
   location?: Prisma.StringNullableWithAggregatesFilter<"Customer"> | string | null
   status?: Prisma.EnumCustomerStatusWithAggregatesFilter<"Customer"> | $Enums.CustomerStatus
   leadStage?: Prisma.EnumLeadStageWithAggregatesFilter<"Customer"> | $Enums.LeadStage
+  chatArchivedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Customer"> | Date | string | null
   batchId?: Prisma.UuidNullableWithAggregatesFilter<"Customer"> | string | null
   optedOutAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Customer"> | Date | string | null
   lastInteractionAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Customer"> | Date | string | null
@@ -411,6 +423,7 @@ export type CustomerCreateInput = {
   location?: string | null
   status?: $Enums.CustomerStatus
   leadStage?: $Enums.LeadStage
+  chatArchivedAt?: Date | string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
   qualifiedAt?: Date | string | null
@@ -435,6 +448,7 @@ export type CustomerUncheckedCreateInput = {
   location?: string | null
   status?: $Enums.CustomerStatus
   leadStage?: $Enums.LeadStage
+  chatArchivedAt?: Date | string | null
   batchId?: string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
@@ -458,6 +472,7 @@ export type CustomerUpdateInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
+  chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -482,6 +497,7 @@ export type CustomerUncheckedUpdateInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
+  chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   batchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -506,6 +522,7 @@ export type CustomerCreateManyInput = {
   location?: string | null
   status?: $Enums.CustomerStatus
   leadStage?: $Enums.LeadStage
+  chatArchivedAt?: Date | string | null
   batchId?: string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
@@ -523,6 +540,7 @@ export type CustomerUpdateManyMutationInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
+  chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -540,6 +558,7 @@ export type CustomerUncheckedUpdateManyInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
+  chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   batchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -573,6 +592,7 @@ export type CustomerCountOrderByAggregateInput = {
   location?: Prisma.SortOrder
   status?: Prisma.SortOrder
   leadStage?: Prisma.SortOrder
+  chatArchivedAt?: Prisma.SortOrder
   batchId?: Prisma.SortOrder
   optedOutAt?: Prisma.SortOrder
   lastInteractionAt?: Prisma.SortOrder
@@ -595,6 +615,7 @@ export type CustomerMaxOrderByAggregateInput = {
   location?: Prisma.SortOrder
   status?: Prisma.SortOrder
   leadStage?: Prisma.SortOrder
+  chatArchivedAt?: Prisma.SortOrder
   batchId?: Prisma.SortOrder
   optedOutAt?: Prisma.SortOrder
   lastInteractionAt?: Prisma.SortOrder
@@ -613,6 +634,7 @@ export type CustomerMinOrderByAggregateInput = {
   location?: Prisma.SortOrder
   status?: Prisma.SortOrder
   leadStage?: Prisma.SortOrder
+  chatArchivedAt?: Prisma.SortOrder
   batchId?: Prisma.SortOrder
   optedOutAt?: Prisma.SortOrder
   lastInteractionAt?: Prisma.SortOrder
@@ -776,6 +798,7 @@ export type CustomerCreateWithoutBatchInput = {
   location?: string | null
   status?: $Enums.CustomerStatus
   leadStage?: $Enums.LeadStage
+  chatArchivedAt?: Date | string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
   qualifiedAt?: Date | string | null
@@ -799,6 +822,7 @@ export type CustomerUncheckedCreateWithoutBatchInput = {
   location?: string | null
   status?: $Enums.CustomerStatus
   leadStage?: $Enums.LeadStage
+  chatArchivedAt?: Date | string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
   qualifiedAt?: Date | string | null
@@ -851,6 +875,7 @@ export type CustomerScalarWhereInput = {
   location?: Prisma.StringNullableFilter<"Customer"> | string | null
   status?: Prisma.EnumCustomerStatusFilter<"Customer"> | $Enums.CustomerStatus
   leadStage?: Prisma.EnumLeadStageFilter<"Customer"> | $Enums.LeadStage
+  chatArchivedAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
   batchId?: Prisma.UuidNullableFilter<"Customer"> | string | null
   optedOutAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
   lastInteractionAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
@@ -869,6 +894,7 @@ export type CustomerCreateWithoutBatchMembersInput = {
   location?: string | null
   status?: $Enums.CustomerStatus
   leadStage?: $Enums.LeadStage
+  chatArchivedAt?: Date | string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
   qualifiedAt?: Date | string | null
@@ -892,6 +918,7 @@ export type CustomerUncheckedCreateWithoutBatchMembersInput = {
   location?: string | null
   status?: $Enums.CustomerStatus
   leadStage?: $Enums.LeadStage
+  chatArchivedAt?: Date | string | null
   batchId?: string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
@@ -930,6 +957,7 @@ export type CustomerUpdateWithoutBatchMembersInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
+  chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -953,6 +981,7 @@ export type CustomerUncheckedUpdateWithoutBatchMembersInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
+  chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   batchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -976,6 +1005,7 @@ export type CustomerCreateWithoutConversationsInput = {
   location?: string | null
   status?: $Enums.CustomerStatus
   leadStage?: $Enums.LeadStage
+  chatArchivedAt?: Date | string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
   qualifiedAt?: Date | string | null
@@ -999,6 +1029,7 @@ export type CustomerUncheckedCreateWithoutConversationsInput = {
   location?: string | null
   status?: $Enums.CustomerStatus
   leadStage?: $Enums.LeadStage
+  chatArchivedAt?: Date | string | null
   batchId?: string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
@@ -1037,6 +1068,7 @@ export type CustomerUpdateWithoutConversationsInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
+  chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1060,6 +1092,7 @@ export type CustomerUncheckedUpdateWithoutConversationsInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
+  chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   batchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1083,6 +1116,7 @@ export type CustomerCreateWithoutMessagesInput = {
   location?: string | null
   status?: $Enums.CustomerStatus
   leadStage?: $Enums.LeadStage
+  chatArchivedAt?: Date | string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
   qualifiedAt?: Date | string | null
@@ -1106,6 +1140,7 @@ export type CustomerUncheckedCreateWithoutMessagesInput = {
   location?: string | null
   status?: $Enums.CustomerStatus
   leadStage?: $Enums.LeadStage
+  chatArchivedAt?: Date | string | null
   batchId?: string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
@@ -1144,6 +1179,7 @@ export type CustomerUpdateWithoutMessagesInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
+  chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1167,6 +1203,7 @@ export type CustomerUncheckedUpdateWithoutMessagesInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
+  chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   batchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1190,6 +1227,7 @@ export type CustomerCreateWithoutRunsInput = {
   location?: string | null
   status?: $Enums.CustomerStatus
   leadStage?: $Enums.LeadStage
+  chatArchivedAt?: Date | string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
   qualifiedAt?: Date | string | null
@@ -1213,6 +1251,7 @@ export type CustomerUncheckedCreateWithoutRunsInput = {
   location?: string | null
   status?: $Enums.CustomerStatus
   leadStage?: $Enums.LeadStage
+  chatArchivedAt?: Date | string | null
   batchId?: string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
@@ -1251,6 +1290,7 @@ export type CustomerUpdateWithoutRunsInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
+  chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1274,6 +1314,7 @@ export type CustomerUncheckedUpdateWithoutRunsInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
+  chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   batchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1297,6 +1338,7 @@ export type CustomerCreateWithoutResponsesInput = {
   location?: string | null
   status?: $Enums.CustomerStatus
   leadStage?: $Enums.LeadStage
+  chatArchivedAt?: Date | string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
   qualifiedAt?: Date | string | null
@@ -1320,6 +1362,7 @@ export type CustomerUncheckedCreateWithoutResponsesInput = {
   location?: string | null
   status?: $Enums.CustomerStatus
   leadStage?: $Enums.LeadStage
+  chatArchivedAt?: Date | string | null
   batchId?: string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
@@ -1358,6 +1401,7 @@ export type CustomerUpdateWithoutResponsesInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
+  chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1381,6 +1425,7 @@ export type CustomerUncheckedUpdateWithoutResponsesInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
+  chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   batchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1404,6 +1449,7 @@ export type CustomerCreateWithoutActivityLogsInput = {
   location?: string | null
   status?: $Enums.CustomerStatus
   leadStage?: $Enums.LeadStage
+  chatArchivedAt?: Date | string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
   qualifiedAt?: Date | string | null
@@ -1427,6 +1473,7 @@ export type CustomerUncheckedCreateWithoutActivityLogsInput = {
   location?: string | null
   status?: $Enums.CustomerStatus
   leadStage?: $Enums.LeadStage
+  chatArchivedAt?: Date | string | null
   batchId?: string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
@@ -1465,6 +1512,7 @@ export type CustomerUpdateWithoutActivityLogsInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
+  chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1488,6 +1536,7 @@ export type CustomerUncheckedUpdateWithoutActivityLogsInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
+  chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   batchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1511,6 +1560,7 @@ export type CustomerCreateManyBatchInput = {
   location?: string | null
   status?: $Enums.CustomerStatus
   leadStage?: $Enums.LeadStage
+  chatArchivedAt?: Date | string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
   qualifiedAt?: Date | string | null
@@ -1527,6 +1577,7 @@ export type CustomerUpdateWithoutBatchInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
+  chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1550,6 +1601,7 @@ export type CustomerUncheckedUpdateWithoutBatchInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
+  chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1573,6 +1625,7 @@ export type CustomerUncheckedUpdateManyWithoutBatchInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCustomerStatusFieldUpdateOperationsInput | $Enums.CustomerStatus
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
+  chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1666,6 +1719,7 @@ export type CustomerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   location?: boolean
   status?: boolean
   leadStage?: boolean
+  chatArchivedAt?: boolean
   batchId?: boolean
   optedOutAt?: boolean
   lastInteractionAt?: boolean
@@ -1692,6 +1746,7 @@ export type CustomerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   location?: boolean
   status?: boolean
   leadStage?: boolean
+  chatArchivedAt?: boolean
   batchId?: boolean
   optedOutAt?: boolean
   lastInteractionAt?: boolean
@@ -1711,6 +1766,7 @@ export type CustomerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   location?: boolean
   status?: boolean
   leadStage?: boolean
+  chatArchivedAt?: boolean
   batchId?: boolean
   optedOutAt?: boolean
   lastInteractionAt?: boolean
@@ -1730,6 +1786,7 @@ export type CustomerSelectScalar = {
   location?: boolean
   status?: boolean
   leadStage?: boolean
+  chatArchivedAt?: boolean
   batchId?: boolean
   optedOutAt?: boolean
   lastInteractionAt?: boolean
@@ -1739,7 +1796,7 @@ export type CustomerSelectScalar = {
   updatedAt?: boolean
 }
 
-export type CustomerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "leadNumber" | "name" | "phoneE164" | "email" | "location" | "status" | "leadStage" | "batchId" | "optedOutAt" | "lastInteractionAt" | "qualifiedAt" | "exportedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["customer"]>
+export type CustomerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "leadNumber" | "name" | "phoneE164" | "email" | "location" | "status" | "leadStage" | "chatArchivedAt" | "batchId" | "optedOutAt" | "lastInteractionAt" | "qualifiedAt" | "exportedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["customer"]>
 export type CustomerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   batch?: boolean | Prisma.Customer$batchArgs<ExtArgs>
   batchMembers?: boolean | Prisma.Customer$batchMembersArgs<ExtArgs>
@@ -1780,6 +1837,10 @@ export type $CustomerPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     location: string | null
     status: $Enums.CustomerStatus
     leadStage: $Enums.LeadStage
+    /**
+     * Hidden from the Chats list until they write again (src/app/(app)/message).
+     */
+    chatArchivedAt: Date | null
     batchId: string | null
     optedOutAt: Date | null
     lastInteractionAt: Date | null
@@ -2225,6 +2286,7 @@ export interface CustomerFieldRefs {
   readonly location: Prisma.FieldRef<"Customer", 'String'>
   readonly status: Prisma.FieldRef<"Customer", 'CustomerStatus'>
   readonly leadStage: Prisma.FieldRef<"Customer", 'LeadStage'>
+  readonly chatArchivedAt: Prisma.FieldRef<"Customer", 'DateTime'>
   readonly batchId: Prisma.FieldRef<"Customer", 'String'>
   readonly optedOutAt: Prisma.FieldRef<"Customer", 'DateTime'>
   readonly lastInteractionAt: Prisma.FieldRef<"Customer", 'DateTime'>

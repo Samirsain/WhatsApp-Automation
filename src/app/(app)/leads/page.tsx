@@ -11,11 +11,8 @@ export const dynamic = "force-dynamic";
 
 export default async function LeadsPage({ searchParams }: { searchParams: Promise<{ stage?: string }> }) {
   await requirePermission("qualified:read");
-  // No filter = the to-do list: only NEW. Changing a lead's status moves it to that
-  // status's tab, so the team never works the same lead twice. "all" shows everyone.
-  const raw = (await searchParams).stage;
-  const showAll = raw === "all";
-  const stage = showAll ? null : (parseStage(raw) ?? "NEW");
+  // No filter = All. Not interested and Member added each have their own tab.
+  const stage = parseStage((await searchParams).stage);
 
   const [leads, counts, brandCount] = await Promise.all([
     prisma.customer.findMany({
@@ -33,8 +30,8 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
   return (
     <>
       <PageHeader
-        title="Final Leads"
-        description="People who tapped Member on the guide and got the thank-you automatically. These are the real leads: contact them and set a status, and the lead moves to that status's tab."
+        title="Leads"
+        description="People who tapped Member on the guide and got the thank-you automatically. These are the real leads: contact them and set their status."
         actions={
           <>
             <PrintButton />
@@ -47,16 +44,10 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
       <LeadSteps current="final" brand={brandCount} final={total} />
       {/* Phones: one row of chips that scrolls sideways instead of wrapping. */}
       <div className="-mx-4 mb-3 flex gap-2 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-wrap md:overflow-visible md:px-0 print:hidden">
-        {LEAD_STAGES.map((s) => (
-          <FilterChip
-            key={s}
-            href={s === "NEW" ? "/leads" : `/leads?stage=${s}`}
-            label={STAGE_LABELS[s]}
-            count={countOf(s)}
-            active={stage === s}
-          />
+        <FilterChip href="/leads" label="All" count={total} active={!stage} />
+        {(["NOT_INTERESTED", "MEMBER_ADDED"] as const).map((s) => (
+          <FilterChip key={s} href={`/leads?stage=${s}`} label={STAGE_LABELS[s]} count={countOf(s)} active={stage === s} />
         ))}
-        <FilterChip href="/leads?stage=all" label="All" count={total} active={showAll} />
       </div>
       {stage && (
         <p className="mb-2 text-[color:var(--color-text-secondary)] print:hidden">
@@ -86,8 +77,8 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
           <EmptyState
             title={stage ? `No ${STAGE_LABELS[stage].toLowerCase()} leads` : "No leads yet"}
             description={
-              stage === "NEW"
-                ? "New Member taps show up here. Change a lead's status and it moves to that tab."
+              stage
+                ? `Set a lead's status to ${STAGE_LABELS[stage]} and it shows up here.`
                 : "People who tap Member on the guide will show up here."
             }
           />

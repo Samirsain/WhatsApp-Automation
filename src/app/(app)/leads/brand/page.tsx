@@ -23,7 +23,7 @@ export default async function BrandLeadsPage() {
   return (
     <>
       <PageHeader
-        title="Brand Leads"
+        title="Leads"
         description="Tapped Brand and got the guide, but have not tapped Member yet. Follow up so they tap Member; that moves them to Final Leads by itself."
         actions={
           <a href="/api/brand-leads/export" className={buttonClass.secondary}>

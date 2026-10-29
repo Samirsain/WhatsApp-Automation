@@ -4,7 +4,15 @@ import { prisma } from "@/lib/prisma";
 /** Meta's customer-service window: free-form text/media only within 24h of the customer's last message. */
 export const WINDOW_MS = 24 * 60 * 60_000;
 
-export type OpenChat = { customerId: string; phoneE164: string; name: string | null; lastText: string | null; lastAt: Date };
+export type OpenChat = {
+  customerId: string;
+  phoneE164: string;
+  name: string | null;
+  lastText: string | null;
+  lastAt: Date;
+  /** Archived and not written since; a new message from them brings the chat back. */
+  archived: boolean;
+};
 
 /**
  * Everyone who ever wrote in, newest first, one row each. Closed and opted-out
@@ -15,7 +23,7 @@ export async function allChats(): Promise<OpenChat[]> {
     where: { direction: "INBOUND" },
     orderBy: { createdAt: "desc" },
     distinct: ["customerId"],
-    select: { body: true, type: true, createdAt: true, customer: { select: { id: true, phoneE164: true, name: true } } },
+    select: { body: true, type: true, createdAt: true, customer: { select: { id: true, phoneE164: true, name: true, chatArchivedAt: true } } },
   });
   return rows.map((m) => ({
     customerId: m.customer.id,
@@ -23,6 +31,7 @@ export async function allChats(): Promise<OpenChat[]> {
     name: m.customer.name,
     lastText: m.body || (m.type === "MEDIA" ? "📎 Media" : null),
     lastAt: m.createdAt,
+    archived: m.customer.chatArchivedAt !== null && m.customer.chatArchivedAt >= m.createdAt,
   }));
 }
 

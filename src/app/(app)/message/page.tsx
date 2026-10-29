@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { relativeTime } from "@/lib/relative-time";
 import { requirePermission } from "@/lib/session";
 import { allChats, chatMessages, WINDOW_MS } from "@/lib/whatsapp/window";
+import { setChatArchived } from "./actions";
 import { AutoRefresh } from "./auto-refresh";
 import { Composer, SendGuideButton } from "./composer";
 
@@ -100,15 +101,20 @@ function Body({ m }: { m: ChatMessage }) {
   );
 }
 
-export default async function MessagePage({ searchParams }: { searchParams: Promise<{ c?: string }> }) {
+export default async function MessagePage({ searchParams }: { searchParams: Promise<{ c?: string; archived?: string }> }) {
   await requirePermission("batch:manage");
-  const selectedId = (await searchParams).c;
+  const params = await searchParams;
+  const selectedId = params.c;
+  const showArchived = params.archived === "1";
   const now = new Date();
-  // Every chat stays listed; closed ones can be read, just not written to.
-  const chats = await allChats();
+  // Every chat stays listed; closed ones can be read, just not written to. Archived ones sit behind "Archived".
+  const all = await allChats();
+  const chats = all.filter((c) => c.archived === showArchived);
+  const archivedCount = showArchived ? chats.length : all.length - chats.length;
   const isOpen = (c: { lastAt: Date }) => now.getTime() - c.lastAt.getTime() < WINDOW_MS;
 
-  const open = chats.find((c) => c.customerId === selectedId && isOpen(c));
+  const open = all.find((c) => c.customerId === selectedId && isOpen(c));
+  const listed = all.find((c) => c.customerId === selectedId);
   // A chat whose window closed can still be read, just not written to.
   const customer =
     open ??
@@ -131,22 +137,32 @@ export default async function MessagePage({ searchParams }: { searchParams: Prom
           customer && "hidden md:flex",
         )}
       >
-        <div className="border-b border-[color:var(--color-border-default)] px-4 py-3">
-          <h1 className="text-[length:var(--text-h2)] font-semibold">Chats</h1>
-          <p className="text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">
-            Everyone who has written to you
-          </p>
+        <div className="flex items-start justify-between gap-2 border-b border-[color:var(--color-border-default)] px-4 py-3">
+          <div>
+            <h1 className="text-[length:var(--text-h2)] font-semibold">{showArchived ? "Archived" : "Chats"}</h1>
+            <p className="text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">
+              {showArchived ? "Back in Chats as soon as they write again" : "Everyone who has written to you"}
+            </p>
+          </div>
+          {(showArchived || archivedCount > 0) && (
+            <Link
+              href={showArchived ? "/message" : "/message?archived=1"}
+              className="flex min-h-11 shrink-0 items-center rounded-full border border-[color:var(--color-border-default)] px-3 text-[length:var(--text-small)] font-semibold hover:bg-[color:var(--color-surface-muted)]"
+            >
+              {showArchived ? "← Chats" : `Archived (${archivedCount})`}
+            </Link>
+          )}
         </div>
         <ul className="min-h-0 flex-1 overflow-y-auto">
           {chats.length === 0 && (
             <li className="px-4 py-8 text-center text-[color:var(--color-text-secondary)]">
-              No chats yet. A number shows up here as soon as it messages you.
+              {showArchived ? "No archived chats." : "No chats yet. A number shows up here as soon as it messages you."}
             </li>
           )}
           {chats.map((c) => (
             <li key={c.customerId}>
               <Link
-                href={`/message?c=${c.customerId}`}
+                href={`/message?c=${c.customerId}${showArchived ? "&archived=1" : ""}`}
                 aria-current={c.customerId === customer?.customerId ? "page" : undefined}
                 className={cx(
                   "flex items-center gap-3 border-b border-[color:var(--color-border-default)] px-4 py-2.5",
@@ -182,7 +198,7 @@ export default async function MessagePage({ searchParams }: { searchParams: Prom
         <section className="flex min-h-0 flex-col">
           <header className="flex items-center gap-2 border-b border-[color:var(--color-border-default)] px-2 py-2 md:gap-3 md:px-3">
             <Link
-              href="/message"
+              href={showArchived ? "/message?archived=1" : "/message"}
               className="flex h-11 w-9 shrink-0 items-center justify-center text-xl md:hidden"
               aria-label="Back to chats"
             >
@@ -198,6 +214,20 @@ export default async function MessagePage({ searchParams }: { searchParams: Prom
               </div>
             </div>
             {open && <SendGuideButton key={customer.customerId} customerId={customer.customerId} />}
+            {listed && (
+              <form action={setChatArchived.bind(null, listed.customerId, !listed.archived)} className="shrink-0">
+                <button
+                  type="submit"
+                  className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border border-[color:var(--color-border-default)] px-3 font-semibold hover:bg-[color:var(--color-surface-muted)] max-md:px-0"
+                >
+                  <svg aria-hidden width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 4h18v4H3zM5 8v12h14V8M10 12h4" />
+                  </svg>
+                  {/* Phones: icon only, so the name keeps its room. */}
+                  <span className="max-md:sr-only">{listed.archived ? "Unarchive" : "Archive"}</span>
+                </button>
+              </form>
+            )}
           </header>
 
           {/* column-reverse keeps the view pinned to the newest message without JS */}

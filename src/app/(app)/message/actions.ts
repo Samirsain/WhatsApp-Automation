@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { logActivity } from "@/lib/activity";
 import { recordAndSend, sendBrandGuide } from "@/lib/brand/send";
@@ -88,6 +89,15 @@ export async function sendDirect(_prev: DirectState, formData: FormData): Promis
   });
   revalidatePath("/message");
   return result.ok ? { sentTo: to } : { error: result.error ?? "Send failed." };
+}
+
+/** Hides a chat from the list until they write again; nothing is deleted. */
+export async function setChatArchived(customerId: string, archived: boolean): Promise<void> {
+  await assertPermission("batch:manage");
+  const id = z.uuid().parse(customerId);
+  await prisma.customer.update({ where: { id }, data: { chatArchivedAt: archived ? new Date() : null } });
+  revalidatePath("/message");
+  redirect(archived ? "/message" : `/message?c=${id}`);
 }
 
 /**

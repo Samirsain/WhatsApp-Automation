@@ -39,9 +39,8 @@ export type CustomerStatus = (typeof CustomerStatus)[keyof typeof CustomerStatus
 
 export const LeadStage = {
   NEW: 'NEW',
-  INTERESTED: 'INTERESTED',
-  ONBOARDING: 'ONBOARDING',
-  NOT_INTERESTED: 'NOT_INTERESTED'
+  NOT_INTERESTED: 'NOT_INTERESTED',
+  MEMBER_ADDED: 'MEMBER_ADDED'
 } as const
 
 export type LeadStage = (typeof LeadStage)[keyof typeof LeadStage]

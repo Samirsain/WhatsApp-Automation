@@ -41,7 +41,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     else if (m.deliveryStatus !== "QUEUED" && m.customer.qualifiedAt === null) noReply++;
   }
 
-  const counts = { "/failed": notDelivered, "/no-reply": noReply, "/brand-leads": brandLeads, "/leads": finalLeads };
+  const counts = { "/failed": notDelivered, "/no-reply": noReply, "/leads": brandLeads + finalLeads };
 
   async function signOutAction() {
     "use server";

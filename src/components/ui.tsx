@@ -58,7 +58,7 @@ export function Wordmark({ className }: { className?: string }) {
  */
 export function LeadSteps({ current, brand, final }: { current: "brand" | "final"; brand: number; final: number }) {
   const steps = [
-    { key: "brand", href: "/brand-leads", n: 1, title: "Brand tapped", note: "Guide sent, not a member yet", count: brand },
+    { key: "brand", href: "/leads/brand", n: 1, title: "Brand tapped", note: "Guide sent, not a member yet", count: brand },
     { key: "final", href: "/leads", n: 2, title: "Member tapped", note: "Final Lead: call them", count: final },
   ] as const;
   return (
