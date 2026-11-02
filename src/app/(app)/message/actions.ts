@@ -101,6 +101,48 @@ export async function setChatArchived(customerId: string, archived: boolean): Pr
 }
 
 /**
+ * Block stops the funnel for good: pending steps and retries are dropped,
+ * journeys stop, and optedOutAt (checked by every send path) is set. Unblock
+ * clears optedOutAt only if the block set it, so a customer's own opt-out stays.
+ */
+export async function setBlocked(customerId: string, blocked: boolean): Promise<void> {
+  const user = await assertPermission("batch:manage");
+  const id = z.uuid().parse(customerId);
+  const now = new Date();
+  const c = await prisma.customer.findUniqueOrThrow({ where: { id }, select: { blockedAt: true, optedOutAt: true } });
+  if (blocked === (c.blockedAt !== null)) return;
+
+  if (blocked) {
+    await prisma.$transaction([
+      prisma.customer.update({ where: { id }, data: { blockedAt: now, optedOutAt: c.optedOutAt ?? now } }),
+      prisma.message.updateMany({
+        where: { customerId: id, OR: [{ followUpAt: { not: null } }, { retryDueAt: { not: null } }] },
+        data: { followUpAt: null, retryDueAt: null },
+      }),
+      prisma.automationRun.updateMany({
+        where: { customerId: id, state: { in: ["RUNNING", "WAITING", "PAUSED"] } },
+        data: { state: "STOPPED", stoppedAt: now, stopReason: "blocked", nextActionAt: null },
+      }),
+    ]);
+  } else {
+    const blockSetOptOut = c.optedOutAt?.getTime() === c.blockedAt?.getTime();
+    await prisma.customer.update({
+      where: { id },
+      data: { blockedAt: null, ...(blockSetOptOut && { optedOutAt: null }) },
+    });
+  }
+
+  await logActivity({
+    actorUserId: user.id,
+    eventType: blocked ? "customer.blocked" : "customer.unblocked",
+    objectType: "customer",
+    objectId: id,
+    customerId: id,
+  });
+  revalidatePath("/message");
+}
+
+/**
  * The guide PDF with the MEMBER button, by hand, to an open chat — for people
  * who tapped Brand before the guide existed. Whoever gets their first guide
  * here moves to Brand Leads; a Member tap then makes them a Final Lead.

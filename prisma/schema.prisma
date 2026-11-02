@@ -183,6 +183,9 @@ model Customer {
   /// Hidden from the Chats list until they write again (src/app/(app)/message).
   chatArchivedAt    DateTime?
   batchId           String?        @db.Uuid
+  /// Blocked by the team from Chats: nothing is sent, not even BRAND/MEMBER replies.
+  /// Blocking also sets optedOutAt, which every send path checks.
+  blockedAt         DateTime?
   optedOutAt        DateTime?
   lastInteractionAt DateTime?
   qualifiedAt       DateTime?

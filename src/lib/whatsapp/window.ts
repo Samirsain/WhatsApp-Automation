@@ -12,6 +12,7 @@ export type OpenChat = {
   lastAt: Date;
   /** Archived and not written since; a new message from them brings the chat back. */
   archived: boolean;
+  blocked: boolean;
 };
 
 /**
@@ -23,7 +24,7 @@ export async function allChats(): Promise<OpenChat[]> {
     where: { direction: "INBOUND" },
     orderBy: { createdAt: "desc" },
     distinct: ["customerId"],
-    select: { body: true, type: true, createdAt: true, customer: { select: { id: true, phoneE164: true, name: true, chatArchivedAt: true } } },
+    select: { body: true, type: true, createdAt: true, customer: { select: { id: true, phoneE164: true, name: true, chatArchivedAt: true, blockedAt: true } } },
   });
   return rows.map((m) => ({
     customerId: m.customer.id,
@@ -32,6 +33,7 @@ export async function allChats(): Promise<OpenChat[]> {
     lastText: m.body || (m.type === "MEDIA" ? "📎 Media" : null),
     lastAt: m.createdAt,
     archived: m.customer.chatArchivedAt !== null && m.customer.chatArchivedAt >= m.createdAt,
+    blocked: m.customer.blockedAt !== null,
   }));
 }
 

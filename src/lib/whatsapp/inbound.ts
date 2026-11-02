@@ -95,7 +95,7 @@ async function applyInboundMessage(
     where: { phoneE164: event.from },
     create: { phoneE164: event.from, name: event.profileName ?? null },
     update: {},
-    select: { id: true },
+    select: { id: true, blockedAt: true },
   });
 
   let storedMessageId: string | null = null;
@@ -151,6 +151,9 @@ async function applyInboundMessage(
       },
     });
   });
+
+  // Blocked: the message shows in Chats, but no guide, thank-you or funnel step answers it.
+  if (customer.blockedAt) return "ok";
 
   // Opt-out is checked before anything else advances (doc 07 §10 exit paths).
   if (await isOptOut(event.text)) {

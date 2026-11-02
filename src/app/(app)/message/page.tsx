@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { relativeTime } from "@/lib/relative-time";
 import { requirePermission } from "@/lib/session";
 import { allChats, chatMessages, WINDOW_MS } from "@/lib/whatsapp/window";
-import { setChatArchived } from "./actions";
+import { setBlocked, setChatArchived } from "./actions";
 import { AutoRefresh } from "./auto-refresh";
 import { Composer, SendGuideButton } from "./composer";
 
@@ -120,8 +120,8 @@ export default async function MessagePage({ searchParams }: { searchParams: Prom
     open ??
     (selectedId && /^[0-9a-f-]{36}$/i.test(selectedId)
       ? await prisma.customer
-          .findUnique({ where: { id: selectedId }, select: { id: true, name: true, phoneE164: true } })
-          .then((c) => c && { customerId: c.id, name: c.name, phoneE164: c.phoneE164, lastAt: null })
+          .findUnique({ where: { id: selectedId }, select: { id: true, name: true, phoneE164: true, blockedAt: true } })
+          .then((c) => c && { customerId: c.id, name: c.name, phoneE164: c.phoneE164, lastAt: null, blocked: c.blockedAt !== null })
       : null);
   const messages = customer ? await chatMessages(customer.customerId) : [];
 
@@ -186,6 +186,9 @@ export default async function MessagePage({ searchParams }: { searchParams: Prom
                       {c.phoneE164}
                     </span>
                   )}
+                  {c.blocked && (
+                    <span className="block text-[length:var(--text-small)] font-semibold text-[color:var(--color-status-error)]">Blocked</span>
+                  )}
                   {c.lastText && <span className="block truncate">{c.lastText}</span>}
                 </span>
               </Link>
@@ -214,7 +217,22 @@ export default async function MessagePage({ searchParams }: { searchParams: Prom
                 {open && `Open ${relativeTime(new Date(open.lastAt.getTime() + WINDOW_MS), now).replace(/^in /, "")} more`}
               </div>
             </div>
-            {open && <SendGuideButton key={customer.customerId} customerId={customer.customerId} />}
+            {open && !customer.blocked && <SendGuideButton key={customer.customerId} customerId={customer.customerId} />}
+            <form action={setBlocked.bind(null, customer.customerId, !customer.blocked)} className="shrink-0">
+              <button
+                type="submit"
+                className={cx(
+                  "flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border border-[color:var(--color-border-default)] px-3 font-semibold hover:bg-[color:var(--color-surface-muted)] max-md:px-0",
+                  !customer.blocked && "text-[color:var(--color-status-error)]",
+                )}
+              >
+                <svg aria-hidden width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M5.6 5.6l12.8 12.8" />
+                </svg>
+                <span className="max-md:sr-only">{customer.blocked ? "Unblock" : "Block"}</span>
+              </button>
+            </form>
             {listed && (
               <form action={setChatArchived.bind(null, listed.customerId, !listed.archived)} className="shrink-0">
                 <button
@@ -265,7 +283,11 @@ export default async function MessagePage({ searchParams }: { searchParams: Prom
             </ol>
           </div>
 
-          {open ? (
+          {customer.blocked ? (
+            <p className="border-t border-[color:var(--color-border-default)] px-4 py-3 text-center text-[color:var(--color-text-secondary)]">
+              Blocked. Their funnel is stopped and nothing is sent to this number. Their messages still show here.
+            </p>
+          ) : open ? (
             <Composer customerId={customer.customerId} />
           ) : (
             <p className="border-t border-[color:var(--color-border-default)] px-4 py-3 text-center text-[color:var(--color-text-secondary)]">
