@@ -1,8 +1,10 @@
 import { ContactButtons } from "@/components/contact-buttons";
-import { Badge, Card, Cell, EmptyState, PageHeader, Row, Table } from "@/components/ui";
+import { Badge, buttonClass, Card, Cell, cx, EmptyState, PageHeader, Row, Table } from "@/components/ui";
 import { formatDateTime } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
+import { can } from "@/lib/rbac";
 import { requirePermission } from "@/lib/session";
+import { stopFunnel } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -21,9 +23,30 @@ function Seen({ status, customer }: { status: string; customer: { status: string
 
 const step = (payload: unknown) => (payload as { step?: number } | null)?.step ?? 1;
 
+/** "Stop funnel" while a next step is still due; once nothing more will go, says so. */
+function StopFunnel({ m, canManage, className }: {
+  m: { customerId: string; followUpAt: Date | null; customer: { status: string } };
+  canManage: boolean;
+  className?: string;
+}) {
+  if (m.customer.status === "NO_RESPONSE") return null;
+  if (!m.followUpAt) {
+    return <span className="text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">Funnel stopped</span>;
+  }
+  if (!canManage) return null;
+  return (
+    <form action={stopFunnel.bind(null, m.customerId)} className={className}>
+      <button type="submit" className={cx(buttonClass.secondary, "w-full text-[color:var(--color-status-error)]")}>
+        Stop funnel
+      </button>
+    </form>
+  );
+}
+
 /** A number is listed while its latest brand message went through but they never tapped Brand. */
 export default async function NoReplyPage() {
-  await requirePermission("batch:read");
+  const user = await requirePermission("batch:read");
+  const canManage = can(user.roles, "batch:manage");
 
   const recent = await prisma.message.findMany({
     where: { direction: "OUTBOUND", payload: { path: ["kind"], equals: "brand" } },
@@ -35,6 +58,7 @@ export default async function NoReplyPage() {
       deliveryStatus: true,
       createdAt: true,
       payload: true,
+      followUpAt: true,
       customer: { select: { name: true, phoneE164: true, status: true, qualifiedAt: true } },
     },
   });
@@ -77,6 +101,9 @@ export default async function NoReplyPage() {
                   </span>
                 </div>
                 <ContactButtons phone={m.customer.phoneE164} className="mt-2 grid grid-cols-2" />
+                <div className="mt-2 text-center">
+                  <StopFunnel m={m} canManage={canManage} />
+                </div>
               </li>
             ))}
           </ul>
@@ -89,7 +116,12 @@ export default async function NoReplyPage() {
                     <Cell>{m.customer.name ?? "—"}</Cell>
                     <Cell className="whitespace-nowrap tabular-nums">{m.customer.phoneE164}</Cell>
                     <Cell className="whitespace-nowrap">{formatDateTime(m.createdAt)}</Cell>
-                    <Cell>{step(m.payload)} of 3</Cell>
+                    <Cell>
+                      <span className="flex items-center gap-3 whitespace-nowrap">
+                        {step(m.payload)} of 3
+                        <StopFunnel m={m} canManage={canManage} />
+                      </span>
+                    </Cell>
                     <Cell>
                       <Seen status={m.deliveryStatus} customer={m.customer} />
                     </Cell>
