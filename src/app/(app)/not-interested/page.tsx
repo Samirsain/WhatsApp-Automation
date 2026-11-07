@@ -1,13 +1,10 @@
-import Link from "next/link";
 import { SearchBar } from "@/components/search-bar";
-import { Badge, buttonClass, Card, Cell, cx, EmptyState, PageHeader, Row, Table } from "@/components/ui";
+import { Badge, Card, Cell, EmptyState, PageHeader, Row, Table } from "@/components/ui";
 import { formatDateTime } from "@/lib/format";
 import { deliveryLabel, matchesSearch, stepOf } from "@/lib/funnel-list";
 import { leadId } from "@/lib/lead-id";
 import { prisma } from "@/lib/prisma";
-import { can } from "@/lib/rbac";
 import { requirePermission } from "@/lib/session";
-import { backToFunnel } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -36,27 +33,11 @@ function load() {
   });
 }
 
-function Actions({ c, className }: { c: Lead; className?: string }) {
-  return (
-    <div className={cx("flex gap-2", className)}>
-      <Link href={`/message?c=${c.id}`} className={buttonClass.secondary}>
-        Open chat
-      </Link>
-      <form action={backToFunnel.bind(null, c.id)} className="contents">
-        <button type="submit" className={buttonClass.secondary}>
-          Back to funnel
-        </button>
-      </form>
-    </div>
-  );
-}
-
 const stage = (c: Lead) => (c.messages[0] ? `${stepOf(c.messages[0].payload)}/3` : "—");
 const status = (c: Lead) => (c.messages[0] ? deliveryLabel(c.messages[0].deliveryStatus) : null);
 
 export default async function NotInterestedPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
-  const user = await requirePermission("batch:read");
-  const canManage = can(user.roles, "batch:manage");
+  await requirePermission("batch:read");
   const query = (await searchParams).q?.trim() ?? "";
   const rows = (await load()).filter((c) => matchesSearch(c, query));
 
@@ -93,7 +74,6 @@ export default async function NotInterestedPage({ searchParams }: { searchParams
                   </span>
                   <Badge>{stage(c)}</Badge>
                 </div>
-                {canManage && <Actions c={c} className="mt-2 grid grid-cols-2" />}
               </li>
             ))}
           </ul>
@@ -101,7 +81,7 @@ export default async function NotInterestedPage({ searchParams }: { searchParams
           <div className="hidden lg:block">
             <Card flush>
               <Table
-                head={["ID", "Name", "Number", "Marked on", "Stage", "Status", ...(canManage ? [""] : [])]}
+                head={["ID", "Name", "Number", "Marked on", "Stage", "Status"]}
                 caption="Numbers marked Not interested"
               >
                 {rows.map((c) => (
@@ -112,11 +92,6 @@ export default async function NotInterestedPage({ searchParams }: { searchParams
                     <Cell className="whitespace-nowrap">{formatDateTime(c.notInterestedAt ?? c.updatedAt)}</Cell>
                     <Cell className="whitespace-nowrap tabular-nums">{stage(c)}</Cell>
                     <Cell>{status(c) ?? "—"}</Cell>
-                    {canManage && (
-                      <Cell>
-                        <Actions c={c} />
-                      </Cell>
-                    )}
                   </Row>
                 ))}
               </Table>
