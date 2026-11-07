@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Fragment, useActionState, useEffect, useState } from "react";
+import { Fragment, useActionState, useEffect, useState, type ClipboardEvent } from "react";
 import { buttonClass, ErrorNote, inputClass } from "@/components/ui";
 import type { AlreadyMessaged } from "@/lib/brand/already-messaged";
+import { applyPaste, parsePaste } from "@/lib/brand/paste";
 import { parseCsvRows, rowsToText } from "@/lib/brand/rules";
 import { formatDate } from "@/lib/format";
 import { parsePhone } from "@/lib/phone";
@@ -61,6 +62,17 @@ export function SendForm() {
     setRows((rs) => rs.map((r, j) => (j === i ? { ...r, [key]: value } : r)));
   }
 
+  /** Copy Name + Number from Excel and paste into any box: each line fills its own row. */
+  function paste(e: ClipboardEvent<HTMLInputElement>, i: number, field: keyof RowInput) {
+    const pasted = parsePaste(e.clipboardData.getData("text/plain"), field);
+    if (!pasted) return; // one plain value: the browser pastes it as usual
+    e.preventDefault();
+    setRows((rs) => applyPaste(rs, i, pasted));
+    const names = pasted.filter((p) => p.name).length;
+    const numbers = pasted.filter((p) => p.number).length;
+    setCsvNote(`Pasted ${pasted.length} row${pasted.length === 1 ? "" : "s"}: ${names} name${names === 1 ? "" : "s"}, ${numbers} number${numbers === 1 ? "" : "s"}.`);
+  }
+
   async function loadCsv(input: HTMLInputElement) {
     const file = input.files?.[0];
     if (!file) return;
@@ -73,6 +85,9 @@ export function SendForm() {
   return (
     <form action={action} className="flex max-w-2xl flex-col gap-3">
       <input type="hidden" name="rows" value={rowsToText(rows)} />
+      <p className="text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">
+        Tip: copy the Name and Number columns from Excel and paste into the first box. Every row fills in by itself.
+      </p>
       <div className="grid grid-cols-[1fr_1fr] gap-2 text-[length:var(--text-small)] font-medium">
         <span>Name</span>
         <span>Number</span>
@@ -88,6 +103,7 @@ export function SendForm() {
                 placeholder={i === 0 ? "Rahul" : undefined}
                 value={r.name}
                 onChange={(e) => update(i, "name", e.target.value)}
+                onPaste={(e) => paste(e, i, "name")}
               />
               <input
                 aria-label={`Number ${i + 1}`}
@@ -96,6 +112,7 @@ export function SendForm() {
                 inputMode="tel"
                 value={r.number}
                 onChange={(e) => update(i, "number", e.target.value)}
+                onPaste={(e) => paste(e, i, "number")}
               />
             </div>
             {note && (
