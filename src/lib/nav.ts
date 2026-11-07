@@ -1,7 +1,7 @@
 import type { Permission } from "@/lib/rbac";
 
-/** Broadcast, see what failed, who stayed quiet, chat with one number, who tapped Brand or Member. */
-export type NavIcon = "send" | "message" | "failed" | "noReply" | "leads";
+/** Broadcast, follow the funnel, chat with one number, and who said no. */
+export type NavIcon = "send" | "message" | "funnel" | "notInterested";
 
 export type NavItem = {
   href: string;
@@ -12,9 +12,7 @@ export type NavItem = {
 
 export const NAV: NavItem[] = [
   { href: "/send", label: "Broadcast", permission: "batch:manage", icon: "send" },
-  { href: "/failed", label: "Not Delivered", permission: "batch:read", icon: "failed" },
-  { href: "/no-reply", label: "No Reply", permission: "batch:read", icon: "noReply" },
+  { href: "/funnel", label: "Funnel", permission: "batch:read", icon: "funnel" },
   { href: "/message", label: "Chats", permission: "batch:manage", icon: "message" },
-  // Brand Leads (/leads/brand) and Final Leads (/leads): one button, steps switch inside.
-  { href: "/leads", label: "Leads", permission: "qualified:read", icon: "leads" },
+  { href: "/not-interested", label: "Not Interested", permission: "batch:read", icon: "notInterested" },
 ];

@@ -46,6 +46,7 @@ export type CustomerMinAggregateOutputType = {
   chatArchivedAt: Date | null
   batchId: string | null
   blockedAt: Date | null
+  notInterestedAt: Date | null
   optedOutAt: Date | null
   lastInteractionAt: Date | null
   qualifiedAt: Date | null
@@ -66,6 +67,7 @@ export type CustomerMaxAggregateOutputType = {
   chatArchivedAt: Date | null
   batchId: string | null
   blockedAt: Date | null
+  notInterestedAt: Date | null
   optedOutAt: Date | null
   lastInteractionAt: Date | null
   qualifiedAt: Date | null
@@ -86,6 +88,7 @@ export type CustomerCountAggregateOutputType = {
   chatArchivedAt: number
   batchId: number
   blockedAt: number
+  notInterestedAt: number
   optedOutAt: number
   lastInteractionAt: number
   qualifiedAt: number
@@ -116,6 +119,7 @@ export type CustomerMinAggregateInputType = {
   chatArchivedAt?: true
   batchId?: true
   blockedAt?: true
+  notInterestedAt?: true
   optedOutAt?: true
   lastInteractionAt?: true
   qualifiedAt?: true
@@ -136,6 +140,7 @@ export type CustomerMaxAggregateInputType = {
   chatArchivedAt?: true
   batchId?: true
   blockedAt?: true
+  notInterestedAt?: true
   optedOutAt?: true
   lastInteractionAt?: true
   qualifiedAt?: true
@@ -156,6 +161,7 @@ export type CustomerCountAggregateInputType = {
   chatArchivedAt?: true
   batchId?: true
   blockedAt?: true
+  notInterestedAt?: true
   optedOutAt?: true
   lastInteractionAt?: true
   qualifiedAt?: true
@@ -263,6 +269,7 @@ export type CustomerGroupByOutputType = {
   chatArchivedAt: Date | null
   batchId: string | null
   blockedAt: Date | null
+  notInterestedAt: Date | null
   optedOutAt: Date | null
   lastInteractionAt: Date | null
   qualifiedAt: Date | null
@@ -306,6 +313,7 @@ export type CustomerWhereInput = {
   chatArchivedAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
   batchId?: Prisma.UuidNullableFilter<"Customer"> | string | null
   blockedAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
+  notInterestedAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
   optedOutAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
   lastInteractionAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
   qualifiedAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
@@ -333,6 +341,7 @@ export type CustomerOrderByWithRelationInput = {
   chatArchivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   batchId?: Prisma.SortOrderInput | Prisma.SortOrder
   blockedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  notInterestedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   optedOutAt?: Prisma.SortOrderInput | Prisma.SortOrder
   lastInteractionAt?: Prisma.SortOrderInput | Prisma.SortOrder
   qualifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -363,6 +372,7 @@ export type CustomerWhereUniqueInput = Prisma.AtLeast<{
   chatArchivedAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
   batchId?: Prisma.UuidNullableFilter<"Customer"> | string | null
   blockedAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
+  notInterestedAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
   optedOutAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
   lastInteractionAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
   qualifiedAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
@@ -390,6 +400,7 @@ export type CustomerOrderByWithAggregationInput = {
   chatArchivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   batchId?: Prisma.SortOrderInput | Prisma.SortOrder
   blockedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  notInterestedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   optedOutAt?: Prisma.SortOrderInput | Prisma.SortOrder
   lastInteractionAt?: Prisma.SortOrderInput | Prisma.SortOrder
   qualifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -418,6 +429,7 @@ export type CustomerScalarWhereWithAggregatesInput = {
   chatArchivedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Customer"> | Date | string | null
   batchId?: Prisma.UuidNullableWithAggregatesFilter<"Customer"> | string | null
   blockedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Customer"> | Date | string | null
+  notInterestedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Customer"> | Date | string | null
   optedOutAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Customer"> | Date | string | null
   lastInteractionAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Customer"> | Date | string | null
   qualifiedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Customer"> | Date | string | null
@@ -437,6 +449,7 @@ export type CustomerCreateInput = {
   leadStage?: $Enums.LeadStage
   chatArchivedAt?: Date | string | null
   blockedAt?: Date | string | null
+  notInterestedAt?: Date | string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
   qualifiedAt?: Date | string | null
@@ -464,6 +477,7 @@ export type CustomerUncheckedCreateInput = {
   chatArchivedAt?: Date | string | null
   batchId?: string | null
   blockedAt?: Date | string | null
+  notInterestedAt?: Date | string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
   qualifiedAt?: Date | string | null
@@ -488,6 +502,7 @@ export type CustomerUpdateInput = {
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
   chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notInterestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -515,6 +530,7 @@ export type CustomerUncheckedUpdateInput = {
   chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   batchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notInterestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -541,6 +557,7 @@ export type CustomerCreateManyInput = {
   chatArchivedAt?: Date | string | null
   batchId?: string | null
   blockedAt?: Date | string | null
+  notInterestedAt?: Date | string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
   qualifiedAt?: Date | string | null
@@ -559,6 +576,7 @@ export type CustomerUpdateManyMutationInput = {
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
   chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notInterestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -579,6 +597,7 @@ export type CustomerUncheckedUpdateManyInput = {
   chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   batchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notInterestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -614,6 +633,7 @@ export type CustomerCountOrderByAggregateInput = {
   chatArchivedAt?: Prisma.SortOrder
   batchId?: Prisma.SortOrder
   blockedAt?: Prisma.SortOrder
+  notInterestedAt?: Prisma.SortOrder
   optedOutAt?: Prisma.SortOrder
   lastInteractionAt?: Prisma.SortOrder
   qualifiedAt?: Prisma.SortOrder
@@ -638,6 +658,7 @@ export type CustomerMaxOrderByAggregateInput = {
   chatArchivedAt?: Prisma.SortOrder
   batchId?: Prisma.SortOrder
   blockedAt?: Prisma.SortOrder
+  notInterestedAt?: Prisma.SortOrder
   optedOutAt?: Prisma.SortOrder
   lastInteractionAt?: Prisma.SortOrder
   qualifiedAt?: Prisma.SortOrder
@@ -658,6 +679,7 @@ export type CustomerMinOrderByAggregateInput = {
   chatArchivedAt?: Prisma.SortOrder
   batchId?: Prisma.SortOrder
   blockedAt?: Prisma.SortOrder
+  notInterestedAt?: Prisma.SortOrder
   optedOutAt?: Prisma.SortOrder
   lastInteractionAt?: Prisma.SortOrder
   qualifiedAt?: Prisma.SortOrder
@@ -822,6 +844,7 @@ export type CustomerCreateWithoutBatchInput = {
   leadStage?: $Enums.LeadStage
   chatArchivedAt?: Date | string | null
   blockedAt?: Date | string | null
+  notInterestedAt?: Date | string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
   qualifiedAt?: Date | string | null
@@ -847,6 +870,7 @@ export type CustomerUncheckedCreateWithoutBatchInput = {
   leadStage?: $Enums.LeadStage
   chatArchivedAt?: Date | string | null
   blockedAt?: Date | string | null
+  notInterestedAt?: Date | string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
   qualifiedAt?: Date | string | null
@@ -902,6 +926,7 @@ export type CustomerScalarWhereInput = {
   chatArchivedAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
   batchId?: Prisma.UuidNullableFilter<"Customer"> | string | null
   blockedAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
+  notInterestedAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
   optedOutAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
   lastInteractionAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
   qualifiedAt?: Prisma.DateTimeNullableFilter<"Customer"> | Date | string | null
@@ -921,6 +946,7 @@ export type CustomerCreateWithoutBatchMembersInput = {
   leadStage?: $Enums.LeadStage
   chatArchivedAt?: Date | string | null
   blockedAt?: Date | string | null
+  notInterestedAt?: Date | string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
   qualifiedAt?: Date | string | null
@@ -947,6 +973,7 @@ export type CustomerUncheckedCreateWithoutBatchMembersInput = {
   chatArchivedAt?: Date | string | null
   batchId?: string | null
   blockedAt?: Date | string | null
+  notInterestedAt?: Date | string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
   qualifiedAt?: Date | string | null
@@ -986,6 +1013,7 @@ export type CustomerUpdateWithoutBatchMembersInput = {
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
   chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notInterestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1012,6 +1040,7 @@ export type CustomerUncheckedUpdateWithoutBatchMembersInput = {
   chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   batchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notInterestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1036,6 +1065,7 @@ export type CustomerCreateWithoutConversationsInput = {
   leadStage?: $Enums.LeadStage
   chatArchivedAt?: Date | string | null
   blockedAt?: Date | string | null
+  notInterestedAt?: Date | string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
   qualifiedAt?: Date | string | null
@@ -1062,6 +1092,7 @@ export type CustomerUncheckedCreateWithoutConversationsInput = {
   chatArchivedAt?: Date | string | null
   batchId?: string | null
   blockedAt?: Date | string | null
+  notInterestedAt?: Date | string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
   qualifiedAt?: Date | string | null
@@ -1101,6 +1132,7 @@ export type CustomerUpdateWithoutConversationsInput = {
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
   chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notInterestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1127,6 +1159,7 @@ export type CustomerUncheckedUpdateWithoutConversationsInput = {
   chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   batchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notInterestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1151,6 +1184,7 @@ export type CustomerCreateWithoutMessagesInput = {
   leadStage?: $Enums.LeadStage
   chatArchivedAt?: Date | string | null
   blockedAt?: Date | string | null
+  notInterestedAt?: Date | string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
   qualifiedAt?: Date | string | null
@@ -1177,6 +1211,7 @@ export type CustomerUncheckedCreateWithoutMessagesInput = {
   chatArchivedAt?: Date | string | null
   batchId?: string | null
   blockedAt?: Date | string | null
+  notInterestedAt?: Date | string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
   qualifiedAt?: Date | string | null
@@ -1216,6 +1251,7 @@ export type CustomerUpdateWithoutMessagesInput = {
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
   chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notInterestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1242,6 +1278,7 @@ export type CustomerUncheckedUpdateWithoutMessagesInput = {
   chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   batchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notInterestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1266,6 +1303,7 @@ export type CustomerCreateWithoutRunsInput = {
   leadStage?: $Enums.LeadStage
   chatArchivedAt?: Date | string | null
   blockedAt?: Date | string | null
+  notInterestedAt?: Date | string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
   qualifiedAt?: Date | string | null
@@ -1292,6 +1330,7 @@ export type CustomerUncheckedCreateWithoutRunsInput = {
   chatArchivedAt?: Date | string | null
   batchId?: string | null
   blockedAt?: Date | string | null
+  notInterestedAt?: Date | string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
   qualifiedAt?: Date | string | null
@@ -1331,6 +1370,7 @@ export type CustomerUpdateWithoutRunsInput = {
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
   chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notInterestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1357,6 +1397,7 @@ export type CustomerUncheckedUpdateWithoutRunsInput = {
   chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   batchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notInterestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1381,6 +1422,7 @@ export type CustomerCreateWithoutResponsesInput = {
   leadStage?: $Enums.LeadStage
   chatArchivedAt?: Date | string | null
   blockedAt?: Date | string | null
+  notInterestedAt?: Date | string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
   qualifiedAt?: Date | string | null
@@ -1407,6 +1449,7 @@ export type CustomerUncheckedCreateWithoutResponsesInput = {
   chatArchivedAt?: Date | string | null
   batchId?: string | null
   blockedAt?: Date | string | null
+  notInterestedAt?: Date | string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
   qualifiedAt?: Date | string | null
@@ -1446,6 +1489,7 @@ export type CustomerUpdateWithoutResponsesInput = {
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
   chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notInterestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1472,6 +1516,7 @@ export type CustomerUncheckedUpdateWithoutResponsesInput = {
   chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   batchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notInterestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1496,6 +1541,7 @@ export type CustomerCreateWithoutActivityLogsInput = {
   leadStage?: $Enums.LeadStage
   chatArchivedAt?: Date | string | null
   blockedAt?: Date | string | null
+  notInterestedAt?: Date | string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
   qualifiedAt?: Date | string | null
@@ -1522,6 +1568,7 @@ export type CustomerUncheckedCreateWithoutActivityLogsInput = {
   chatArchivedAt?: Date | string | null
   batchId?: string | null
   blockedAt?: Date | string | null
+  notInterestedAt?: Date | string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
   qualifiedAt?: Date | string | null
@@ -1561,6 +1608,7 @@ export type CustomerUpdateWithoutActivityLogsInput = {
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
   chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notInterestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1587,6 +1635,7 @@ export type CustomerUncheckedUpdateWithoutActivityLogsInput = {
   chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   batchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notInterestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1611,6 +1660,7 @@ export type CustomerCreateManyBatchInput = {
   leadStage?: $Enums.LeadStage
   chatArchivedAt?: Date | string | null
   blockedAt?: Date | string | null
+  notInterestedAt?: Date | string | null
   optedOutAt?: Date | string | null
   lastInteractionAt?: Date | string | null
   qualifiedAt?: Date | string | null
@@ -1629,6 +1679,7 @@ export type CustomerUpdateWithoutBatchInput = {
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
   chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notInterestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1654,6 +1705,7 @@ export type CustomerUncheckedUpdateWithoutBatchInput = {
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
   chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notInterestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1679,6 +1731,7 @@ export type CustomerUncheckedUpdateManyWithoutBatchInput = {
   leadStage?: Prisma.EnumLeadStageFieldUpdateOperationsInput | $Enums.LeadStage
   chatArchivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notInterestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   optedOutAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastInteractionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   qualifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1775,6 +1828,7 @@ export type CustomerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   chatArchivedAt?: boolean
   batchId?: boolean
   blockedAt?: boolean
+  notInterestedAt?: boolean
   optedOutAt?: boolean
   lastInteractionAt?: boolean
   qualifiedAt?: boolean
@@ -1803,6 +1857,7 @@ export type CustomerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   chatArchivedAt?: boolean
   batchId?: boolean
   blockedAt?: boolean
+  notInterestedAt?: boolean
   optedOutAt?: boolean
   lastInteractionAt?: boolean
   qualifiedAt?: boolean
@@ -1824,6 +1879,7 @@ export type CustomerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   chatArchivedAt?: boolean
   batchId?: boolean
   blockedAt?: boolean
+  notInterestedAt?: boolean
   optedOutAt?: boolean
   lastInteractionAt?: boolean
   qualifiedAt?: boolean
@@ -1845,6 +1901,7 @@ export type CustomerSelectScalar = {
   chatArchivedAt?: boolean
   batchId?: boolean
   blockedAt?: boolean
+  notInterestedAt?: boolean
   optedOutAt?: boolean
   lastInteractionAt?: boolean
   qualifiedAt?: boolean
@@ -1853,7 +1910,7 @@ export type CustomerSelectScalar = {
   updatedAt?: boolean
 }
 
-export type CustomerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "leadNumber" | "name" | "phoneE164" | "email" | "location" | "status" | "leadStage" | "chatArchivedAt" | "batchId" | "blockedAt" | "optedOutAt" | "lastInteractionAt" | "qualifiedAt" | "exportedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["customer"]>
+export type CustomerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "leadNumber" | "name" | "phoneE164" | "email" | "location" | "status" | "leadStage" | "chatArchivedAt" | "batchId" | "blockedAt" | "notInterestedAt" | "optedOutAt" | "lastInteractionAt" | "qualifiedAt" | "exportedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["customer"]>
 export type CustomerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   batch?: boolean | Prisma.Customer$batchArgs<ExtArgs>
   batchMembers?: boolean | Prisma.Customer$batchMembersArgs<ExtArgs>
@@ -1904,6 +1961,10 @@ export type $CustomerPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
      * Blocking also sets optedOutAt, which every send path checks.
      */
     blockedAt: Date | null
+    /**
+     * Marked "Not interested" from the Funnel page; their funnel is stopped.
+     */
+    notInterestedAt: Date | null
     optedOutAt: Date | null
     lastInteractionAt: Date | null
     qualifiedAt: Date | null
@@ -2351,6 +2412,7 @@ export interface CustomerFieldRefs {
   readonly chatArchivedAt: Prisma.FieldRef<"Customer", 'DateTime'>
   readonly batchId: Prisma.FieldRef<"Customer", 'String'>
   readonly blockedAt: Prisma.FieldRef<"Customer", 'DateTime'>
+  readonly notInterestedAt: Prisma.FieldRef<"Customer", 'DateTime'>
   readonly optedOutAt: Prisma.FieldRef<"Customer", 'DateTime'>
   readonly lastInteractionAt: Prisma.FieldRef<"Customer", 'DateTime'>
   readonly qualifiedAt: Prisma.FieldRef<"Customer", 'DateTime'>

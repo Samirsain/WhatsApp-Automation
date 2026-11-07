@@ -81,5 +81,6 @@ export async function sendBulk(_prev: SendState, formData: FormData): Promise<Se
     },
   });
   revalidatePath("/failed");
+  revalidatePath("/funnel");
   return { sent, failed, skipped, alreadySent, duplicates: parsed.duplicateCount, rejected: parsed.rejected };
 }

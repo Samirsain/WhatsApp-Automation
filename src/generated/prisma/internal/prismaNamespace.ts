@@ -1634,6 +1634,7 @@ export const CustomerScalarFieldEnum = {
   chatArchivedAt: 'chatArchivedAt',
   batchId: 'batchId',
   blockedAt: 'blockedAt',
+  notInterestedAt: 'notInterestedAt',
   optedOutAt: 'optedOutAt',
   lastInteractionAt: 'lastInteractionAt',
   qualifiedAt: 'qualifiedAt',

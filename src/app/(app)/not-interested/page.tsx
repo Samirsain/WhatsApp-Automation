@@ -1,0 +1,129 @@
+import Link from "next/link";
+import { SearchBar } from "@/components/search-bar";
+import { Badge, buttonClass, Card, Cell, cx, EmptyState, PageHeader, Row, Table } from "@/components/ui";
+import { formatDateTime } from "@/lib/format";
+import { deliveryLabel, matchesSearch, stepOf } from "@/lib/funnel-list";
+import { leadId } from "@/lib/lead-id";
+import { prisma } from "@/lib/prisma";
+import { can } from "@/lib/rbac";
+import { requirePermission } from "@/lib/session";
+import { backToFunnel } from "./actions";
+
+export const dynamic = "force-dynamic";
+
+type Lead = Awaited<ReturnType<typeof load>>[number];
+
+/** Everyone marked Not interested, newest first, with how far their funnel got. */
+function load() {
+  return prisma.customer.findMany({
+    where: { status: "NOT_INTERESTED" },
+    orderBy: [{ notInterestedAt: { sort: "desc", nulls: "last" } }, { updatedAt: "desc" }],
+    take: 2000, // ponytail: paginate if the list outgrows it
+    select: {
+      id: true,
+      leadNumber: true,
+      name: true,
+      phoneE164: true,
+      notInterestedAt: true,
+      updatedAt: true,
+      messages: {
+        where: { direction: "OUTBOUND", payload: { path: ["kind"], equals: "brand" } },
+        orderBy: { createdAt: "desc" },
+        take: 1,
+        select: { payload: true, deliveryStatus: true },
+      },
+    },
+  });
+}
+
+function Actions({ c, className }: { c: Lead; className?: string }) {
+  return (
+    <div className={cx("flex gap-2", className)}>
+      <Link href={`/message?c=${c.id}`} className={buttonClass.secondary}>
+        Open chat
+      </Link>
+      <form action={backToFunnel.bind(null, c.id)} className="contents">
+        <button type="submit" className={buttonClass.secondary}>
+          Back to funnel
+        </button>
+      </form>
+    </div>
+  );
+}
+
+const stage = (c: Lead) => (c.messages[0] ? `${stepOf(c.messages[0].payload)}/3` : "—");
+const status = (c: Lead) => (c.messages[0] ? deliveryLabel(c.messages[0].deliveryStatus) : null);
+
+export default async function NotInterestedPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const user = await requirePermission("batch:read");
+  const canManage = can(user.roles, "batch:manage");
+  const query = (await searchParams).q?.trim() ?? "";
+  const rows = (await load()).filter((c) => matchesSearch(c, query));
+
+  return (
+    <>
+      <PageHeader title="Not Interested" />
+      <SearchBar action="/not-interested" query={query} placeholder="Search name, number or ID" />
+      {rows.length === 0 ? (
+        <Card flush>
+          {query ? (
+            <EmptyState title="No match" description={`Nobody here matches "${query}".`} />
+          ) : (
+            <EmptyState title="Nobody here yet" description='Tap "Not interested" on the Funnel page and the number moves here.' />
+          )}
+        </Card>
+      ) : (
+        <>
+          {/* Phones and tablets: one card per number. */}
+          <ul className="grid gap-3 md:grid-cols-2 lg:hidden">
+            {rows.map((c) => (
+              <li
+                key={c.id}
+                className="rounded-[var(--radius-md)] border border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] p-3 shadow-[var(--shadow-surface)]"
+              >
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="truncate font-semibold">{c.name ?? "—"}</span>
+                  <span className="shrink-0 text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">
+                    {formatDateTime(c.notInterestedAt ?? c.updatedAt)}
+                  </span>
+                </div>
+                <div className="mt-0.5 flex items-center justify-between gap-2">
+                  <span className="tabular-nums text-[color:var(--color-text-secondary)]">
+                    {leadId(c.leadNumber)} · {c.phoneE164}
+                  </span>
+                  <Badge>{stage(c)}</Badge>
+                </div>
+                {canManage && <Actions c={c} className="mt-2 grid grid-cols-2" />}
+              </li>
+            ))}
+          </ul>
+
+          <div className="hidden lg:block">
+            <Card flush>
+              <Table
+                head={["ID", "Name", "Number", "Marked on", "Stage", "Status", ...(canManage ? [""] : [])]}
+                caption="Numbers marked Not interested"
+              >
+                {rows.map((c) => (
+                  <Row key={c.id}>
+                    <Cell className="whitespace-nowrap tabular-nums">{leadId(c.leadNumber)}</Cell>
+                    <Cell>{c.name ?? "—"}</Cell>
+                    <Cell className="whitespace-nowrap tabular-nums">{c.phoneE164}</Cell>
+                    <Cell className="whitespace-nowrap">{formatDateTime(c.notInterestedAt ?? c.updatedAt)}</Cell>
+                    <Cell className="whitespace-nowrap tabular-nums">{stage(c)}</Cell>
+                    <Cell>{status(c) ?? "—"}</Cell>
+                    {canManage && (
+                      <Cell>
+                        <Actions c={c} />
+                      </Cell>
+                    )}
+                  </Row>
+                ))}
+              </Table>
+            </Card>
+          </div>
+        </>
+      )}
+    </>
+  );
+}

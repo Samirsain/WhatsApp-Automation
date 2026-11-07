@@ -186,6 +186,8 @@ model Customer {
   /// Blocked by the team from Chats: nothing is sent, not even BRAND/MEMBER replies.
   /// Blocking also sets optedOutAt, which every send path checks.
   blockedAt         DateTime?
+  /// Marked "Not interested" from the Funnel page; their funnel is stopped.
+  notInterestedAt   DateTime?
   optedOutAt        DateTime?
   lastInteractionAt DateTime?
   qualifiedAt       DateTime?

@@ -14,19 +14,13 @@ import type { NavIcon, NavItem } from "@/lib/nav";
 const ICONS: Record<NavIcon, React.ReactNode> = {
   send: <path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z" />,
   message: <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z" />,
-  failed: (
+  funnel: <path d="M3 4h18l-7 8.5V19l-4 2v-8.5z" />,
+  notInterested: (
     <>
       <circle cx="12" cy="12" r="9" />
-      <path d="M12 7v6M12 16.5v.5" />
+      <path d="M5.6 5.6l12.8 12.8" />
     </>
   ),
-  noReply: (
-    <>
-      <circle cx="12" cy="12" r="9" />
-      <path d="M12 7v5l3 2" />
-    </>
-  ),
-  leads: <path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" />,
 };
 
 function Icon({ name, active }: { name: NavIcon; active: boolean }) {
@@ -50,6 +44,9 @@ function Icon({ name, active }: { name: NavIcon; active: boolean }) {
   );
 }
 
+/** "/funnel" lights up on /funnel and /funnel/..., not on /funnels. */
+const isActive = (pathname: string, href: string) => pathname === href || pathname.startsWith(`${href}/`);
+
 export type NavCounts = Partial<Record<string, number>>;
 
 /**
@@ -68,7 +65,7 @@ export function MobileNav({
   const pathname = usePathname();
   const ref = useRef<HTMLDialogElement>(null);
   const close = () => ref.current?.close();
-  const current = items.find((item) => pathname.startsWith(item.href));
+  const current = items.find((item) => isActive(pathname, item.href));
 
   return (
     <>
@@ -112,7 +109,7 @@ export function MobileNav({
 
           <ul className="flex flex-col gap-0.5">
             {items.map((item) => {
-              const active = pathname.startsWith(item.href);
+              const active = isActive(pathname, item.href);
               const count = counts[item.href];
               return (
                 <li key={item.href}>
@@ -176,7 +173,7 @@ export function Sidebar({
 
       <ul className="flex flex-col gap-1">
         {items.map((item) => {
-          const active = pathname.startsWith(item.href);
+          const active = isActive(pathname, item.href);
           const count = counts[item.href];
 
           return (

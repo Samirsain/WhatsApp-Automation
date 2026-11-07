@@ -5,6 +5,7 @@ import { signOut } from "@/auth";
 import { MobileNav, Sidebar } from "@/components/sidebar";
 import { Badge } from "@/components/ui";
 import { NAV } from "@/lib/nav";
+import { funnelRows } from "@/lib/funnel-rows";
 import { prisma } from "@/lib/prisma";
 import { can, ROLE_LABELS } from "@/lib/rbac";
 import { requireUser } from "@/lib/session";
@@ -20,28 +21,14 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   // Nav visibility is usability only; every page re-checks server-side.
   const items = NAV.filter((item) => can(user.roles, item.permission));
 
-  const [unread, finalLeads, brandLeads, recent] = await Promise.all([
+  const [unread, inFunnel, notInterested] = await Promise.all([
     prisma.notification.count({ where: { userId: user.id, readAt: null } }),
-    prisma.customer.count({ where: { status: "QUALIFIED" } }),
-    prisma.customer.count({ where: { qualifiedAt: { not: null }, status: { not: "QUALIFIED" } } }),
-    // Same rows and rule as the Not Delivered and No Reply pages: each number's latest brand message.
-    prisma.message.findMany({
-      where: { direction: "OUTBOUND", payload: { path: ["kind"], equals: "brand" } },
-      orderBy: { createdAt: "desc" },
-      take: 2000, // ponytail: newest 2000 sends, as on those pages
-      select: { customerId: true, deliveryStatus: true, customer: { select: { qualifiedAt: true } } },
-    }),
+    // Same rows and rule as the Funnel page.
+    funnelRows().then((rows) => rows.length),
+    prisma.customer.count({ where: { status: "NOT_INTERESTED" } }),
   ]);
-  const latest = new Map<string, (typeof recent)[number]>();
-  for (const m of recent) if (!latest.has(m.customerId)) latest.set(m.customerId, m);
-  let notDelivered = 0;
-  let noReply = 0;
-  for (const m of latest.values()) {
-    if (m.deliveryStatus === "FAILED") notDelivered++;
-    else if (m.deliveryStatus !== "QUEUED" && m.customer.qualifiedAt === null) noReply++;
-  }
 
-  const counts = { "/failed": notDelivered, "/no-reply": noReply, "/leads": brandLeads + finalLeads };
+  const counts = { "/funnel": inFunnel, "/not-interested": notInterested };
 
   async function signOutAction() {
     "use server";

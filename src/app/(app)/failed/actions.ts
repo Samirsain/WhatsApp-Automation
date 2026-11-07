@@ -50,4 +50,5 @@ export async function resendBrand(formData: FormData): Promise<void> {
     retryOf: m.id,
   });
   revalidatePath("/failed");
+  revalidatePath("/funnel");
 }
