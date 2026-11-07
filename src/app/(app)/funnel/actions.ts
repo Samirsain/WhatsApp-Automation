@@ -14,27 +14,6 @@ const pendingSteps = (customerId: string) => ({
 });
 
 /**
- * No more automatic funnel steps (or 131049 retries) for this number. The tick
- * claims a step by clearing followUpAt, so clearing it first means it never goes.
- * They are not blocked: a Brand tap still gets the guide, and a manual send restarts the funnel.
- */
-export async function stopFunnel(customerId: string): Promise<void> {
-  const user = await assertPermission("batch:manage");
-  const id = z.uuid().parse(customerId);
-  const stopped = await prisma.message.updateMany(pendingSteps(id));
-  if (stopped.count > 0) {
-    await logActivity({
-      actorUserId: user.id,
-      eventType: "funnel.stopped",
-      objectType: "customer",
-      objectId: id,
-      customerId: id,
-    });
-  }
-  revalidatePath("/funnel");
-}
-
-/**
  * Moves a number from Funnel to Not Interested and stops its funnel for good.
  * Not a block: if they write or tap Brand later, Chats still shows it.
  */

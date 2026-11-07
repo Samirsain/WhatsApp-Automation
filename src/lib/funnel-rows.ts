@@ -18,8 +18,6 @@ export async function funnelRows() {
       deliveryStatus: true,
       createdAt: true,
       payload: true,
-      followUpAt: true,
-      retryDueAt: true,
       customer: {
         select: { leadNumber: true, name: true, phoneE164: true, status: true, qualifiedAt: true },
       },

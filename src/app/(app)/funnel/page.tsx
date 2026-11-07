@@ -6,7 +6,7 @@ import { funnelRows, type FunnelRow } from "@/lib/funnel-rows";
 import { leadId } from "@/lib/lead-id";
 import { can } from "@/lib/rbac";
 import { requirePermission } from "@/lib/session";
-import { markInterested, markNotInterested, stopFunnel } from "./actions";
+import { markInterested, markNotInterested } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -21,21 +21,6 @@ const GREEN_BUTTON = cx(buttonClass.primary, "bg-[color:var(--color-status-succe
 function Status({ status }: { status: string }) {
   const label = deliveryLabel(status);
   return <Badge tone={TONE[label]} dot>{label}</Badge>;
-}
-
-/** "Stop funnel" while a next step or retry is still due; otherwise says why nothing more goes. */
-function StopFunnel({ m, canManage, className }: { m: FunnelRow; canManage: boolean; className?: string }) {
-  const muted = "text-[length:var(--text-small)] whitespace-nowrap text-[color:var(--color-text-secondary)]";
-  if (m.customer.status === "NO_RESPONSE") return <span className={muted}>Funnel ended</span>;
-  if (!m.followUpAt && !m.retryDueAt) return <span className={muted}>Funnel stopped</span>;
-  if (!canManage) return <span className={muted}>Running</span>;
-  return (
-    <form action={stopFunnel.bind(null, m.customerId)} className={className}>
-      <button type="submit" className={cx(buttonClass.secondary, "w-full text-[color:var(--color-status-error)]")}>
-        Stop funnel
-      </button>
-    </form>
-  );
 }
 
 /** Red "Not interested" moves them to that menu; green "Interested" adds them to Chats and opens it. */
@@ -107,9 +92,6 @@ export default async function FunnelPage({ searchParams }: { searchParams: Promi
                   </span>
                 </div>
                 {canManage && <Decide m={m} className="mt-2 grid grid-cols-2" />}
-                <div className="mt-2 text-center">
-                  <StopFunnel m={m} canManage={canManage} />
-                </div>
               </li>
             ))}
           </ul>
@@ -117,7 +99,7 @@ export default async function FunnelPage({ searchParams }: { searchParams: Promi
           <div className="hidden lg:block">
             <Card flush>
               <Table
-                head={["ID", "Name", "Number", "Date", "Stage", "Stop funnel", "Status", ...(canManage ? [""] : [])]}
+                head={["ID", "Name", "Number", "Date", "Stage", "Status", ...(canManage ? [""] : [])]}
                 caption="Everyone in the funnel, furthest stage first"
               >
                 {rows.map((m) => (
@@ -127,9 +109,6 @@ export default async function FunnelPage({ searchParams }: { searchParams: Promi
                     <Cell className="whitespace-nowrap tabular-nums">{m.customer.phoneE164}</Cell>
                     <Cell className="whitespace-nowrap">{formatDateTime(m.createdAt)}</Cell>
                     <Cell className="whitespace-nowrap font-semibold tabular-nums">{m.step}/3</Cell>
-                    <Cell>
-                      <StopFunnel m={m} canManage={canManage} />
-                    </Cell>
                     <Cell>
                       <Status status={m.deliveryStatus} />
                     </Cell>
