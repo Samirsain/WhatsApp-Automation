@@ -188,6 +188,8 @@ model Customer {
   blockedAt         DateTime?
   /// Marked "Not interested" from the Funnel page; their funnel is stopped.
   notInterestedAt   DateTime?
+  /// Marked "Interested" from the Funnel page: listed in Chats even before they write.
+  interestedAt      DateTime?
   optedOutAt        DateTime?
   lastInteractionAt DateTime?
   qualifiedAt       DateTime?

@@ -9,32 +9,55 @@ export type OpenChat = {
   phoneE164: string;
   name: string | null;
   lastText: string | null;
-  lastAt: Date;
+  /** Their last message; null if they never wrote (marked Interested only). Drives the 24h window. */
+  lastAt: Date | null;
+  /** Where the chat sits in the list: their last message or the Interested tap, whichever is newer. */
+  sortAt: Date;
+  /** Marked Interested from the Funnel page. */
+  interested: boolean;
   /** Archived and not written since; a new message from them brings the chat back. */
   archived: boolean;
   blocked: boolean;
 };
 
+const CUSTOMER = { id: true, phoneE164: true, name: true, chatArchivedAt: true, blockedAt: true, interestedAt: true } as const;
+
 /**
- * Everyone who ever wrote in, newest first, one row each. Closed and opted-out
- * chats stay, so nothing is lost; sending is blocked for them in message/actions.ts.
+ * Everyone who ever wrote in, plus everyone marked Interested, newest first,
+ * one row each. Closed and opted-out chats stay, so nothing is lost; sending
+ * is blocked for them in message/actions.ts.
  */
 export async function allChats(): Promise<OpenChat[]> {
-  const rows = await prisma.message.findMany({
-    where: { direction: "INBOUND" },
-    orderBy: { createdAt: "desc" },
-    distinct: ["customerId"],
-    select: { body: true, type: true, createdAt: true, customer: { select: { id: true, phoneE164: true, name: true, chatArchivedAt: true, blockedAt: true } } },
-  });
-  return rows.map((m) => ({
-    customerId: m.customer.id,
-    phoneE164: m.customer.phoneE164,
-    name: m.customer.name,
-    lastText: m.body || (m.type === "MEDIA" ? "📎 Media" : null),
-    lastAt: m.createdAt,
-    archived: m.customer.chatArchivedAt !== null && m.customer.chatArchivedAt >= m.createdAt,
-    blocked: m.customer.blockedAt !== null,
-  }));
+  const [inbound, interested] = await Promise.all([
+    prisma.message.findMany({
+      where: { direction: "INBOUND" },
+      orderBy: { createdAt: "desc" },
+      distinct: ["customerId"],
+      select: { body: true, type: true, createdAt: true, customer: { select: CUSTOMER } },
+    }),
+    prisma.customer.findMany({ where: { interestedAt: { not: null } }, select: CUSTOMER }),
+  ]);
+  const last = new Map(inbound.map((m) => [m.customer.id, m]));
+  const customers = new Map([...interested, ...inbound.map((m) => m.customer)].map((c) => [c.id, c]));
+
+  return [...customers.values()]
+    .map((c) => {
+      const m = last.get(c.id);
+      const lastAt = m?.createdAt ?? null;
+      const sortAt = new Date(Math.max(lastAt?.getTime() ?? 0, c.interestedAt?.getTime() ?? 0));
+      return {
+        customerId: c.id,
+        phoneE164: c.phoneE164,
+        name: c.name,
+        lastText: m ? m.body || (m.type === "MEDIA" ? "📎 Media" : null) : null,
+        lastAt,
+        sortAt,
+        interested: c.interestedAt !== null,
+        archived: c.chatArchivedAt !== null && c.chatArchivedAt >= sortAt,
+        blocked: c.blockedAt !== null,
+      };
+    })
+    .sort((a, b) => b.sortAt.getTime() - a.sortAt.getTime());
 }
 
 /**

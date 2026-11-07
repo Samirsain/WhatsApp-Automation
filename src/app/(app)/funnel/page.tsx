@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { SearchBar } from "@/components/search-bar";
 import { Badge, buttonClass, Card, Cell, cx, EmptyState, PageHeader, Row, Table } from "@/components/ui";
 import { formatDateTime } from "@/lib/format";
@@ -7,7 +6,7 @@ import { funnelRows, type FunnelRow } from "@/lib/funnel-rows";
 import { leadId } from "@/lib/lead-id";
 import { can } from "@/lib/rbac";
 import { requirePermission } from "@/lib/session";
-import { markNotInterested, stopFunnel } from "./actions";
+import { markInterested, markNotInterested, stopFunnel } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -39,7 +38,7 @@ function StopFunnel({ m, canManage, className }: { m: FunnelRow; canManage: bool
   );
 }
 
-/** Red "Not interested" moves them to that menu; green "Interested" opens their chat. */
+/** Red "Not interested" moves them to that menu; green "Interested" adds them to Chats and opens it. */
 function Decide({ m, className }: { m: FunnelRow; className?: string }) {
   return (
     <div className={cx("flex gap-2", className)}>
@@ -48,9 +47,11 @@ function Decide({ m, className }: { m: FunnelRow; className?: string }) {
           Not interested
         </button>
       </form>
-      <Link href={`/message?c=${m.customerId}`} className={GREEN_BUTTON}>
-        Interested
-      </Link>
+      <form action={markInterested.bind(null, m.customerId)} className="contents">
+        <button type="submit" className={GREEN_BUTTON}>
+          Interested
+        </button>
+      </form>
     </div>
   );
 }

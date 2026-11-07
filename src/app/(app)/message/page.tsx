@@ -3,7 +3,7 @@ import { cx } from "@/components/ui";
 import { prisma } from "@/lib/prisma";
 import { relativeTime } from "@/lib/relative-time";
 import { requirePermission } from "@/lib/session";
-import { allChats, chatMessages, WINDOW_MS } from "@/lib/whatsapp/window";
+import { allChats, chatMessages, type OpenChat, WINDOW_MS } from "@/lib/whatsapp/window";
 import { setBlocked, setChatArchived } from "./actions";
 import { AutoRefresh } from "./auto-refresh";
 import { Composer, SendGuideButton } from "./composer";
@@ -111,9 +111,11 @@ export default async function MessagePage({ searchParams }: { searchParams: Prom
   const all = await allChats();
   const chats = all.filter((c) => c.archived === showArchived);
   const archivedCount = showArchived ? chats.length : all.length - chats.length;
-  const isOpen = (c: { lastAt: Date }) => now.getTime() - c.lastAt.getTime() < WINDOW_MS;
+  // Only their own messages open the window; an Interested tap does not.
+  const isOpen = (c: OpenChat): c is OpenChat & { lastAt: Date } =>
+    c.lastAt !== null && now.getTime() - c.lastAt.getTime() < WINDOW_MS;
 
-  const open = all.find((c) => c.customerId === selectedId && isOpen(c));
+  const open = all.filter((c) => c.customerId === selectedId).find(isOpen);
   const listed = all.find((c) => c.customerId === selectedId);
   // A chat whose window closed can still be read, just not written to.
   const customer =
@@ -178,13 +180,16 @@ export default async function MessagePage({ searchParams }: { searchParams: Prom
                   <span className="flex items-baseline justify-between gap-2">
                     <b className="truncate">{c.name || c.phoneE164}</b>
                     <span className="shrink-0 text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">
-                      {isOpen(c) ? TIME.format(c.lastAt) : `Closed · ${DAY.format(c.lastAt)}`}
+                      {isOpen(c) ? TIME.format(c.lastAt) : `Closed · ${DAY.format(c.sortAt)}`}
                     </span>
                   </span>
                   {c.name && (
                     <span className="block text-[length:var(--text-small)] tabular-nums text-[color:var(--color-text-secondary)]">
                       {c.phoneE164}
                     </span>
+                  )}
+                  {c.interested && !c.blocked && (
+                    <span className="block text-[length:var(--text-small)] font-semibold text-[color:var(--color-status-success)]">Interested</span>
                   )}
                   {c.blocked && (
                     <span className="block text-[length:var(--text-small)] font-semibold text-[color:var(--color-status-error)]">Blocked</span>
