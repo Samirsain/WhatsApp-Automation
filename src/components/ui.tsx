@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 
 /**
  * Core components per 05_3_Percent_Club_Design_System.md §6.
@@ -357,9 +357,9 @@ export function Table({
   );
 }
 
-export function Row({ children, className }: { children: ReactNode; className?: string }) {
+export function Row({ children, className, ...rest }: ComponentProps<"tr">) {
   return (
-    <tr className={cx(className, "border-b border-[color:var(--color-border-default)] last:border-0 hover:bg-[color:var(--color-surface-muted)]")}>
+    <tr {...rest} className={cx(className, "border-b border-[color:var(--color-border-default)] last:border-0 hover:bg-[color:var(--color-surface-muted)]")}>
       {children}
     </tr>
   );

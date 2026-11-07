@@ -1,12 +1,12 @@
 import { SearchBar } from "@/components/search-bar";
-import { Badge, buttonClass, Card, Cell, cx, EmptyState, PageHeader, Row, Table } from "@/components/ui";
+import { Badge, Card, Cell, cx, EmptyState, PageHeader, Row, Table } from "@/components/ui";
 import { formatDateTime } from "@/lib/format";
 import { deliveryLabel, matchesSearch, type DeliveryLabel } from "@/lib/funnel-list";
-import { funnelRows, type FunnelRow } from "@/lib/funnel-rows";
+import { funnelRows } from "@/lib/funnel-rows";
 import { leadId } from "@/lib/lead-id";
 import { can } from "@/lib/rbac";
 import { requirePermission } from "@/lib/session";
-import { markInterested, markNotInterested } from "./actions";
+import { DecideButtons } from "./decide-buttons";
 
 export const dynamic = "force-dynamic";
 
@@ -16,29 +16,10 @@ const TONE: Record<DeliveryLabel, "error" | "info" | "success"> = {
   Seen: "success",
 };
 const RED_BG = "bg-[color:var(--color-status-error)]/10";
-const GREEN_BUTTON = cx(buttonClass.primary, "bg-[color:var(--color-status-success)] hover:bg-[color:var(--color-status-success)] hover:opacity-90");
 
 function Status({ status }: { status: string }) {
   const label = deliveryLabel(status);
   return <Badge tone={TONE[label]} dot>{label}</Badge>;
-}
-
-/** Red "Not interested" moves them to that menu; green "Interested" adds them to Chats and opens it. */
-function Decide({ m, className }: { m: FunnelRow; className?: string }) {
-  return (
-    <div className={cx("flex gap-2", className)}>
-      <form action={markNotInterested.bind(null, m.customerId)} className="contents">
-        <button type="submit" className={buttonClass.danger}>
-          Not interested
-        </button>
-      </form>
-      <form action={markInterested.bind(null, m.customerId)} className="contents">
-        <button type="submit" className={GREEN_BUTTON}>
-          Interested
-        </button>
-      </form>
-    </div>
-  );
 }
 
 /** Everyone the funnel messaged and who has not tapped Brand or said no; 3/3 on top. */
@@ -69,6 +50,7 @@ export default async function FunnelPage({ searchParams }: { searchParams: Promi
             {rows.map((m) => (
               <li
                 key={m.id}
+                data-funnel-row
                 className={cx(
                   "rounded-[var(--radius-md)] border p-3 shadow-[var(--shadow-surface)]",
                   m.customer.status === "NO_RESPONSE"
@@ -91,7 +73,7 @@ export default async function FunnelPage({ searchParams }: { searchParams: Promi
                     <Status status={m.deliveryStatus} />
                   </span>
                 </div>
-                {canManage && <Decide m={m} className="mt-2 grid grid-cols-2" />}
+                {canManage && <DecideButtons customerId={m.customerId} className="mt-2 grid grid-cols-2" />}
               </li>
             ))}
           </ul>
@@ -103,7 +85,7 @@ export default async function FunnelPage({ searchParams }: { searchParams: Promi
                 caption="Everyone in the funnel, furthest stage first"
               >
                 {rows.map((m) => (
-                  <Row key={m.id} className={m.customer.status === "NO_RESPONSE" ? RED_BG : undefined}>
+                  <Row key={m.id} data-funnel-row className={m.customer.status === "NO_RESPONSE" ? RED_BG : undefined}>
                     <Cell className="whitespace-nowrap tabular-nums">{leadId(m.customer.leadNumber)}</Cell>
                     <Cell>{m.customer.name ?? "—"}</Cell>
                     <Cell className="whitespace-nowrap tabular-nums">{m.customer.phoneE164}</Cell>
@@ -114,7 +96,7 @@ export default async function FunnelPage({ searchParams }: { searchParams: Promi
                     </Cell>
                     {canManage && (
                       <Cell>
-                        <Decide m={m} />
+                        <DecideButtons customerId={m.customerId} />
                       </Cell>
                     )}
                   </Row>
