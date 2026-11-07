@@ -1,7 +1,8 @@
+import { Highlight } from "@/components/highlight";
 import { SearchBar } from "@/components/search-bar";
 import { Badge, Card, Cell, cx, EmptyState, PageHeader, Row, Table } from "@/components/ui";
 import { formatDateTime } from "@/lib/format";
-import { deliveryLabel, matchesSearch, type DeliveryLabel } from "@/lib/funnel-list";
+import { deliveryLabel, search, type DeliveryLabel } from "@/lib/funnel-list";
 import { funnelRows } from "@/lib/funnel-rows";
 import { leadId } from "@/lib/lead-id";
 import { can } from "@/lib/rbac";
@@ -29,7 +30,7 @@ export default async function FunnelPage({ searchParams }: { searchParams: Promi
   const query = (await searchParams).q?.trim() ?? "";
 
   const all = await funnelRows();
-  const rows = all.filter((m) => matchesSearch(m.customer, query));
+  const rows = search(all, query, (m) => m.customer);
 
   return (
     <>
@@ -59,14 +60,14 @@ export default async function FunnelPage({ searchParams }: { searchParams: Promi
                 )}
               >
                 <div className="flex items-baseline justify-between gap-2">
-                  <span className="truncate font-semibold">{m.customer.name ?? "—"}</span>
+                  <span className="truncate font-semibold">{m.customer.name ? <Highlight text={m.customer.name} query={query} /> : "—"}</span>
                   <span className="shrink-0 text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">
                     {formatDateTime(m.createdAt)}
                   </span>
                 </div>
                 <div className="mt-0.5 flex items-center justify-between gap-2">
                   <span className="tabular-nums text-[color:var(--color-text-secondary)]">
-                    {leadId(m.customer.leadNumber)} · {m.customer.phoneE164}
+                    {leadId(m.customer.leadNumber)} · <Highlight text={m.customer.phoneE164} query={query} kind="number" />
                   </span>
                   <span className="flex shrink-0 gap-1">
                     <Badge>{m.step}/3</Badge>
@@ -87,8 +88,8 @@ export default async function FunnelPage({ searchParams }: { searchParams: Promi
                 {rows.map((m) => (
                   <Row key={m.id} data-funnel-row className={m.customer.status === "NO_RESPONSE" ? RED_BG : undefined}>
                     <Cell className="whitespace-nowrap tabular-nums">{leadId(m.customer.leadNumber)}</Cell>
-                    <Cell>{m.customer.name ?? "—"}</Cell>
-                    <Cell className="whitespace-nowrap tabular-nums">{m.customer.phoneE164}</Cell>
+                    <Cell>{m.customer.name ? <Highlight text={m.customer.name} query={query} /> : "—"}</Cell>
+                    <Cell className="whitespace-nowrap tabular-nums"><Highlight text={m.customer.phoneE164} query={query} kind="number" /></Cell>
                     <Cell className="whitespace-nowrap">{formatDateTime(m.createdAt)}</Cell>
                     <Cell className="whitespace-nowrap font-semibold tabular-nums">{m.step}/3</Cell>
                     <Cell>

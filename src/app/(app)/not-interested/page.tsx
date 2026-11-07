@@ -1,7 +1,8 @@
+import { Highlight } from "@/components/highlight";
 import { SearchBar } from "@/components/search-bar";
 import { Badge, Card, Cell, EmptyState, PageHeader, Row, Table } from "@/components/ui";
 import { formatDateTime } from "@/lib/format";
-import { deliveryLabel, matchesSearch, stepOf } from "@/lib/funnel-list";
+import { deliveryLabel, search, stepOf } from "@/lib/funnel-list";
 import { leadId } from "@/lib/lead-id";
 import { prisma } from "@/lib/prisma";
 import { requirePermission } from "@/lib/session";
@@ -39,7 +40,7 @@ const status = (c: Lead) => (c.messages[0] ? deliveryLabel(c.messages[0].deliver
 export default async function NotInterestedPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   await requirePermission("batch:read");
   const query = (await searchParams).q?.trim() ?? "";
-  const rows = (await load()).filter((c) => matchesSearch(c, query));
+  const rows = search(await load(), query, (c) => c);
 
   return (
     <>
@@ -63,14 +64,14 @@ export default async function NotInterestedPage({ searchParams }: { searchParams
                 className="rounded-[var(--radius-md)] border border-[color:var(--color-border-default)] bg-[color:var(--color-surface)] p-3 shadow-[var(--shadow-surface)]"
               >
                 <div className="flex items-baseline justify-between gap-2">
-                  <span className="truncate font-semibold">{c.name ?? "—"}</span>
+                  <span className="truncate font-semibold">{c.name ? <Highlight text={c.name} query={query} /> : "—"}</span>
                   <span className="shrink-0 text-[length:var(--text-small)] text-[color:var(--color-text-secondary)]">
                     {formatDateTime(c.notInterestedAt ?? c.updatedAt)}
                   </span>
                 </div>
                 <div className="mt-0.5 flex items-center justify-between gap-2">
                   <span className="tabular-nums text-[color:var(--color-text-secondary)]">
-                    {leadId(c.leadNumber)} · {c.phoneE164}
+                    {leadId(c.leadNumber)} · <Highlight text={c.phoneE164} query={query} kind="number" />
                   </span>
                   <Badge>{stage(c)}</Badge>
                 </div>
@@ -87,8 +88,8 @@ export default async function NotInterestedPage({ searchParams }: { searchParams
                 {rows.map((c) => (
                   <Row key={c.id}>
                     <Cell className="whitespace-nowrap tabular-nums">{leadId(c.leadNumber)}</Cell>
-                    <Cell>{c.name ?? "—"}</Cell>
-                    <Cell className="whitespace-nowrap tabular-nums">{c.phoneE164}</Cell>
+                    <Cell>{c.name ? <Highlight text={c.name} query={query} /> : "—"}</Cell>
+                    <Cell className="whitespace-nowrap tabular-nums"><Highlight text={c.phoneE164} query={query} kind="number" /></Cell>
                     <Cell className="whitespace-nowrap">{formatDateTime(c.notInterestedAt ?? c.updatedAt)}</Cell>
                     <Cell className="whitespace-nowrap tabular-nums">{stage(c)}</Cell>
                     <Cell>{status(c) ?? "—"}</Cell>
