@@ -5,7 +5,7 @@ import { signOut } from "@/auth";
 import { MobileNav, Sidebar } from "@/components/sidebar";
 import { Badge } from "@/components/ui";
 import { NAV } from "@/lib/nav";
-import { funnelRows } from "@/lib/funnel-rows";
+import { funnelCount } from "@/lib/funnel-rows";
 import { prisma } from "@/lib/prisma";
 import { can, ROLE_LABELS } from "@/lib/rbac";
 import { requireUser } from "@/lib/session";
@@ -23,8 +23,8 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
   const [unread, inFunnel, notInterested] = await Promise.all([
     prisma.notification.count({ where: { userId: user.id, readAt: null } }),
-    // Same rows and rule as the Funnel page.
-    funnelRows().then((rows) => rows.length),
+    // Same rule as the Funnel page.
+    funnelCount(),
     // Same rule as the Not Interested page.
     prisma.customer.count({ where: { status: "NOT_INTERESTED", chatArchivedAt: null, blockedAt: null } }),
   ]);
@@ -83,7 +83,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         </header>
         <main className="min-w-0 flex-1 px-4 py-4 md:px-8 md:py-6">
           {/* Wide screens: tables stay scannable instead of stretching edge to edge. */}
-          <div className="mx-auto w-full max-w-6xl">{children}</div>
+          <div className="page-in mx-auto w-full max-w-6xl">{children}</div>
         </main>
       </div>
     </div>

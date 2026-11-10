@@ -136,7 +136,7 @@ export default async function MessagePage({ searchParams }: { searchParams: Prom
       {/* Chat list. Phones show either the list or one chat. */}
       <aside
         className={cx(
-          "flex min-h-0 flex-col border-[color:var(--color-border-default)] md:border-r",
+          "chat-list-in flex min-h-0 flex-col border-[color:var(--color-border-default)] md:border-r",
           customer && "hidden md:flex",
         )}
       >
@@ -168,7 +168,7 @@ export default async function MessagePage({ searchParams }: { searchParams: Prom
                 href={`/message?c=${c.customerId}${showArchived ? "&archived=1" : ""}`}
                 aria-current={c.customerId === customer?.customerId ? "page" : undefined}
                 className={cx(
-                  "flex items-center gap-3 border-b border-[color:var(--color-border-default)] px-4 py-2.5",
+                  "flex items-center gap-3 border-b border-[color:var(--color-border-default)] px-4 py-2.5 transition-colors",
                   !isOpen(c) && "opacity-60",
                   c.customerId === customer?.customerId
                     ? "bg-[color:var(--color-surface-muted)]"
@@ -204,7 +204,8 @@ export default async function MessagePage({ searchParams }: { searchParams: Prom
 
       {/* Conversation */}
       {customer ? (
-        <section className="flex min-h-0 flex-col">
+        // Keyed by chat so opening another one replays the entrance; the 8s refresh keeps the key and does not.
+        <section key={customer.customerId} className="chat-in flex min-h-0 flex-col">
           <header className="flex items-center gap-2 border-b border-[color:var(--color-border-default)] px-2 py-2 md:gap-3 md:px-3">
             <Link
               href={showArchived ? "/message?archived=1" : "/message"}
@@ -262,7 +263,8 @@ export default async function MessagePage({ searchParams }: { searchParams: Prom
                 const day = DAY.format(m.createdAt);
                 const newDay = i === 0 || DAY.format(messages[i - 1].createdAt) !== day;
                 return (
-                  <li key={m.id} className="flex flex-col">
+                  // Only the newest few: a reply that arrives on refresh settles in, and opening a long chat stays cheap.
+                  <li key={m.id} className={cx("flex flex-col", i >= messages.length - 3 && "bubble-in")}>
                     {newDay && (
                       <span className="my-2 self-center rounded-[var(--radius-md)] bg-[color:var(--color-surface)] px-2.5 py-0.5 text-[length:var(--text-small)] text-[color:var(--color-text-secondary)] shadow-[var(--shadow-surface)]">
                         {day}

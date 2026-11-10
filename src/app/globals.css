@@ -88,6 +88,44 @@ body {
 
 /* §4 spacing uses Tailwind's 4px base scale as-is. */
 
+/*
+ * Motion: quick and calm, so the app answers without making anyone wait.
+ * New page content fades in; a chat slides in from the right on phones (the
+ * list comes back from the left) and settles in place on wider screens.
+ * Nothing replays on the 8s Chats refresh, because those nodes stay mounted.
+ */
+:root {
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+}
+@keyframes settle-in {
+  from { opacity: 0; transform: translateY(6px); }
+}
+@keyframes from-right {
+  from { opacity: 0; transform: translateX(24px); }
+}
+@keyframes from-left {
+  from { opacity: 0; transform: translateX(-24px); }
+}
+/* Opacity only: a transform would become the containing block for anything fixed in a page.
+   In the base layer so a page's own animate-* utility (the loading pulse) still wins. */
+@layer base {
+  .page-in > * { animation: fade-in 180ms var(--ease-out); }
+}
+.chat-in { animation: settle-in 260ms var(--ease-out); }
+.bubble-in { animation: settle-in 220ms var(--ease-out); }
+@media (max-width: 767px) {
+  .chat-in { animation-name: from-right; }
+  .chat-list-in { animation: from-left 260ms var(--ease-out); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chat-in,
+  .chat-list-in,
+  .bubble-in { animation-name: fade-in; }
+}
+
 /* Phones: 16px form text stops iOS zooming into a field on focus. */
 @media (max-width: 767px) {
   input,
