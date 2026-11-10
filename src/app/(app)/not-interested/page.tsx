@@ -11,10 +11,10 @@ export const dynamic = "force-dynamic";
 
 type Lead = Awaited<ReturnType<typeof load>>[number];
 
-/** Everyone marked Not interested, newest first, with how far their funnel got. */
+/** Everyone marked Not interested and not archived or blocked, newest first, with how far their funnel got. */
 function load() {
   return prisma.customer.findMany({
-    where: { status: "NOT_INTERESTED" },
+    where: { status: "NOT_INTERESTED", chatArchivedAt: null, blockedAt: null },
     orderBy: [{ notInterestedAt: { sort: "desc", nulls: "last" } }, { updatedAt: "desc" }],
     take: 2000, // ponytail: paginate if the list outgrows it
     select: {

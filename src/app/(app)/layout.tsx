@@ -25,7 +25,8 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     prisma.notification.count({ where: { userId: user.id, readAt: null } }),
     // Same rows and rule as the Funnel page.
     funnelRows().then((rows) => rows.length),
-    prisma.customer.count({ where: { status: "NOT_INTERESTED" } }),
+    // Same rule as the Not Interested page.
+    prisma.customer.count({ where: { status: "NOT_INTERESTED", chatArchivedAt: null, blockedAt: null } }),
   ]);
 
   const counts = { "/funnel": inFunnel, "/not-interested": notInterested };
